@@ -1,0 +1,111 @@
+% !TEX encoding = UTF-8
+% !TEX TS-program = pdflatex
+% !TEX spellcheck = it-IT
+%% !TEX root = 
+%% !BIB TS-program = biber
+
+\documentclass[
+	12pt,
+	%German, % Uncomment for German
+]{sty/report_style}
+% \documentclass{article}
+\usepackage[final, nonatbib]{sty/nips_2018}
+\usepackage{sty/article_defaults}
+
+\setminted[python]{linenos, breaklines, fontsize=\footnotesize}
+
+%-------------------------------------------------------
+%	ASSIGNMENT INFORMATION
+%-------------------------------------------------------
+
+\title{Practical Course on Computer Vision and Robotics} % Assignment title
+
+\authorOne{Tommaso Bertola, 111111 ( $\leftarrow$ your student ID)} % Student name
+\authorTwo{Marco Martinico, 111111} % Student name
+\authorThree{Roberto Togni, 111111} % Student name
+
+\date{15.02.2024 (t.b.a.)} % Due date
+
+\institute{Georg-August-Universität Göttingen \\ Drittes Physikalisches Institut} % Institute or school name
+
+\class{Practical Course on Computer Vision \& Robotics} % Course or class name
+
+\professor{Sebastian Ruiz, Lennart Jahn} % Professor or teacher in charge of the assignment
+
+%-------------------------------------------------------
+
+\begin{document}
+
+\maketitle
+
+%-------------------------------------------------------
+%	ASSIGNMENT CONTENT
+%-------------------------------------------------------
+\begin{problem}
+    Write 3-6 pages (excluding appendix) for the following sections. Complete the table in \cref{appendix:time_schedule} and attach interesting pieces of code in \cref{appendix:code}.
+\end{problem}
+
+\section{Summary}
+
+Give a short summary on the methods used and on the major discussion points.
+
+\section{Method}
+
+Write down your method for solving the task. What was your strategy? How did you construct the robot to perform the task?
+
+For example, split into sections like this (or however you like):
+
+\subsection{Computer Vision}
+
+\subsection{Exploration}
+
+\subsection{Mapping}
+
+\subsection{Optimisation}
+
+\section{Results}
+
+Can you quantify any parts of your method? What is your accuracy in SLAM for example? How well does your path finding perform? etc...
+
+\section{Discussion}
+
+Discuss problems that you encountered with the robot and how you solved them. What worked well? What didn't work so well? What would you improve next time? 
+
+\section{Teamwork}
+
+Discuss how you divided the task. Mention what went well in the division of work and what could have gone better. Fill in the table in \cref{appendix:time_schedule}.
+
+\clearpage
+\appendix
+\section{Time Schedule}\label{appendix:time_schedule}
+
+Approximate time schedule and task distribution.
+
+\begin{table}[h]
+\begin{tabularx}{\linewidth}{@{}p{2cm}p{4cm}Xc>{\centering\arraybackslash}c@{}}
+\toprule
+Date                  & Group Member(s)        & Description of Work \\
+\midrule
+10/11/2022 & First name & Compiled the Operating system for the robot and wrote some code to test the motor functions. \\
+\addlinespace[0.5em]
+10/11/2022 & First name & Did something else. \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+
+
+\clearpage
+\section{Code}\label{appendix:code}
+
+Put interesting pieces of code here. Please also send all your code in a .zip file by email to \\ \href{mailto:sebastian.ruiz@uni-goettingen.de}{sebastian.ruiz@uni-goettingen.de}. 
+
+\subsection*{Amazing Motor Controller}
+%\inputminted{python}{example.py}
+
+\subsection*{Path Finding Algorithm}
+%\inputminted{python}{example2.py}
+
+etc...
+
+\end{document}

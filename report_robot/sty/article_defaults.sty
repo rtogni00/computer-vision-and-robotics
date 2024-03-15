@@ -1,0 +1,128 @@
+
+\NeedsTeXFormat{LaTeX2e}[1994/06/01]
+\ProvidesPackage{sty/article_defaults}
+  [2019/04/23 v0.01 LaTeX package for my own purpose]
+
+% \usepackage[utf8]{luainputenc} % required for lualatex
+\RequirePackage[utf8]{inputenc} % allow utf-8 input
+\RequirePackage[T1]{fontenc}    % use 8-bit T1 fonts
+\RequirePackage{tabularx,  ragged2e, booktabs}       % professional-quality tables
+\RequirePackage{mathtools, amsthm, amsfonts, mathrsfs, amsfonts, amssymb}       % maths
+\RequirePackage{enumitem}       % enumerate
+\RequirePackage{algorithm}
+\RequirePackage{verbatim}
+\RequirePackage[noend]{algpseudocode}
+\RequirePackage{nicefrac}       % compact symbols for 1/2, etc.
+\RequirePackage{microtype}      % microtypography
+\RequirePackage{graphicx}
+
+\RequirePackage{csquotes}
+\RequirePackage{float}
+\RequirePackage{subcaption}
+\captionsetup[figure]{font=small,labelfont=bf, width=.8\linewidth}
+\RequirePackage[toc,page]{appendix}
+% \RequirePackage{tikz/tikzit}
+\RequirePackage{pgfplots}
+\RequirePackage[colorlinks=true]{hyperref}       % hyperlinks
+\RequirePackage[capitalise]{cleveref} % must be loaded after hyperref
+\RequirePackage{url}            % simple URL typesetting
+% \input{tikz/main.tikzstyles}
+\graphicspath{ {images/} }
+% \pgfplotsset{compat=1.16}
+
+% ran into memory issues with lots of pgf plots, so externalise them
+\usepackage{shellesc} % required for lualatex
+\usepgfplotslibrary{external} 
+\tikzexternalize
+% \tikzexternalize{main}
+
+
+\RequirePackage{minted}
+% \setminted[python]{linenos, breaklines}
+
+% \RequirePackage[style=alphabetic,maxalphanames=1]{biblatex}
+\RequirePackage[bibstyle=authoryear,citestyle=authoryear,maxbibnames=9,maxcitenames=1,uniquelist=false,uniquename=false]{biblatex}
+\addbibresource{references.bib}
+
+% for use with authoryear, use square brackets.
+\makeatletter
+
+\newrobustcmd*{\parentexttrack}[1]{%
+  \begingroup
+  \blx@blxinit
+  \blx@setsfcodes
+  \blx@bibopenparen#1\blx@bibcloseparen
+  \endgroup}
+
+\AtEveryCite{%
+  \let\parentext=\parentexttrack%
+  \let\bibopenparen=\bibopenbracket%
+  \let\bibcloseparen=\bibclosebracket}
+
+\makeatother
+
+% \renewcommand*{\labelalphaothers}{}
+
+% \DeclareLabelalphaTemplate{
+%   \labelelement{
+%     \field[final]{shorthand}
+%     \field{labelname}
+%     \field{label}
+%   }
+%   \labelelement{
+%     \literal{,\addhighpenspace}
+%   }
+%   \labelelement{
+%     \field{year}
+%   }
+% }
+
+% new page for each section
+% \RequirePackage{titlesec}
+% \newcommand{\sectionbreak}{\clearpage}
+
+\newtheorem{theorem}{Theorem}[section]
+\newtheorem{corollary}{Corollary}[theorem]
+\newtheorem{lemma}[theorem]{Lemma}
+\newtheorem{remark}{Remark}
+\newtheorem{definition}{Definition}[section]
+\newtheorem{model}{Model}[section]
+\newtheorem{proposition}{Proposition}[section]
+\newtheorem{example}{Example}[section]
+
+% Number figures per section
+\RequirePackage{chngcntr}
+\counterwithin{figure}{section}
+
+% Number tables per section
+\counterwithin{table}{section}
+
+%figures should not escape their subsection or subsubsection
+\usepackage[section]{placeins}
+
+\makeatletter
+\AtBeginDocument{%
+  \expandafter\renewcommand\expandafter\subsection\expandafter{%
+    \expandafter\@fb@secFB\subsection
+  }%
+}
+\makeatother
+
+
+\makeatletter
+\AtBeginDocument{%
+  \expandafter\renewcommand\expandafter\subsubsection\expandafter{%
+    \expandafter\@fb@secFB\subsubsection
+  }%
+}
+\makeatother
+%end figure escapement blocking code
+
+
+% definition of the "problem" environment
+\newsavebox{\myproblembox}
+\newenvironment{myproblem}
+    {\begin{center} \begin{lrbox}{\myproblembox}\begin{minipage}{.98\textwidth}}
+    {\end{minipage}\end{lrbox}\fbox{\usebox{\myproblembox}} \end{center} }
+
+\endinput
