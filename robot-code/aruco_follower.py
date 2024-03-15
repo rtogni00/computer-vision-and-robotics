@@ -1,6 +1,7 @@
 from cycler import V
 import ev3_dc as ev3
 import time
+from timeit import default_timer as timer
 from utils import camera
 from utils import vision
 import utils.utils
@@ -10,13 +11,15 @@ from rich import print
 from utils.tempo import *
 
 class Wanderer:
-    def __init__(self, robot):
-        self.robot = robot
-        self.speed = 20
+    def __init__(self):
+        # self.robot = robot
+        self.speed = 15
         self.turn = 0
         self.speed_lost = 10
-        self.speed_cruise = 20
+        self.speed_cruise = 15
         self.which_side = 'outer'  # by default start following the outer perimeter
+        self.grace_time = 10  # seconds of grace time
+        self.time0= timer()
 
     @timeit
     def choose_traj(self, data):
@@ -80,22 +83,29 @@ class Wanderer:
 
     @timeit
     def tramp(self, data):
-        ids_seen = np.array(data.landmark_ids)
-        landmark_estimated_positions = np.array(data.landmark_positions)
         robot_pose = data.robot_position
-        # i have seen the finish line in the past
-        finish_line_ids_mask = (ids_seen < 100) & (ids_seen > 0)
-        if np.sum(finish_line_ids_mask) >= 1:
-            if self.which_side == 'outer':
-                # ids_finish_line = ids_seen[finish_line_ids_mask]
-                pos_1 = landmark_estimated_positions[finish_line_ids_mask][0]
-                if distance(robot_pose, pos_1) < 0.4:
+        landmark_esitmated_ids = np.array(data.landmark_estimated_ids)
+        landmark_estimated_positions = np.array(
+            data.landmark_estimated_positions)
+        # mask on arrival arucos
+        mask_arrival_ids = (landmark_esitmated_ids < 100) & (
+            landmark_esitmated_ids > 0)
+        # if at leat 2 arrival arucos were seen
+        if np.sum(mask_arrival_ids) > 1:
+            pos_arrival_ids = landmark_estimated_positions[mask_arrival_ids]
+            finish_line = np.mean(pos_arrival_ids, axis=0)
+            dist_from_arrival = np.sqrt(np.sum((finish_line-robot_pose)**2))
+
+            # if closer than 0.25m
+            if dist_from_arrival < 0.25:
+                if self.which_side == 'outer':
+                    print('Switch to inner side')
                     self.which_side = 'inner'
+                    self.time0 = timer()
+                elif timer()-self.time0 > self.grace_time:
+                    print('Stopping now')
+                    return 0, 0
 
         self.choose_traj(data)
 
         return self.speed, self.turn
-
-# @timeit
-def distance(pos_1, pos_2):
-    return np.sqrt((pos_1[0]-pos_2[0])**2 + (pos_1[1]-pos_2[1])**2)
