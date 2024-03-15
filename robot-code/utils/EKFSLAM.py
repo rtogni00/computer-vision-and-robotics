@@ -37,12 +37,12 @@ class EKFSLAM:
 
     def get_robot_pose(self):
         pass
-        robot_x, robot_y, robot_theta, robot_stdev = 0, 0, 0, 0
+        robot_x, robot_y, robot_theta, robot_stdev = 0, 0, 0, [0, 0]
         return robot_x, robot_y, robot_theta, robot_stdev
 
     def get_landmark_poses(self):
         pass
-        landmark_estimated_positions, landmark_estimated_stdevs = 0, 0
+        landmark_estimated_positions, landmark_estimated_stdevs = [], []
         return landmark_estimated_positions, landmark_estimated_stdevs
     
     def get_error_ellipse(self, covariance):
