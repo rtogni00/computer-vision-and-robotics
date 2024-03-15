@@ -11,6 +11,10 @@ pip install opencv-contrib-python Pillow numpy imagezmq jsonpickle pyqt5
 
 In `subscriber.py` set the correct IP address of your robot.
 
+```python
+self.image_hub = imagezmq.ImageHub(open_port='tcp://100.64.0.3:5555', REQ_REP=False)
+```
+
 In `viewer.py` you can change the size of your world by editing these parameters:
 ```python
 self.world_extents = (8.0, 8.0) # world extents, in meters
