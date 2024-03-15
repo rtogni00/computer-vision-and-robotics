@@ -32,6 +32,10 @@ class GuiPart:
         # camera image size
         self.camera_img_size = (848, 480)
 
+        self.camera_img_ratio = self.camera_img_size[0]/self.camera_img_size[1]
+        print("camera_img_ratio", self.camera_img_ratio)
+
+
         # The world extents of the scene in meters
         self.world_extents = (4.0, 4.0) # world extents, in meters
         self.scanner_range = 2.0 # range of camera, in meters
@@ -80,46 +84,82 @@ class GuiPart:
         self.width, self.height = self.root.winfo_width(), self.root.winfo_height()
         root.bind("<Configure>", self.resize_event)
 
+    #     self.compute_window_spacing()
+
+    
+    # def compute_window_spacing(self):
+    #     root_w = self.root.winfo_width()
+    #     root_h = self.root.winfo_height()
+
+    #     print(root_w, root_h)
+
+    #     frame_width = self.world_canvas.winfo_width() + self.sensor_canvas.winfo_width()
+    #     frame_height = self.world_canvas.winfo_height() + self.camera_canvas.winfo_height()
+
+    #     print(frame_width, frame_height)
+
 
     def resize_event(self, event):
         if(event.widget == self.root and (self.width != event.width or self.height != event.height)
             and (event.width != 0 or event.height != 0)):
-            print("resize event!")
+            # print("resize event!")
 
             self.width, self.height = event.width, event.height
             self.resize()
-        else:
-            print("false? resize event?", event.widget == self.root, self.width, self.height, event.width, event.height)
+        # else:
+        #     print("false? resize event?", event.widget == self.root, self.width, self.height, event.width, event.height)
 
 
     
     def resize(self):
-        pass
-        # fixed_height_part = self.frame2.winfo_height() + 10 # add 10 to make sure none of the image is cropped
-        fixed_height_part = 0
 
-        max_canvas_width = (self.width)/2
-        max_canvas_height = (self.height - fixed_height_part)/2
+        fixed_height_part = 8
+        fixed_weight_part = 8
+
+        frame_width = self.width - fixed_weight_part
+        frame_height = self.height - fixed_height_part
+
+        # frame_width = self.world_canvas.winfo_width() + self.sensor_canvas.winfo_width()
+        # frame_height = self.world_canvas.winfo_height() + self.camera_canvas.winfo_height()
+        
+        # print("frame_width", frame_width)
+        # print("max_window_width", max_window_width)
+
+        # print("frame_height", frame_height)
+        # print("max_window_height", max_window_height)
+
+        # now we calculate new canvas sizes
+        max_canvas_width = int((frame_width)/2)
+        max_canvas_height = int((frame_height)/2)
         
         self.world_canvas_extents = (max_canvas_width, max_canvas_height)
         self.sensor_canvas_extents = (max_canvas_width, max_canvas_height)
 
-        # self.world_canvas.config(width=self.world_canvas_extents[0], height=self.world_canvas_extents[1])
-        # self.sensor_canvas.config(width=self.sensor_canvas_extents[0], height=self.sensor_canvas_extents[1])
+        # todo: these seem to not crash stuff on mac
+        self.world_canvas.config(width=self.world_canvas_extents[0], height=self.world_canvas_extents[1])
+        self.sensor_canvas.config(width=self.sensor_canvas_extents[0], height=self.sensor_canvas_extents[1])
 
-        camera_img_ratio = self.camera_img_size[0]/self.camera_img_size[1]
-        print("camera_img_ratio", camera_img_ratio)
+        camera_canvas_width = int(frame_width * (2/3))
+        camera_canvas_height = frame_height - max_canvas_height
 
-        # TODO: this resize function breaks everything when dragging window to top
-        # TODO: something to do with camera_canvas_extents
-        # self.camera_canvas_extents = (int(max_canvas_height * camera_img_ratio), int(max_canvas_height+2))
-        # self.camera_canvas.config(width=self.camera_canvas_extents[0], height=self.camera_canvas_extents[1])
+        log_canvas_width = frame_width - camera_canvas_width
+        log_canvas_height = camera_canvas_height
 
-        # print("camera_canvas_extents ratio", self.camera_canvas_extents[0]/self.camera_canvas_extents[1])
-        # print("camera_canvas_extents ratio", self.camera_canvas.winfo_width()/self.camera_canvas.winfo_height())
+        camera_canvas_ratio = camera_canvas_width/camera_canvas_height
 
-        # self.log_canvas_extents = (self.width - self.camera_canvas_extents[0],  self.camera_canvas_extents[1])
-        # self.log_canvas.config(width=self.log_canvas_extents[0], height=self.log_canvas_extents[1])
+        if self.camera_img_ratio > camera_canvas_ratio:
+            self.camera_canvas_extents = (int(camera_canvas_width), int(camera_canvas_width/self.camera_img_ratio))
+
+        else:
+            self.camera_canvas_extents = (int(camera_canvas_height * self.camera_img_ratio), int(camera_canvas_height))
+
+            camera_canvas_width = int(camera_canvas_height * self.camera_img_ratio)
+            log_canvas_width = frame_width - camera_canvas_width
+
+
+        # TODO: Does this still break resizing to full screen on linux?
+        self.camera_canvas.config(width=camera_canvas_width, height=camera_canvas_height)
+        self.log_canvas.config(width=log_canvas_width, height=log_canvas_height)
 
     def slider_moved(self, index):
         """Callback for moving the scale slider."""
