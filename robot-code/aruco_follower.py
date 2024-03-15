@@ -7,7 +7,7 @@ import utils.utils
 import numpy as np
 import sys
 from rich import print
-
+from utils.tempo import *
 
 class Wanderer:
     def __init__(self, robot):
@@ -18,7 +18,8 @@ class Wanderer:
         self.speed_cruise = 20
         self.which_side = 'outer'  # by default start following the outer perimeter
 
-    def choose_traj_outer(self, data):
+    @timeit
+    def choose_traj(self, data):
         ids, rho, alpha = data.landmark_ids, data.landmark_rs, data.landmark_alphas
         side = 1
 
@@ -63,7 +64,7 @@ class Wanderer:
                 self.turn = 80
 
             if abs(rho_ids[first]*np.sin(alpha_ids[first])) < 0.13 and (rho_ids[first]*np.cos(alpha_ids[first])) < 0.4:
-                self.turn = int(self.turn+5)*direction * side
+                self.turn = int(self.turn+10)*direction * side
                 print(":warning:[bright_red]Too close")
 
             if rho_ids[first] > 0.35:
@@ -77,9 +78,10 @@ class Wanderer:
             self.turn = -150*side
             self.speed = self.speed_lost
 
+    @timeit
     def tramp(self, data):
-        ids_seen = np.array(data.landmark_estimated_ids)
-        landmark_estimated_positions = np.array(data.landmark_estimated_positions)
+        ids_seen = np.array(data.landmark_ids)
+        landmark_estimated_positions = np.array(data.landmark_positions)
         robot_pose = data.robot_position
         # i have seen the finish line in the past
         finish_line_ids_mask = (ids_seen < 100) & (ids_seen > 0)
@@ -90,14 +92,10 @@ class Wanderer:
                 if distance(robot_pose, pos_1) < 0.4:
                     self.which_side = 'inner'
 
-        # if self.which_side=='outer':
-        self.choose_traj_outer(data)
-        # else:
-        # self.choose_traj_inner(data)
-        # pass
+        self.choose_traj(data)
 
         return self.speed, self.turn
 
-
+# @timeit
 def distance(pos_1, pos_2):
     return np.sqrt((pos_1[0]-pos_2[0])**2 + (pos_1[1]-pos_2[1])**2)

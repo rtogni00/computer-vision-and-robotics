@@ -18,7 +18,7 @@ from rich import print
 from utils.utils import load_config
 
 import aruco_follower
-
+from utils.tempo import *
 
 from enum import Enum
 
@@ -74,17 +74,18 @@ class Main():
                 time0 = timer()
                 self.run(count, time0)
 
-                elapsed_time = timer() - time0
-                if elapsed_time <= self.DT:
-                    dt = self.DT - elapsed_time
-                    time.sleep(dt)  # moves while sleeping
-                else:
-                    print(f"[red]Warning! dt = {elapsed_time}")
+                # elapsed_time = timer() - time0
+                # if elapsed_time <= self.DT:
+                #     dt = self.DT - elapsed_time
+                #     time.sleep(dt)  # moves while sleeping
+                # else:
+                #     print(f"[red]{count} dt = {elapsed_time}, RUN")
 
                 count += 1
 
             print("*** END PROGRAM ***")
 
+    @timeit
     def run(self, count, time0):
         if not self.robot.recorder.playback:
             # read webcam and get distance from aruco markers
@@ -99,13 +100,22 @@ class Main():
         if raw_img is None:
             print("[red]image is None!")
             return
-
+        
+        #check timer for ex
+        # time0 = timer()
         if self.mode == TaskPart.Race:
             draw_img = raw_img
             data = self.robot.run_ekf_slam(raw_img, fastmode=True)
         else:
             draw_img = raw_img.copy()
             data = self.robot.run_ekf_slam(raw_img, draw_img)
+
+        # elapsed_time = timer() - time0
+        # if elapsed_time <= self.DT:
+        #     dt = self.DT - elapsed_time
+        #     time.sleep(dt)  # moves while sleeping
+        # else:
+        #     print(f"[red]{count} dt = {elapsed_time}, EKFSLAM")
 
         self.parse_keypress(raw_img, count)
 
@@ -148,10 +158,13 @@ class Main():
         )
 
         self.message = {"positions": data.landmark_estimated_positions,
-                        "ids": data.landmark_estimated_ids}
+                        "ids": data.landmark_estimated_ids,
+                        "robot_pose": data.robot_position,
+                        "robot_theta": data.robot_theta}
 
         msg_str = jsonpickle.encode(msg)
         self.publisher.publish_img(msg_str, draw_img)
+        print('-----------')
 
     def save_state(self, data):
         with open('pathfinding/SLAM'+str(datetime.now().strftime("%Y%m%d_%H%M%S"))+'.pickle', 'wb') as pickle_file:
@@ -163,6 +176,7 @@ class Main():
 
         pass
 
+    @timeit
     def parse_keypress(self, raw_img, count):
         char = self.keypress_listener.get_keypress()
 
