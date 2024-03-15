@@ -3,6 +3,16 @@ robot:
   width:  1
   delta_t: 0.1 # in seconds
 
+geometries:
+  h_r2c: 0.075 # horizontal displacement of camera wrt robot
+  v_r2c: 0.285 # vertical displacement of camera wrt robot
+  x_angle: -130 # rotation degrees angle along X intrinsic axis
+  y_angle: 0 # rotation degrees angle along Y intrinsic axis
+  z_angle: -90 # rotation degrees angle along Z intrinsic axis
+  aruco_size: 0.048  # measured in meters
+
+
+
 camera:
   y_offset: 0
   z_offset: 0
