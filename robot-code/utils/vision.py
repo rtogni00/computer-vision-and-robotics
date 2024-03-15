@@ -89,13 +89,16 @@ class Vision:
         # concatenate all ids and get all x and y coords
         ids = np.concatenate((ids, ids_circles)).astype(np.int16)
         x_r2landmarks=np.asarray(x_r2m+x_r2circle)
-        y_r2landmark=np.asarray(y_r2m+y_r2circle)
+        y_r2landmarks=np.asarray(y_r2m+y_r2circle)
+
+        x_w2landmarks=x_r2landmarks+x[0] # coordinates of landmarks wrt to world coordinates
+        y_w2landmarks=y_r2landmarks+x[1]
 
         # if landmarks were found
         if len(ids)>0:
-            landmark_rs=np.sqrt(x_r2landmarks**2 + y_r2landmark**2)
-            landmark_alphas = np.arctan2(y_r2landmark, x_r2landmarks)
-            landmark_positions = np.zeros_like(landmark_rs)
+            landmark_rs=np.sqrt(x_r2landmarks**2 + y_r2landmarks**2)
+            landmark_alphas = np.arctan2(y_r2landmarks, x_r2landmarks)
+            landmark_positions = np.vstack([x_w2landmarks, y_w2landmarks]).T
         else:
             landmark_rs = []
             landmark_alphas = []
@@ -124,8 +127,7 @@ class Vision:
             circles_binary_image, cv2.MORPH_CLOSE, kernel, iterations=3)
 
         # each pixel in the binary image is assigned a label
-        output = cv2.connectedComponentsWithStats(
-            circles_binary_image, 8, cv2.CV_32S)
+        output = cv2.connectedComponentsWithStats(circles_binary_image, 8, cv2.CV_32S)
         # representing the connected component it belongs to.
         # as many random colors as labels
         (numLabels, labels, stats, centroids) = output
@@ -169,9 +171,9 @@ class Vision:
         world_coord_y=[]
 
         if color=='green':
-            offset=0
-        else:
             offset=1
+        else:
+            offset=0
 
         if numLabels>0:
             counter=1002+offset
