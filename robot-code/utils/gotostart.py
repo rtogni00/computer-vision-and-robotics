@@ -1,29 +1,26 @@
-from the_maze_runner import MazeRunner
+from utils.the_maze_runner import MazeRunner
 from cycler import V
 import ev3_dc as ev3
-import time
-from timeit import default_timer as timer
-from utils import camera
-from utils import vision
-import utils.utils
 import numpy as np
-import sys
 from rich import print
 from utils.tempo import *
-from magic import ordinator
-# import math
-
+from utils.magic import ordinator
 
 class GoToStart:
     def __init__(self, data):
-        self.positions = data.landmark_estimated_positions
-        self.ids = data.landmark_estimated_ids
+        self.positions = np.array(data.landmark_estimated_positions)
+        self.robot_pose = data.robot_position
+        # self.robot_theta = data.robot_theta
+        self.ids = np.array(data.landmark_estimated_ids)
         self.target = None
+        self.get_arrival_coords()
+        print("TARGET:",self.target, "TYPE:", type(self.target))
+        self.status = 0
+        self.angle_limit = np.deg2rad(5)
 
     def find_extremes(self):
-        positions_array = np.array(self.positions)
         mask_start_line = (self.ids < 100) & (self.ids > 0)
-        positions_start_line = positions_array[mask_start_line]
+        positions_start_line = self.positions[mask_start_line]
         pos_start_line_ordered = np.array(
             ordinator(positions_start_line, max_distance=0.3))
         first = pos_start_line_ordered[0]
@@ -64,7 +61,7 @@ class GoToStart:
         return [np.array([ix1, iy1]), np.array([ix2, iy2])]
 
     def get_arrival_coords(self):
-        intersect_1, intersect_2 = self.get_centers(self.find_extremes())
+        intersect_1, intersect_2 = self.get_centers(*self.find_extremes())
         d1 = np.sqrt(np.sum((self.robot_pose-intersect_1)**2))
         d2 = np.sqrt(np.sum((self.robot_pose-intersect_2)**2))
 
@@ -73,15 +70,43 @@ class GoToStart:
         else:
             self.target = intersect_2
 
-    def run(self, data, vehicle):
+
+    def run(self, data):
         # get current position and orientation
-        robot_pose = data.robot_position
-        robot_angle = data.robot_theta
-        start_line_reached = False
-
+        self.robot_pose = data.robot_position
+        x_robot, y_robot = self.robot_pose
+        robot_theta = data.robot_theta % (2*np.pi)
+        y_target = self.target[1]
+        x_target = self.target[0]
+        # use to decide whether to only rotate
         distance_to_target = np.sqrt(np.sum((self.robot_pose-self.target)**2))
-        target_angle = np.arccos((self.target[1]-robot_pose[1])/distance_to_target)
 
-        while(target_angle - robot_angle < 0.1):
-            self.move = -200
+        if distance_to_target < 0.05:
+            self.status = 2
 
+        if self.status == 0:  # first rotation to target
+            print("Entering status 0")
+            angle_to_target = np.arctan2(y_target-y_robot, x_target-x_robot)
+            print("angle to start", angle_to_target)
+            print("abs difference", abs(angle_to_target-robot_theta))
+
+            if (abs(angle_to_target-robot_theta) > self.angle_limit):
+                return 3, -200, False  # speed, angle, end_condition
+            else:
+                self.status = 1
+                return 0, 0, False
+
+        elif self.status == 1:  # translation
+            print("Entering status 1")
+            return 10, 0, False
+
+        elif self.status == 2:  # second roatation
+            print("Entering status 2")
+            if (abs(robot_theta) > self.angle_limit):
+                return 15, -200, False  # speed, angle, end_condition
+            else:
+                return 0, 0, True
+        else:
+            raise Exception(
+                'Something went horribly wrong in going to starting line')
+            # return 0, 0, False

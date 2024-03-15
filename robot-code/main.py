@@ -81,7 +81,7 @@ class Main():
                     dt = self.DT - elapsed_time
                     time.sleep(dt)  # moves while sleeping
                 else:
-                    # print(f"[red]{count} dt = {elapsed_time}, RUN")
+                    print(f"[red]{count} dt = {elapsed_time}, RUN")
                     pass
 
                 count += 1
@@ -104,7 +104,7 @@ class Main():
             print("[red]image is None!")
             return
 
-        if self.mode == TaskPart.Race:
+        if self.mode == TaskPart.Race or self.mode == TaskPart.ToStartLine:
             draw_img = raw_img
             data = self.robot.run_ekf_slam(raw_img, fastmode=True)
         else:
@@ -120,16 +120,22 @@ class Main():
             self.speed, self.turn, end_reached = self.wanderer.tramp(data)
             self.robot.move(self.speed, self.turn)
             if end_reached:
+                print('END REACHED')
+                self.speed, self.turn = 0, 0
+                self.starter = GoToStart(data)
                 self.mode = TaskPart.ToStartLine
 
         if self.mode == TaskPart.ToStartLine:
-            self.starter = GoToStart(data).get_arrival_coords()
-            self.speed, self.turn, start_line_reached =self.starter.run(data)
+            print('I am in to start line')
+            self.speed, self.turn, start_line_reached = self.starter.run(data)
+            self.robot.move(self.speed, self.turn)
 
             if start_line_reached:
+                print('Switching to prepare race')
                 self.mode = TaskPart.PrepareRace
 
         if self.mode == TaskPart.PrepareRace:
+            print('preparing race')
             self.runner = Runner(data)
             self.mode = TaskPart.Race
 
