@@ -36,12 +36,12 @@ python main.py
 The message should be of the following format, where m is the number of landmarks measured by the camera, and n the number of landmarks estimated by SLAM:
 
 - landmark_ids: shape (m,)
-- landmark_rs: shape (m,)
-- landmark_alphas: shape (m,)
-- landmark_positions: shape (m, 2)
+- landmark_rs: shape (m,) - distance to landmark
+- landmark_alphas: shape (m,) - angle to landmark
+- landmark_positions: shape (m, 2) - list of (x, y)
 - landmark_estimated_ids: shape (n,)
-- landmark_estimated_positions: shape (n, 2)
-- landmark_estimated_stdevs: shape (n, 3)
-- robot_position: shape (2,)
+- landmark_estimated_positions: shape (n, 2) - list of (x, y)
+- landmark_estimated_stdevs: shape (n, 3) - list of (sqrt(lambda1), sqrt(lambda2), alpha)
+- robot_position: shape (2,) - (x, y)
 - robot_theta: float
-- robot_stdev: shape (3,)
+- robot_stdev: shape (3,) - list of (sqrt(lambda1), sqrt(lambda2), alpha)
