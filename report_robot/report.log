@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.141592653-2.6-1.40.25 (TeX Live 2023/Arch Linux) (preloaded format=pdflatex 2024.1.10)  18 JAN 2024 22:38
+This is pdfTeX, Version 3.141592653-2.6-1.40.25 (TeX Live 2023/Arch Linux) (preloaded format=pdflatex 2024.1.25)  14 FEB 2024 10:29
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -1240,32 +1240,32 @@ See the minted package documentation for explanation.
 Type  H <return>  for immediate help.
  ...                                              
                                                   
-l.37 \begin{document}
+l.38 \begin{document}
                      
 Refer to the installation instructions in the minted documentation for more inf
 ormation.
 
-(./report.aux)
+No file report.aux.
 \openout1 = `report.aux'.
 
-LaTeX Font Info:    Checking defaults for OML/cmm/m/it on input line 37.
-LaTeX Font Info:    ... okay on input line 37.
-LaTeX Font Info:    Checking defaults for OMS/cmsy/m/n on input line 37.
-LaTeX Font Info:    ... okay on input line 37.
-LaTeX Font Info:    Checking defaults for OT1/cmr/m/n on input line 37.
-LaTeX Font Info:    ... okay on input line 37.
-LaTeX Font Info:    Checking defaults for T1/cmr/m/n on input line 37.
-LaTeX Font Info:    ... okay on input line 37.
-LaTeX Font Info:    Checking defaults for TS1/cmr/m/n on input line 37.
-LaTeX Font Info:    ... okay on input line 37.
-LaTeX Font Info:    Checking defaults for OMX/cmex/m/n on input line 37.
-LaTeX Font Info:    ... okay on input line 37.
-LaTeX Font Info:    Checking defaults for U/cmr/m/n on input line 37.
-LaTeX Font Info:    ... okay on input line 37.
-LaTeX Font Info:    Checking defaults for PD1/pdf/m/n on input line 37.
-LaTeX Font Info:    ... okay on input line 37.
-LaTeX Font Info:    Checking defaults for PU/pdf/m/n on input line 37.
-LaTeX Font Info:    ... okay on input line 37.
+LaTeX Font Info:    Checking defaults for OML/cmm/m/it on input line 38.
+LaTeX Font Info:    ... okay on input line 38.
+LaTeX Font Info:    Checking defaults for OMS/cmsy/m/n on input line 38.
+LaTeX Font Info:    ... okay on input line 38.
+LaTeX Font Info:    Checking defaults for OT1/cmr/m/n on input line 38.
+LaTeX Font Info:    ... okay on input line 38.
+LaTeX Font Info:    Checking defaults for T1/cmr/m/n on input line 38.
+LaTeX Font Info:    ... okay on input line 38.
+LaTeX Font Info:    Checking defaults for TS1/cmr/m/n on input line 38.
+LaTeX Font Info:    ... okay on input line 38.
+LaTeX Font Info:    Checking defaults for OMX/cmex/m/n on input line 38.
+LaTeX Font Info:    ... okay on input line 38.
+LaTeX Font Info:    Checking defaults for U/cmr/m/n on input line 38.
+LaTeX Font Info:    ... okay on input line 38.
+LaTeX Font Info:    Checking defaults for PD1/pdf/m/n on input line 38.
+LaTeX Font Info:    ... okay on input line 38.
+LaTeX Font Info:    Checking defaults for PU/pdf/m/n on input line 38.
+LaTeX Font Info:    ... okay on input line 38.
 *geometry* driver: auto-detecting
 *geometry* detected driver: pdftex
 *geometry* verbose mode - [ preamble ] result:
@@ -1332,19 +1332,19 @@ LaTeX Font Info:    ... okay on input line 37.
 * \@reversemarginfalse
 * (1in=72.27pt=25.4mm, 1cm=28.453pt)
 
-LaTeX Info: Redefining \microtypecontext on input line 37.
-Package microtype Info: Applying patch `item' on input line 37.
-Package microtype Info: Applying patch `toc' on input line 37.
-Package microtype Info: Applying patch `eqnum' on input line 37.
-Package microtype Info: Applying patch `footnote' on input line 37.
-Package microtype Info: Applying patch `verbatim' on input line 37.
+LaTeX Info: Redefining \microtypecontext on input line 38.
+Package microtype Info: Applying patch `item' on input line 38.
+Package microtype Info: Applying patch `toc' on input line 38.
+Package microtype Info: Applying patch `eqnum' on input line 38.
+Package microtype Info: Applying patch `footnote' on input line 38.
+Package microtype Info: Applying patch `verbatim' on input line 38.
 Package microtype Info: Generating PDF output.
 Package microtype Info: Character protrusion enabled (level 2).
 Package microtype Info: Using default protrusion set `alltext'.
 Package microtype Info: Automatic font expansion enabled (level 2),
 (microtype)             stretch: 20, shrink: 20, step: 1, non-selected.
 Package microtype Info: Using default expansion set `alltext-nott'.
-LaTeX Info: Redefining \showhyphens on input line 37.
+LaTeX Info: Redefining \showhyphens on input line 38.
 Package microtype Info: No adjustment of tracking.
 Package microtype Info: No adjustment of interword spacing.
 Package microtype Info: No adjustment of character kerning.
@@ -1378,10 +1378,9 @@ Package caption Info: End \AtBeginDocument code.
 Package pgfplots Warning: running in backwards compatibility mode (unsuitable t
 ick labels; missing features). Consider writing \pgfplotsset{compat=1.18} into 
 your preamble.
- on input line 37.
+ on input line 38.
 
-Package hyperref Info: Link coloring ON on input line 37.
-(./report.out) (./report.out)
+Package hyperref Info: Link coloring ON on input line 38.
 \@outlinefile=\write7
 \openout7 = `report.out'.
 
@@ -1398,60 +1397,308 @@ Package biblatex Info: Automatic encoding selection.
 Package biblatex Info: Trying to load bibliographic data...
 Package biblatex Info: ... file 'report.bbl' not found.
 No file report.bbl.
-Package biblatex Info: Reference section=0 on input line 37.
-Package biblatex Info: Reference segment=0 on input line 37.
+Package biblatex Info: Reference section=0 on input line 38.
+Package biblatex Info: Reference segment=0 on input line 38.
+
+LaTeX Warning: Reference `appendix:time_schedule' on page 1 undefined on input 
+line 46.
+
+
+LaTeX Warning: Reference `appendix:code' on page 1 undefined on input line 46.
+
 (/usr/share/texmf-dist/tex/latex/microtype/mt-cmr.cfg
 File: mt-cmr.cfg 2013/05/19 v2.2 microtype config. file: Computer Modern Roman 
 (RS)
 )
-LaTeX Font Info:    Trying to load font information for U+msa on input line 40.
+LaTeX Font Info:    Trying to load font information for U+msa on input line 47.
 
 (/usr/share/texmf-dist/tex/latex/amsfonts/umsa.fd
 File: umsa.fd 2013/01/14 v3.01 AMS symbols A
 ) (/usr/share/texmf-dist/tex/latex/microtype/mt-msa.cfg
 File: mt-msa.cfg 2006/02/04 v1.1 microtype config. file: AMS symbols (a) (RS)
 )
-LaTeX Font Info:    Trying to load font information for U+msb on input line 40.
+LaTeX Font Info:    Trying to load font information for U+msb on input line 47.
 
 (/usr/share/texmf-dist/tex/latex/amsfonts/umsb.fd
 File: umsb.fd 2013/01/14 v3.01 AMS symbols B
 ) (/usr/share/texmf-dist/tex/latex/microtype/mt-msb.cfg
 File: mt-msb.cfg 2005/06/01 v1.0 microtype config. file: AMS symbols (b) (RS)
 )
-LaTeX Font Info:    Trying to load font information for U+rsfs on input line 40
+LaTeX Font Info:    Trying to load font information for U+rsfs on input line 47
 .
 (/usr/share/texmf-dist/tex/latex/jknapltx/ursfs.fd
 File: ursfs.fd 1998/03/24 rsfs font definition file (jk)
-) [1
+)
+LaTeX Font Info:    Trying to load font information for TS1+ptm on input line 5
+7.
+(/usr/share/texmf-dist/tex/latex/psnfss/ts1ptm.fd
+File: ts1ptm.fd 2001/06/04 font definitions for TS1/ptm.
+)
+
+LaTeX Warning: Reference `appendix:vision' on page 1 undefined on input line 71
+.
+
+LaTeX Font Info:    Trying to load font information for T1+cmtt on input line 7
+5.
+(/usr/share/texmf-dist/tex/latex/base/t1cmtt.fd
+File: t1cmtt.fd 2022/07/10 v2.5l Standard LaTeX font definitions
+)
+Package microtype Info: Loading generic protrusion settings for font family
+(microtype)             `cmtt' (encoding: T1).
+(microtype)             For optimal results, create family-specific settings.
+(microtype)             See the microtype manual for details.
+
+LaTeX Warning: Reference `eq:1' on page 1 undefined on input line 75.
+
+[1
 
 
 {/var/lib/texmf/fonts/map/pdftex/updmap/pdftex.map}{/usr/share/texmf-dist/fonts
-/enc/dvips/base/8r.enc}] [2
+/enc/dvips/base/8r.enc}{/usr/share/texmf-dist/fonts/enc/dvips/cm-super/cm-super
+-t1.enc}]
 
-] [3
+LaTeX Warning: Reference `appendix:reactctrl' on page 1 undefined on input line
+ 95.
+
+
+LaTeX Warning: Reference `appendix:map' on page 1 undefined on input line 102.
+
+
+LaTeX Warning: Reference `appendix:astar' on page 1 undefined on input line 115
+.
+
+[2]
+
+LaTeX Warning: Reference `fig:exec_times_exploration' on page 1 undefined on in
+put line 129.
+
+
+LaTeX Warning: Reference `fig:exec_times_race' on page 1 undefined on input lin
+e 129.
+
+
+LaTeX Warning: Reference `appendix:figures' on page 1 undefined on input line 1
+45.
+
+
+LaTeX Warning: Reference `sec:optimisation' on page 1 undefined on input line 1
+51.
+
+
+LaTeX Warning: Reference `appendix:ordinator' on page 1 undefined on input line
+ 153.
+
+[3]
+
+LaTeX Warning: Reference `appendix:time_schedule' on page 1 undefined on input 
+line 164.
+
+[4]
+<img/Exploration.pdf, id=46, 504.65538pt x 312.02145pt>
+File: img/Exploration.pdf Graphic file (type pdf)
+<use img/Exploration.pdf>
+Package pdftex.def Info: img/Exploration.pdf  used on input line 178.
+(pdftex.def)             Requested size: 397.48499pt x 245.77055pt.
+<img/Race.pdf, id=47, 528.98067pt x 312.02145pt>
+File: img/Race.pdf Graphic file (type pdf)
+<use img/Race.pdf>
+Package pdftex.def Info: img/Race.pdf  used on input line 185.
+(pdftex.def)             Requested size: 397.48499pt x 234.45828pt.
+[5
+
+ <./img/Exploration.pdf> <./img/Race.pdf>] [6]
+runsystem(pygmentize -S default -f latex -P commandprefix=PYG > _minted-report/
+default.pygstyle)...disabled (restricted).
+
+
+! Package catchfile Error: File `_minted-report/default.pygstyle' not found.
+
+See the catchfile package documentation for explanation.
+Type  H <return>  for immediate help.
+ ...                                              
+                                                  
+l.288 ...ted{python}{py_files/reactive_control.py}
+                                                  
+Try typing  <return>  to proceed.
+If that doesn't work, type  X <return>  to quit.
+
+runsystem(pygmentize -S default -f latex -P commandprefix=PYG > _minted-report/
+default.pygstyle)...disabled (restricted).
+
+
+! Package catchfile Error: File `_minted-report/default.pygstyle' not found.
+
+See the catchfile package documentation for explanation.
+Type  H <return>  for immediate help.
+ ...                                              
+                                                  
+l.288 ...ted{python}{py_files/reactive_control.py}
+                                                  
+Try typing  <return>  to proceed.
+If that doesn't work, type  X <return>  to quit.
+
+
+! Package minted Error: Cannot find Pygments style default.
+
+See the minted package documentation for explanation.
+Type  H <return>  for immediate help.
+ ...                                              
+                                                  
+l.288 ...ted{python}{py_files/reactive_control.py}
+                                                  
+Cannot find Pygments style default
+
+runsystem(pygmentize -l 'python' -f latex -P commandprefix=PYG -F tokenmerge -P
+ stripnl='False' -o _minted-report/552EB443444D6D884FD085EA2AA835ED87E383A656BC
+0EDFFE1F45FD99E7ABC0.pygtex py_files/reactive_control.py)...disabled (restricte
+d).
+
+
+! Package minted Error: Missing Pygments output; \inputminted was
+probably given a file that does not exist--otherwise, you may need 
+the outputdir package option, or may be using an incompatible build tool,
+or may be using frozencache with a missing file.
+
+See the minted package documentation for explanation.
+Type  H <return>  for immediate help.
+ ...                                              
+                                                  
+l.288 ...ted{python}{py_files/reactive_control.py}
+                                                  
+This could be caused by using -output-directory or -aux-directory 
+without setting minted's outputdir, or by using a build tool that 
+changes paths in ways minted cannot detect, 
+or using frozencache with a missing file.
+
+runsystem(pygmentize -l 'python' -f latex -P commandprefix=PYG -F tokenmerge -P
+ stripnl='False' -o _minted-report/EB30706F30A183BDAE715DAD1162F787BC00FB08C0E4
+D55ACE7C937512E69711.pygtex py_files/vision.py)...disabled (restricted).
+
+
+! Package minted Error: Missing Pygments output; \inputminted was
+probably given a file that does not exist--otherwise, you may need 
+the outputdir package option, or may be using an incompatible build tool,
+or may be using frozencache with a missing file.
+
+See the minted package documentation for explanation.
+Type  H <return>  for immediate help.
+ ...                                              
+                                                  
+l.292 \inputminted{python}{py_files/vision.py}
+                                              
+This could be caused by using -output-directory or -aux-directory 
+without setting minted's outputdir, or by using a build tool that 
+changes paths in ways minted cannot detect, 
+or using frozencache with a missing file.
+
+runsystem(pygmentize -l 'python' -f latex -P commandprefix=PYG -F tokenmerge -P
+ stripnl='False' -o _minted-report/A232B67A27F40E1E718702E53DFFC07656C105BBB257
+CFB6114DC1248F50A13A.pygtex py_files/mazerunner.py)...disabled (restricted).
+
+
+! Package minted Error: Missing Pygments output; \inputminted was
+probably given a file that does not exist--otherwise, you may need 
+the outputdir package option, or may be using an incompatible build tool,
+or may be using frozencache with a missing file.
+
+See the minted package documentation for explanation.
+Type  H <return>  for immediate help.
+ ...                                              
+                                                  
+l.295 \inputminted{python}{py_files/mazerunner.py}
+                                                  
+This could be caused by using -output-directory or -aux-directory 
+without setting minted's outputdir, or by using a build tool that 
+changes paths in ways minted cannot detect, 
+or using frozencache with a missing file.
+
+runsystem(pygmentize -l 'python' -f latex -P commandprefix=PYG -F tokenmerge -P
+ stripnl='False' -o _minted-report/38A10FC23E5A54571EE9C505F01922C0FADC360DE4F2
+0F21FB53562E13DFC39A.pygtex py_files/ordinator.py)...disabled (restricted).
+
+
+! Package minted Error: Missing Pygments output; \inputminted was
+probably given a file that does not exist--otherwise, you may need 
+the outputdir package option, or may be using an incompatible build tool,
+or may be using frozencache with a missing file.
+
+See the minted package documentation for explanation.
+Type  H <return>  for immediate help.
+ ...                                              
+                                                  
+l.298 \inputminted{python}{py_files/ordinator.py}
+                                                 
+This could be caused by using -output-directory or -aux-directory 
+without setting minted's outputdir, or by using a build tool that 
+changes paths in ways minted cannot detect, 
+or using frozencache with a missing file.
+
+runsystem(pygmentize -l 'python' -f latex -P commandprefix=PYG -F tokenmerge -P
+ stripnl='False' -o _minted-report/A339A8FD709C415038130E7BAE2BA25EAA0689B881A4
+F6E92F7EAE720B97D07B.pygtex py_files/astar.py)...disabled (restricted).
+
+
+! Package minted Error: Missing Pygments output; \inputminted was
+probably given a file that does not exist--otherwise, you may need 
+the outputdir package option, or may be using an incompatible build tool,
+or may be using frozencache with a missing file.
+
+See the minted package documentation for explanation.
+Type  H <return>  for immediate help.
+ ...                                              
+                                                  
+l.302 \inputminted{python}{py_files/astar.py}
+                                             
+This could be caused by using -output-directory or -aux-directory 
+without setting minted's outputdir, or by using a build tool that 
+changes paths in ways minted cannot detect, 
+or using frozencache with a missing file.
+
+[7
 
 ] (./report.aux)
-Package rerunfilecheck Info: File `report.out' has not changed.
-(rerunfilecheck)             Checksum: 28653FDB46C9DDA464015CE77C5E20FB;1039.
+
+LaTeX Warning: There were undefined references.
+
+
+LaTeX Warning: Label(s) may have changed. Rerun to get cross-references right.
+
+
+Package rerunfilecheck Warning: File `report.out' has changed.
+(rerunfilecheck)                Rerun to get outlines right
+(rerunfilecheck)                or use package `bookmark'.
+
+Package rerunfilecheck Info: Checksums for `report.out':
+(rerunfilecheck)             Before: <no file>
+(rerunfilecheck)             After:  6055542C5EF1053816B69503C47BDE8D;1802.
+
+Package biblatex Warning: Please (re)run Biber on the file:
+(biblatex)                report
+(biblatex)                and rerun LaTeX afterwards.
+
 Package logreq Info: Writing requests to 'report.run.xml'.
 \openout1 = `report.run.xml'.
 
  ) 
 Here is how much of TeX's memory you used:
- 49454 strings out of 477901
- 1096120 string characters out of 5838160
- 2003101 words of memory out of 5000000
- 68826 multiletter control sequences out of 15000+600000
- 546256 words of font info for 108 fonts, out of 8000000 for 9000
+ 49685 strings out of 477901
+ 1100866 string characters out of 5838160
+ 2007796 words of memory out of 5000000
+ 68922 multiletter control sequences out of 15000+600000
+ 558130 words of font info for 179 fonts, out of 8000000 for 9000
  59 hyphenation exceptions out of 8191
  114i,12n,117p,1151b,801s stack positions out of 10000i,1000n,20000p,200000b,200000s
-</usr/share/texmf-dist/fonts/type1/public/amsfonts/cm/cmsy10.pfb></usr/share/
-texmf-dist/fonts/type1/urw/times/utmb8a.pfb></usr/share/texmf-dist/fonts/type1/
-urw/times/utmr8a.pfb></usr/share/texmf-dist/fonts/type1/urw/times/utmri8a.pfb>
-Output written on report.pdf (3 pages, 60211 bytes).
+</usr/share/texmf-dist/fonts/type1/public/amsfonts/cm/cmmi10.pfb></usr/share/
+texmf-dist/fonts/type1/public/amsfonts/cm/cmmi7.pfb></usr/share/texmf-dist/font
+s/type1/public/amsfonts/cm/cmr10.pfb></usr/share/texmf-dist/fonts/type1/public/
+amsfonts/cm/cmsy10.pfb></usr/share/texmf-dist/fonts/type1/public/cm-super/sftt1
+000.pfb></usr/share/texmf-dist/fonts/type1/urw/times/utmb8a.pfb></usr/share/tex
+mf-dist/fonts/type1/urw/times/utmr8a.pfb></usr/share/texmf-dist/fonts/type1/urw
+/times/utmri8a.pfb>
+Output written on report.pdf (7 pages, 154979 bytes).
 PDF statistics:
- 100 PDF objects out of 1000 (max. 8388607)
- 86 compressed objects within 1 object stream
- 18 named destinations out of 1000 (max. 500000)
- 38501 words of extra memory for PDF output out of 42996 (max. 10000000)
+ 206 PDF objects out of 1000 (max. 8388607)
+ 99 compressed objects within 1 object stream
+ 33 named destinations out of 1000 (max. 500000)
+ 51223 words of extra memory for PDF output out of 51595 (max. 10000000)
 
