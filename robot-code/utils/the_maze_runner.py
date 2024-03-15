@@ -8,22 +8,28 @@ from scipy import ndimage
 
 class MazeRunner():
     def __init__(self, data):
-        self.spatial_step = 0.03
-        # get data from data
+        self.spatial_step = 0.02  # 2cm of the grid resolution
+        # get data from data object
         self.positions = data.positions
         self.ids = data.ids
         self.robot_pose = data.robot_pose
-        self.path = []
+        # self.path_meter = []
         self.n_x = 0
         self.n_y = 0
         self.start = ()
         self.end = ()
+        self.min_x = 0
+        self.min_y = 0
 
-    def matrix_to_meter(self):
-        pass
+    def matrix_to_meter(self, index_x, index_y):
+        x = self.spatial_step*index_x+self.min_x+self.spatial_step/2
+        y = self.spatial_step*index_y+self.min_y+self.spatial_step/2
+        return x, y
 
-    def meter_to_matrix(self):
-        pass
+    def meter_to_matrix(self, x, y):
+        index_x = int((self.min_x-x)/self.spatial_step)
+        index_y = int((self.min_y-y)/self.spatial_step)
+        return index_x, index_y
 
     def create_mask(self):
         # distinguish internal external obstable and start markers
@@ -53,15 +59,16 @@ class MazeRunner():
 
         max_x = np.max(external_ordered[:, 0])
         max_y = np.max(external_ordered[:, 1])
-        min_x = np.min(external_ordered[:, 0])
-        min_y = np.min(external_ordered[:, 1])
-        delta_x = max_x-min_x
-        delta_y = max_y-min_y
+        self.min_x = np.min(external_ordered[:, 0])
+        self.min_y = np.min(external_ordered[:, 1])
+
+        delta_x = max_x-self.min_x
+        delta_y = max_y-self.min_y
         # center_x = min_x+delta_x/2
         # center_y = min_y+delta_y/2
 
-        self.n_x = int(delta_x/self.spatial_step/1.5)
-        self.n_y = int(delta_y/self.spatial_step/1.5)
+        self.n_x = int(delta_x/self.spatial_step)
+        self.n_y = int(delta_y/self.spatial_step)
 
         ext_ordered_poly = Polygon(external_ordered)
         int_ordered_poly = Polygon(internal_ordered)
@@ -85,9 +92,12 @@ class MazeRunner():
                                    for i in range(self.n_x)]
                                   for j in range(self.n_y)])
 
+        # erosion to avoid stepping over the track
         mask_internal = ndimage.binary_dilation(mask_internal, iterations=2)
+
         mask = mask_internal + mask_external
 
+        # addition of obstacles markers and start line to split the track
         mask_line_obs = np.zeros_like(mask, dtype=bool)
         for x_i, y_i in np.vstack((positions_start_line, positions_obstacle)):
             mask_line_obs += np.array([[Point(x_i, y_i).buffer(0.1).contains(Point(x[i], y[j]))
@@ -95,6 +105,6 @@ class MazeRunner():
 
         self.mask = mask+mask_line_obs
 
-        # Invert x and y for map
-        self.path = astar(self.mask, self.start, self.end)
-        return self.path]
+        path_matrix = astar(self.mask, self.start, self.end)
+        path_meter = [self.matrix_to_meter(*xy) for xy in path_matrix]
+        return path_meter
