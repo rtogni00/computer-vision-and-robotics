@@ -107,13 +107,14 @@ class RobotController:
             self.slam.predict(*movements)
 
         ids, landmark_rs, landmark_alphas, landmark_positions = self.vision.detections(
-            img, draw_img, self.slam.get_robot_pose())
+            img, draw_img, self.slam.get_robot_pose(), kind='arucos')
 
         robot_x, robot_y, robot_theta, robot_stdev = self.slam.get_robot_pose()
         landmark_estimated_ids = self.slam.get_landmark_ids()
         landmark_estimated_positions, landmark_estimated_stdevs = self.slam.get_landmark_poses()
 
         for i, id in enumerate(ids):
+            # if id<=1000:
             if id not in self.slam.get_landmark_ids():
                 self.slam.add_landmark(
                     landmark_positions[i], id)  # (landmark_rs[i], landmark_alphas[i]), id) # already done the calculation in vision
@@ -121,8 +122,15 @@ class RobotController:
                 #     print(f"Landmark with id {id} added")
             else:
                 # correct each detected landmark that is already added
+                print('Correcting ', id)
                 self.slam.correction(
                     (landmark_rs[i], landmark_alphas[i]), id)
+
+        sigma_to_save = self.slam.get_sigma()
+        # saving sigma to a file
+        # with open("Check_sigma.txt", 'ab') as f:
+        #     f.write(b'\n\n')
+        #     np.savetxt(f, sigma_to_save, fmt='%d')
 
         data = SimpleNamespace()
         data.landmark_ids = ids

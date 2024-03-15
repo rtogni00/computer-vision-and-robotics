@@ -20,51 +20,59 @@ class EKFSLAM:
 
         # Initialize state (mean and covariance)
         self.mu = init_state.copy()
-        self.mu_prime = init_state.copy()
 
         self.Sigma = init_covariance.copy()
-        self.Sigma_prime = init_covariance.copy()
 
         self.ids = []
         self.SIGMA_SQUARED_X = 100
         self.SIGMA_SQUARED_Y = 100
-        self.SIGMA_SQUARED_L = MOTOR_STD
-        self.SIGMA_SQUARED_R = MOTOR_STD
+        self.error_l = MOTOR_STD
+        self.error_r = MOTOR_STD
 
         self.DIST_STD = DIST_STD
         self.ANGLE_STD = np.radians(ANGLE_STD)
 
         # initial uncertainty on mark position
         self.Sigma_u = np.array(
-            [[self.SIGMA_SQUARED_L, 0], [0, self.SIGMA_SQUARED_R]])
+            [[self.error_l, 0], [0, self.error_r]])
 
         # uncertainty on measurements
+        # TODO cancel Q if not used
         self.Q = np.array([[self.DIST_STD**2, 0], [0, self.ANGLE_STD**2]])
 
         return
 
-    def predict(self, l, r):
-        # get current poition in world coordinates
-        # these are world coordinated
+    def predict(self, l ,r):
         x, y, theta, std = self.get_robot_pose()
+        self.mu, self.Sigma = self._predict(l, r, 
+                                            self.WIDTH, self.WHEEL_RADIUS,
+                                            x, y, theta, 
+                                            self.error_l, self.error_r,
+                                            self.ids, 
+                                            self.mu, self.Sigma)
 
-        w = self.WIDTH  # robot width from center of the two wheels
+    
+    def _predict(self, l, r , WIDTH, WHEEL_RADIUS, x, y, theta, error_l, error_r, ids, mu, Sigma):
+
+        w = WIDTH  # robot width from center of the two wheels
         alpha = (r-l)/w
-        sin_theta = np.sin(theta)
-        cos_theta = np.cos(theta)
-        sin_theta_rlw = np.sin(theta+alpha)
-        cos_theta_rlw = np.cos(theta+alpha)
-
+        
         # prediction for robot coordinates only
         # new position and covariance matrix
-        if l == r:
-            x_prime = x + l*(cos_theta)
-            y_prime = y + l*(sin_theta)
-            theta_prime = theta
+        if abs(l- r) <= np.radians(1) * WHEEL_RADIUS: # difference in left and right angle  1°
+            
+            sin_theta = np.sin(theta)
+            cos_theta = np.cos(theta)
+            sin_theta_rlw = np.sin(theta+alpha)
+            cos_theta_rlw = np.cos(theta+alpha)
+            
+            l = np.mean(np.array([l,r]))
+            x += l*(cos_theta)
+            x += l*(sin_theta)
 
             G = np.array([[1, 0, -l*sin_theta],
                           [0, 1, l*cos_theta],
-                          [0, 0, 1]])
+                          [0, 0, 1]], dtype=np.float64)
             A = 0.5*(cos_theta+l/w*sin_theta)
             B = 0.5*(sin_theta-l/w*cos_theta)
             C = 0.5*(cos_theta-l/w*sin_theta)
@@ -73,21 +81,28 @@ class EKFSLAM:
         else:
             R = l/alpha
             R_w_2 = R+(w/2)
-            x_prime = x + R_w_2*(np.sin(theta+alpha)-sin_theta)
-            y_prime = y + R_w_2*(-np.cos(theta+alpha)+cos_theta)
+            x += R_w_2*(np.sin(theta+alpha)-np.sin(theta))
+            y += R_w_2*(-np.cos(theta+alpha)+np.cos(theta))
+            
             # TODO: check if theta in -pi pi is needed
-            theta_prime = (theta+alpha) % (2*np.pi)
-            if theta_prime > np.pi:
-                theta_prime = theta_prime-2*np.pi
+            theta = (theta+alpha) % (2*np.pi)
+            if theta > np.pi:
+                theta = theta-2*np.pi
 
+            sin_theta = np.sin(theta)
+            cos_theta = np.cos(theta)
+            sin_theta_rlw = np.sin(theta+alpha)
+            cos_theta_rlw = np.cos(theta+alpha)
+        
             const_AB = (w*r)/(r-l)**2
             const_CD = -(w*l)/(r-l)**2
             const_ABCD = (r+l)/(2*(r-l))
-            l_alpha_w_2 = (l/alpha+w/2)
+            l_alpha_w_2 = (R+w/2)
 
             G = np.array([[1, 0, l_alpha_w_2*(cos_theta_rlw-cos_theta)],
                           [0, 1, l_alpha_w_2*(sin_theta_rlw-sin_theta)],
-                          [0, 0, 1]])
+                          [0, 0, 1]], dtype=np.float64)
+            
             A = const_AB*(sin_theta_rlw-sin_theta)-const_ABCD*cos_theta_rlw
             B = const_AB*(-cos_theta_rlw+cos_theta)-const_ABCD*sin_theta_rlw
             C = const_CD*(sin_theta_rlw-sin_theta)+const_ABCD*cos_theta_rlw
@@ -96,22 +111,35 @@ class EKFSLAM:
         V = np.array([[A, C],
                       [B, D],
                       [-1/w, 1/w]])
+        
+
+        N = len(ids)
+        if N > 0:
+            G = np.block([[G, np.zeros((3,2*N))], [np.zeros((2*N,3)), np.identity(2*N)]])
+            # G = np.block(((G, np.zeros((3,2*N))), (np.zeros((2*N,3)), np.identity(2*N))))
+            V = np.append(V, np.zeros((2*N,2)), axis=0)
+
+        diag = np.diag(np.array([np.power(error_l,2), np.power(error_r,2)]))
+        Sigma = np.dot(np.dot(G, Sigma), G.T) + np.dot(np.dot(V, diag), V.T)
 
         # faster computation for new covariance matrix
-        sigma_xx = self.Sigma[0:3, 0:3]
-        sigma_xm = self.Sigma[0:3, 3:]
-        sigma_mm = self.Sigma[3:, 3:]
+        # sigma_xx = self.Sigma[0:3, 0:3]
+        # sigma_xm = self.Sigma[0:3, 3:]
+        # sigma_mm = self.Sigma[3:, 3:]
 
-        Sigma_top_left = G@sigma_xx@G.T + V @ self.Sigma_u @ V.T  # final dim 3x3
-        Sigma_top_right = G@sigma_xm
-        Sigma_low_left = (G@sigma_xm).T
+        # Sigma_top_left = G@sigma_xx@G.T + V @ self.Sigma_u @ V.T  # final dim 3x3
+        # Sigma_top_right = G@sigma_xm
+        # Sigma_low_left = (G@sigma_xm).T
 
         # save updated position and covariance matrix
-        mu_prime = self.mu.copy()
-        mu_prime[0:3] = np.array([x_prime, y_prime, theta_prime])
-        self.mu_prime = mu_prime
-        self.Sigma_prime = np.block([[Sigma_top_left, Sigma_top_right],
-                                     [Sigma_low_left, sigma_mm]])
+        # mu_prime = self.mu.copy()
+        # mu_prime[0:3] = np.array([x_prime, y_prime, theta_prime])
+        # self.mu_prime = mu_prime
+        # self.Sigma_prime = np.block([[Sigma_top_left, Sigma_top_right],
+        #                              [Sigma_low_left, sigma_mm]])
+        mu[0], mu[1], mu[2] = x, y, theta
+
+        return mu, Sigma
 
     def add_landmark(self, position: tuple, id: str):
         # measurement: tuple, id: str): # changed to a shorter signature of the function
@@ -120,23 +148,23 @@ class EKFSLAM:
 
             # extend self.mu and self.Sigma with the new landmark
             self.mu = np.append(self.mu, [x, y])
-            self.mu_prime = np.append(self.mu_prime, [x, y])
+            # self.mu_prime = np.append(self.mu_prime, [x, y])
 
             dim = self.Sigma.shape
-            dim_prime = self.Sigma_prime.shape
+            # dim_prime = self.Sigma_prime.shape
             Sigma = np.zeros(np.add(dim, 2))
-            Sigma_prime = np.zeros(np.add(dim_prime, 2))
+            # Sigma_prime = np.zeros(np.add(dim_prime, 2))
 
             Sigma[:dim[0], :dim[1]] = self.Sigma
             Sigma[-2, -2] = self.SIGMA_SQUARED_X
             Sigma[-1, -1] = self.SIGMA_SQUARED_Y
 
-            Sigma_prime[:dim[0], :dim[1]] = self.Sigma_prime
-            Sigma_prime[-2, -2] = self.SIGMA_SQUARED_X
-            Sigma_prime[-1, -1] = self.SIGMA_SQUARED_Y
+            # Sigma_prime[:dim[0], :dim[1]] = self.Sigma_prime
+            # Sigma_prime[-2, -2] = self.SIGMA_SQUARED_X
+            # Sigma_prime[-1, -1] = self.SIGMA_SQUARED_Y
 
             self.Sigma = Sigma
-            self.Sigma_prime = Sigma_prime
+            # self.Sigma_prime = Sigma_prime
 
             # add the landmark id to self.ids
             self.ids.append(id)
@@ -145,6 +173,7 @@ class EKFSLAM:
     def correction(self, landmark_position_measured: tuple, id: int):
         # index of identified aruco
         index = self.ids.index(id)
+        print("Index for correction:", index)
 
         # current world position of robot
         x, y, theta, _ = self.get_robot_pose()
@@ -197,11 +226,12 @@ class EKFSLAM:
 
         Z = H_s@sigma_s@(H_s.T)+self.Q
 
-        K = self.Sigma_prime@((H.T)@(np.linalg.inv(Z)))
-        self.mu = self.mu_prime + \
-            K@(np.array([r_i-r, self.subtract(beta_i, beta)]).T)
-        self.Sigma = (np.eye(3+2*len(self.ids))-K@H)@self.Sigma_prime
-        # pass
+        K = self.Sigma@((H.T)@(np.linalg.inv(Z)))
+        
+        self.mu = self.mu + \
+            K@(np.array([r_i-r, self.subtract(beta_i, beta)]))
+        self.Sigma = (np.identity(3+2*len(self.ids))-K@H)@self.Sigma 
+
 
     def get_robot_pose(self):
         # read out the robot position and angle from mu variable
@@ -252,3 +282,6 @@ class EKFSLAM:
         if diff > np.pi:
             diff = diff-(2*np.pi)
         return diff
+
+    def get_sigma(self):
+        return self.Sigma

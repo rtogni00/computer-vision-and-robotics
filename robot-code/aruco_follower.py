@@ -13,10 +13,10 @@ class Wanderer:
     def __init__(self, robot):
         self.robot = robot
         self.side = 0
-        self.speed = 70
+        self.speed = 20
         self.turn = 0
         self.speed_lost=20
-        self.speed_cruise=70
+        self.speed_cruise=20
 
     def choose_traj(self, img):
         # TODO In the future we can get all this info directly from ekf_slam
@@ -90,7 +90,7 @@ class Wanderer:
 
         else:
             print(':warning:[bright_red]I can\'t see a thing')
-            self.turn = -200*self.side
+            self.turn = 200*self.side
             self.speed=self.speed_lost
 
             # Closer aruco on the right
