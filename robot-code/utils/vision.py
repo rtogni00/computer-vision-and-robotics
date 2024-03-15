@@ -19,6 +19,12 @@ class Vision:
         self.green_lower = np.array([10, 40, 35])
         self.green_upper = np.array([80, 255, 255])
 
+        # self.red_lower = np.array([0, 100, 100])
+        # self.red_upper = np.array([10, 255, 255])
+        # self.green_lower = np.array([50, 100, 100])
+        # self.green_upper = np.array([70, 255, 255])
+
+
         # get aruco stuff from cv
         self.aruco_dict = cv2.aruco.getPredefinedDictionary(
             cv2.aruco.DICT_ARUCO_ORIGINAL)
@@ -68,7 +74,7 @@ class Vision:
 
     def to_tf(self, rvec, tvec, order="xyz"):
         """Returns transformation matrix from camera to marker"""
-        
+
         tf = np.identity(4, dtype=float)
         r = Rotation.from_euler(order, rvec, degrees=False)
         rot_matrix = r.as_matrix()
@@ -86,27 +92,27 @@ class Vision:
 
         # detect arucos and circles
         ids, x_r2m, y_r2m = self.detect_arucos(img, draw_img)
-        if kind=="all":
-            ids_circles, x_r2circle, y_r2circle = self.detect_circles(
-                img, draw_img)
-        else:
-            ids_circles=[]
-            x_r2circle=[]
-            y_r2circle=[]
-        
+        # if kind=="all":
+        ids_circles, x_r2circle, y_r2circle = self.detect_circles(
+            img, draw_img)
+        # else:
+        #     ids_circles=[]
+        #     x_r2circle=[]
+        #     y_r2circle=[]
+
         # concatenate all ids and get all x and y coords
         ids = np.concatenate((ids, ids_circles)).astype(np.int16)
         x_r2landmarks = np.asarray(x_r2m+x_r2circle)
         y_r2landmarks = np.asarray(y_r2m+y_r2circle)
 
-
         # if landmarks were found
         # landmark_positions are wrt world coordinates
         if len(ids) > 0:
             landmark_rs = np.sqrt(x_r2landmarks**2 + y_r2landmarks**2)
-            landmark_alphas = np.arctan2(y_r2landmarks, x_r2landmarks)#+ np.deg2rad(90)
-            x_w2landmarks = x[0] + landmark_rs * np.cos(x[2]+ landmark_alphas)
-            y_w2landmarks = x[1] + landmark_rs * np.sin(x[2]+ landmark_alphas)
+            landmark_alphas = np.arctan2(
+                y_r2landmarks, x_r2landmarks)  # + np.deg2rad(90)
+            x_w2landmarks = x[0] + landmark_rs * np.cos(x[2] + landmark_alphas)
+            y_w2landmarks = x[1] + landmark_rs * np.sin(x[2] + landmark_alphas)
             landmark_positions = np.vstack([x_w2landmarks, y_w2landmarks]).T
         else:
             landmark_rs = []
@@ -120,7 +126,9 @@ class Vision:
 
         hsv = cv2.cvtColor(img, cv2.COLOR_BGR2HSV)
 
+        # mask = cv2.inRange(img, range_lower, range_upper)
         mask = cv2.inRange(hsv, range_lower, range_upper)
+
 
         circles = cv2.bitwise_and(img, img, mask=mask)
 
@@ -200,8 +208,10 @@ class Vision:
                     top = stats[i, cv2.CC_STAT_TOP]
                     height = stats[i, cv2.CC_STAT_HEIGHT]
                     width = stats[i, cv2.CC_STAT_WIDTH]
-                    draw_img = cv2.rectangle(
-                        draw_img, (left, top), (left+width, top+height),  (0, 255, 0), 2)
+                    area = stats[i, cv2.CC_STAT_AREA]
+                    if area > 400 and area < 6000:
+                        draw_img = cv2.rectangle(
+                            draw_img, (left, top), (left+width, top+height),  (0, 255, 0), 2)
                 counter = counter+2
                 x, y, _ = self.img_to_world([x, y, 1])
                 world_coord_x.append(x)
@@ -209,7 +219,7 @@ class Vision:
 
         return ids, world_coord_x, world_coord_y
 
-    def detect_circles(self, img: np.ndarray, draw_img=None):
+    def detect_circles(self, img: np.ndarray, draw_img=None, kind='all'):
 
         ids_r, w_c_r_x, w_c_r_y = self.detect_circle(
             img, 'red', self.red_lower, self.red_upper, draw_img)
@@ -221,4 +231,7 @@ class Vision:
         world_coordinates_x = w_c_r_x+w_c_g_x
         world_coordinates_y = w_c_r_y+w_c_g_y
 
-        return ids, world_coordinates_x, world_coordinates_y
+        if kind == 'all':
+            return ids, world_coordinates_x, world_coordinates_y
+        else:
+            return [], [], []

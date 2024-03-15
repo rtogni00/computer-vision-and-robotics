@@ -112,7 +112,7 @@ class RobotController:
             self.slam.predict(*movements)
 
         ids, landmark_rs, landmark_alphas, landmark_positions = self.vision.detections(
-            img, draw_img, self.slam.get_robot_pose(), kind='arucos')
+            img, draw_img, self.slam.get_robot_pose(), kind='all')
 
         robot_x, robot_y, robot_theta, robot_stdev = self.slam.get_robot_pose()
         print("Angle from robot:", np.rad2deg(robot_theta))
