@@ -177,6 +177,9 @@ class WorldGrid(DrawableObject):
                 0, y_interval,
                 self.canvas_extents[0], y_interval,
                 fill="#D9D9D9")
+            
+    def draw(self, at_step):
+        pass
 
 
 class Points(DrawableObject):
