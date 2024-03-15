@@ -125,14 +125,9 @@ class RobotController:
             img, draw_img, robot_pose, kind='all')
 
         robot_x, robot_y, robot_theta, robot_stdev = robot_pose
-        # print("Angle from robot:", np.rad2deg(robot_theta))
-        # print("Angle from gyro: ", np.rad2deg(theta_gyro))
         landmark_estimated_ids = self.slam.get_landmark_ids()
-        landmark_estimated_positions, landmark_estimated_stdevs = self.slam.get_landmark_poses()
 
         for i, id in enumerate(ids):
-            # if id<=1000:
-            # if id not in self.slam.get_landmark_ids() and id in self.past_ids:
             if id in self.past_ids:
                 if id not in landmark_estimated_ids:
                     self.slam.add_landmark(
@@ -144,6 +139,8 @@ class RobotController:
         
         self.past_ids=ids
 
+        landmark_estimated_positions, landmark_estimated_stdevs = self.slam.get_landmark_poses()
+    
         data = SimpleNamespace()
         data.landmark_ids = ids
         data.landmark_rs = landmark_rs

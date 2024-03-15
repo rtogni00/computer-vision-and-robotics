@@ -230,7 +230,7 @@ class EKFSLAM:
         landmark_estimated_positions = []
         landmark_estimated_stdevs = []
         # for i, id in enumerate(self.get_landmark_ids()):
-        for i in range(self.n_ids):
+        for i in range(len(self.ids)):
             landmark_xy = self.mu[3+2*i: 3+2*i+2]
             sigma_xy = self.Sigma[3+2*i:3+2*i+2, 3+2*i:3+2*i+2]
             landmark_error = self.get_error_ellipse(sigma_xy)
