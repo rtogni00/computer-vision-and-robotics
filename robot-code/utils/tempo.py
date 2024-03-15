@@ -1,9 +1,11 @@
 from functools import wraps
 import time
 import logging
+from utils.utils import load_config
+config=load_config("config.yaml")
 
 
-logging.basicConfig(filename='timestamps.log', encoding='utf-8',
+logging.basicConfig(filename=config.log.filename, encoding='utf-8',
                     level=logging.DEBUG, 
                     format="%(message)s")
 

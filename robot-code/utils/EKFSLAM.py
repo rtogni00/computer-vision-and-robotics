@@ -4,6 +4,7 @@ from timeit import default_timer as timer
 from utils.tempo import *
 import jsonpickle
 import pickle
+from numba import jit
 
 
 class EKFSLAM:
@@ -34,6 +35,7 @@ class EKFSLAM:
         self.error_l = MOTOR_STD
         self.error_r = MOTOR_STD
         self.std_lr = MOTOR_STD**2
+        self.diag = np.eye(2)*self.std_lr
 
         self.DIST_STD = DIST_STD
         self.ANGLE_STD = np.radians(ANGLE_STD)
@@ -50,25 +52,25 @@ class EKFSLAM:
     @timeit
     def predict(self, l, r):
         x, y, theta, _ = self.get_robot_pose(fastmode=True)
-        # self.mu, self.Sigma = 
-        self._predict(l, r, 
-                      self.WIDTH, #self.WHEEL_RADIUS,
-                      x, y, theta,
-                      self.std_lr)#,
-                      # self.ids,
-                    #   self.mu, self.Sigma)
+        # self.mu, self.Sigma =
+        # self._predict(l, r,
+        #               self.WIDTH, #self.WHEEL_RADIUS,
+        #               x, y, theta,
+        #               self.std_lr)#,
+        # self.ids,
+        #   self.mu, self.Sigma)
 
-    @timeit
-    # def _predict(self, l, r, WIDTH, WHEEL_RADIUS, x, y, theta, std_lr, mu, Sigma):
-    def _predict(self, l, r, WIDTH, x, y, theta, std_lr):#, mu, Sigma):
+    # @timeit
+    # # def _predict(self, l, r, WIDTH, WHEEL_RADIUS, x, y, theta, std_lr, mu, Sigma):
+    # def _predict(self, l, r, WIDTH, x, y, theta, std_lr):#, mu, Sigma):
 
-        alpha = (r-l)/WIDTH
+        alpha = (r-l)/self.WIDTH
 
         # prediction for robot coordinates only
         # new position and covariance matrix
         # difference in left and right angle  0.1 deg
         # if abs(l - r) <= np.deg2rad(0.1) * WHEEL_RADIUS:
-        if np.abs(l-r)<=0.00004:
+        if np.abs(l-r) <= 0.00004:
 
             sin_theta = np.sin(theta)
             cos_theta = np.cos(theta)
@@ -82,14 +84,14 @@ class EKFSLAM:
             G = np.array([[1, 0, -l*sin_theta],
                           [0, 1, l*cos_theta],
                           [0, 0, 1]], dtype=np.float64)
-            A = 0.5*(cos_theta+l/WIDTH*sin_theta)
-            B = 0.5*(sin_theta-l/WIDTH*cos_theta)
-            C = 0.5*(cos_theta-l/WIDTH*sin_theta)
-            D = 0.5*(sin_theta+l/WIDTH*cos_theta)
+            A = 0.5*(cos_theta+l/self.WIDTH*sin_theta)
+            B = 0.5*(sin_theta-l/self.WIDTH*cos_theta)
+            C = 0.5*(cos_theta-l/self.WIDTH*sin_theta)
+            D = 0.5*(sin_theta+l/self.WIDTH*cos_theta)
 
         else:
             R = l/alpha
-            R_w_2 = R+(WIDTH/2)
+            R_w_2 = R+(self.WIDTH/2)
             x += R_w_2*(np.sin(theta+alpha)-np.sin(theta))
             y += R_w_2*(-np.cos(theta+alpha)+np.cos(theta))
 
@@ -100,10 +102,10 @@ class EKFSLAM:
             sin_theta_rlw = np.sin(theta+alpha)
             cos_theta_rlw = np.cos(theta+alpha)
 
-            const_AB = (WIDTH*r)/(r-l)**2
-            const_CD = -(WIDTH*l)/(r-l)**2
+            const_AB = (self.WIDTH*r)/(r-l)**2
+            const_CD = -(self.WIDTH*l)/(r-l)**2
             const_ABCD = (r+l)/(2*(r-l))
-            l_alpha_w_2 = (R+WIDTH/2)
+            l_alpha_w_2 = (R+self.WIDTH/2)
 
             G = np.array([[1, 0, l_alpha_w_2*(cos_theta_rlw-cos_theta)],
                           [0, 1, l_alpha_w_2*(sin_theta_rlw-sin_theta)],
@@ -116,7 +118,7 @@ class EKFSLAM:
 
         V = np.array([[A, C],
                       [B, D],
-                      [-1/WIDTH, 1/WIDTH]])
+                      [-1/self.WIDTH, 1/self.WIDTH]])
 
         N = self.n_ids
         if N > 0:
@@ -125,8 +127,8 @@ class EKFSLAM:
             V = np.append(V, np.zeros((2*N, 2)), axis=0)
 
         # diag = np.diag(np.array([np.power(error_l, 2), np.power(error_r, 2)]))
-        diag = np.eye(2)*std_lr
-        self.Sigma = np.dot(np.dot(G, self.Sigma), G.T) + np.dot(np.dot(V, diag), V.T)
+        self.Sigma = np.dot(np.dot(G, self.Sigma), G.T) + \
+            np.dot(np.dot(V, self.diag), V.T)
 
         self.mu[0], self.mu[1], self.mu[2] = x, y, theta
 
@@ -159,7 +161,6 @@ class EKFSLAM:
     @timeit
     def correction(self, landmark_position_measured: tuple, id: int):
         # index of identified aruco
-        # index = self.ids.index(id)
         index = self.index_to_ids[id]
 
         # current world position of robot
@@ -174,7 +175,7 @@ class EKFSLAM:
 
         # define the return values of h
         r = np.sqrt((x_m-x)**2+(y_m-y)**2)
-        beta = self.subtract(np.arctan2((y_m-y), (x_m-x)), theta)
+        beta = subtract(np.arctan2((y_m-y), (x_m-x)), theta)
 
         # define the entries of jacobian
         r_x = -(x_m-x)/r
@@ -211,12 +212,17 @@ class EKFSLAM:
         sigma_s = np.block([[sigma_s_top_left, sigma_s_top_right],
                             [sigma_s_low_left, sigma_s_low_right]])
 
-        Z = H_s@sigma_s@(H_s.T)+self.Q
+        # Z = H_s@sigma_s@(H_s.T)+self.Q
 
-        K = self.Sigma@H.T@np.linalg.inv(Z)
+        # K = self.Sigma@H.T@np.linalg.inv(Z)
 
-        self.mu += K@(np.array([r_i-r, self.subtract(beta_i, beta)]))
+        K = compute_matrix_mul(H_s, sigma_s, self.Q, self.Sigma, H)
+
+        self.mu += K@(np.array([r_i-r, subtract(beta_i, beta)]))
         self.Sigma = (np.eye(3+2*self.n_ids)-K@H)@self.Sigma
+
+        # delta_mu, self.Sigma= compute_heavy_stuff(H_s, sigma_s, self.Q, self.Sigma, H)
+        # self.mu+=delta_mu
 
     @timeit
     def get_robot_pose(self, fastmode=False):
@@ -227,7 +233,7 @@ class EKFSLAM:
             sigma = self.Sigma[:2, :2]
             error = self.get_error_ellipse(sigma)
         else:
-            error=[0,0,0]
+            error = [0, 0, 0]
 
         return robot_x, robot_y, robot_theta % (2*np.pi), error  # wrt world
 
@@ -238,15 +244,17 @@ class EKFSLAM:
         # for i, id in enumerate(self.get_landmark_ids()):
         if not fastmode:
             for i in range(self.n_ids):
-                landmark_xy = self.mu[3+2*i: 3+2*i+2]
-                landmark_estimated_positions.append(landmark_xy)
                 sigma_xy = self.Sigma[3+2*i:3+2*i+2, 3+2*i:3+2*i+2]
                 landmark_error = self.get_error_ellipse(sigma_xy)
                 landmark_estimated_stdevs.append(landmark_error)
+            # landmark_xy = self.mu[3+2*i: 3+2*i+2]
+            # landmark_estimated_positions.append(landmark_xy)
+            landmark_estimated_positions= self.mu[3:].reshape(self.n_ids,2)
         else:
-            for i in range(self.n_ids):
-                landmark_xy = self.mu[3+2*i: 3+2*i+2]
-                landmark_estimated_positions.append(landmark_xy)
+            # for i in range(self.n_ids):
+            #     landmark_xy = self.mu[3+2*i: 3+2*i+2]
+            #     landmark_estimated_positions.append(landmark_xy)
+            landmark_estimated_positions = self.mu[3:].reshape(self.n_ids,2)
             landmark_estimated_stdevs = [[0, 0, 0]] * self.n_ids
         return landmark_estimated_positions, landmark_estimated_stdevs
 
@@ -272,12 +280,6 @@ class EKFSLAM:
     def get_landmark_ids(self):
         return self.ids
 
-    @timeit
-    # helper function to get correct difference of two angle
-    def subtract(self, theta_1, theta_2):
-        diff = (theta_1-theta_2) % (2*np.pi)
-        diff = np.where(diff > np.pi, diff - 2 * np.pi, diff)
-        return diff
 
     def get_sigma(self):
         return self.Sigma
@@ -292,8 +294,10 @@ class EKFSLAM:
                 "n_ids": self.n_ids,
                 "mu": self.mu,
                 "sigma": self.Sigma}
+        # print(data)
         with open('SLAM_DUMP.pickle', 'wb') as pickle_file:  # dump of all the robot has recorded
             pickle.dump(data, pickle_file)
+        print("DUMPING FINISHED")
 
     def load_map(self, ids, index_to_ids, n_ids, mu, sigma):
         self.ids = ids
@@ -301,3 +305,18 @@ class EKFSLAM:
         self.n_ids = n_ids
         self.mu = mu
         self.Sigma = sigma
+
+# helper function to get correct difference of two angle
+@timeit
+@jit(nopython=True)
+def subtract( theta_1, theta_2):
+    diff = (theta_1-theta_2) % (2*np.pi)
+    diff = np.where(diff > np.pi, diff - 2 * np.pi, diff)
+    return diff
+
+@timeit
+@jit(nopython=True)
+def compute_matrix_mul(H_s, sigma_s, Q, Sigma, H):
+    # Z = 
+    K = Sigma@H.T@np.linalg.inv(H_s@sigma_s@(H_s.T)+Q)
+    return K

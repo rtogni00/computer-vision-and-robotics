@@ -29,13 +29,13 @@ class GoToStart:
         last = pos_start_line_ordered[-1]
 
         radius = np.sqrt((first[0]-last[0])**2+(last[1]-first[1])**2)
-        print("first and last:", first, last, radius)
+        # print("first and last:", first, last, radius)
         return (first, last, radius)
 
     def get_centers(self, first, last, r):
         x1, y1 = first
         x2, y2 = last
-        r1 = r2 = r
+        r1 = r2 = 0.65 * r
         centerdx = x1 - x2
         centerdy = y1 - y2
         R = np.sqrt(centerdx**2 + centerdy**2)

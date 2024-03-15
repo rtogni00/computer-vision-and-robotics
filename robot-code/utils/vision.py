@@ -106,6 +106,7 @@ class Vision:
             # ids_circles = []
             # x_r2circle = []
             # y_r2circle = []
+            ids=np.asarray(ids)
             x_r2landmarks= np.asarray(x_r2m)
             y_r2landmarks= np.asarray(y_r2m)
 

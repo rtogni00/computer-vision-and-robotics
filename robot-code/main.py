@@ -17,7 +17,7 @@ from utils.keypress_listener import KeypressListener
 from rich import print
 from utils.utils import load_config
 
-from aruco_follower import Wanderer
+from utils.aruco_follower import Wanderer
 from utils.path_follower import Runner
 from utils.gotostart import GoToStart
 from utils.tempo import *
@@ -42,7 +42,7 @@ class Main():
         self.robot = RobotController(self.config)
         self.keypress_listener = KeypressListener()
         self.publisher = Publisher()
-        self.wanderer = Wanderer()
+        self.wanderer = Wanderer(self.config)
         self.starter = None
 
         self.DT = self.config.robot.delta_t  # delta time in seconds
@@ -124,7 +124,7 @@ class Main():
         if self.mode == TaskPart.Exploration:
             self.speed, self.turn, end_reached = self.wanderer.tramp(data)
             self.robot.move(self.speed, self.turn)
-            if end_reached:
+            if end_reached>5:
                 print('END REACHED')
                 self.speed, self.turn = 0, 0
                 self.starter = GoToStart(data)
@@ -133,7 +133,7 @@ class Main():
 
         if self.mode == TaskPart.ToStartLine:
             print('I am in to start line')
-            angle_to_start = np.deg2rad(self.starter.angle_to_start(data))
+            angle_to_start = np.rad2deg(self.starter.angle_to_start(data))
             # self.robot.move(self.speed, self.turn)
             print('angle to start', angle_to_start)
             if abs(angle_to_start) > 10:

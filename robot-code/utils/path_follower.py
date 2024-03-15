@@ -25,15 +25,12 @@ class Runner:
         print('Computing the path')
         self.path = MazeRunner(data).create_path(start, end)  # in meters
         # np.savetxt('path_coords.txt', self.path)
-        # for p in self.path:
-        #     print(p)
         # np.savetxt('robot_pose.txt', data.robot_position)
         self.save_path_info(data)
         # np.savetxt("robot_angle.txt", np.array(data.robot_theta))
         print('Path computed, ready to run the race')
         # kp_initial, ki_initial and kd_initial are hyperparameters to be tuned
         self.pid_turn = PIDController(kp, ki, kd)
-        # self.pid_turn
 
     @timeit
     def compute_desired_direction(self, current_pose, target_coordinate):
@@ -43,9 +40,6 @@ class Runner:
         desired_direction = math.atan2(dy, dx)
         return desired_direction
 
-    # def compute_actual_direction(self, current_pose):
-    #     # Assuming the robot's orientation is given by the third element of the pose tuple
-    #     return current_pose[2]
     @timeit
     def compute_error_angle(self, desired_direction, actual_direction):
 
@@ -90,7 +84,7 @@ class Runner:
 
         if self.reached_target_coordinate(self.path[0], robot_pose):
             print('Removed point, going to next')
-            self.pid_turn.reset()
+            # self.pid_turn.reset()
             if(len(self.path) > 0):
                 self.path.pop(0)
 
