@@ -19,3 +19,5 @@ class Message:
     robot_position: List = field(default_factory=lambda: [])
     robot_theta: float = 0.0
     robot_stdev: List = field(default_factory=lambda: [])
+
+    text: str = ""

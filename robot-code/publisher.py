@@ -22,28 +22,12 @@ class Publisher():
         # sender = imagezmq.ImageSender(connect_to='tcp://100.76.2.68:5555')
 
         # PUB/SUB:
-        self.sender = imagezmq.ImageSender(connect_to='tcp://*:5555', REQ_REP=False)
+        self.sender = None
 
         self.jpeg_quality = 50  # 0 to 100, higher is better quality, 95 is cv2 default
 
-    @staticmethod
-    def print_on_image(image):
-
-        curr_time = datetime.now()
-        formatted_time = curr_time.strftime('%H:%M:%S.%f')
-
-        text = "milliseconds: " + str(formatted_time)
-        org = (30, 60)
-        font = cv2.FONT_HERSHEY_SIMPLEX
-        fontScale = 1
-        color = (0,0,255)  #(B, G, R)
-        thickness = 2
-        lineType = cv2.LINE_AA
-        bottomLeftOrigin = False
-
-        img_text = cv2.putText(image, text, org, font, fontScale, color, thickness, lineType, bottomLeftOrigin)
-
-        return image
+    def __enter__(self):
+        self.sender = imagezmq.ImageSender(connect_to='tcp://*:5555', REQ_REP=False)
 
     def publish_img(self, msg, image):
 
@@ -60,6 +44,9 @@ class Publisher():
 
     def close(self):
         self.sender.close()  # close the ZMQ socket and context
+
+    def __exit__(self, exc_type, exc_val, exc_tb) -> None:
+        self.close()
 
 if __name__ == '__main__':
     publisher = Publisher()

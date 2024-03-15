@@ -1,0 +1,18 @@
+robot:
+  wheel_radius: 1
+  width:  1
+  delta_t: 0.1 # in seconds
+
+camera:
+  y_offset: 0
+  z_offset: 0
+  y_angle: 0
+  exposure_time: 60
+  gain: 100
+
+ekf_slam:
+  robot_width: 0
+  motor_std: 0
+  dist_std: 0
+  angle_std: 0
+
