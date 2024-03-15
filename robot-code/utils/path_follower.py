@@ -17,16 +17,18 @@ class Runner:
     def __init__(self, data, start, end, config):
         # self.robot = robot
         self.speed = config.runner.speed
-        kp=config.pid.kp
-        ki=config.pid.ki
-        kd=config.pid.kd
+        kp = config.pid.kp
+        ki = config.pid.ki
+        kd = config.pid.kd
         self.turn = 0
+        self.removal_distance = config.pid.removal_distance  # 0.25 m
         # TODO choose start and end in the_maze_runner
         print('Computing the path')
-        self.path = MazeRunner(data).create_path(start, end)  # in meters
+        self.path = MazeRunner(data, config).create_path(start, end)  # in meters
         # np.savetxt('path_coords.txt', self.path)
         # np.savetxt('robot_pose.txt', data.robot_position)
-        self.save_path_info(data)
+        if config.maze.save_fig:
+            self.save_path_info(data)
         # np.savetxt("robot_angle.txt", np.array(data.robot_theta))
         print('Path computed, ready to run the race')
         # kp_initial, ki_initial and kd_initial are hyperparameters to be tuned
@@ -50,13 +52,13 @@ class Runner:
         # Normalize the error angle to be within [-pi, pi]
         error_angle = (error_angle + np.pi) % (2 * np.pi) - np.pi
         return error_angle
-    
+
     @timeit
     def reached_target_coordinate(self, target, robot_pose):
         """Check if the robot has reached its target"""
         print("DISTANCE TO TARGET:", np.sqrt(np.sum((target-robot_pose)**2)))
         # if closer than 5 cm form the checkpoint
-        if np.sqrt(np.sum((target-robot_pose)**2)) < 0.20:
+        if np.sqrt(np.sum((target-robot_pose)**2)) < self.removal_distance:
             return True
         else:
             return False
@@ -66,10 +68,10 @@ class Runner:
         # get current poistion and orientation
         robot_pose = data.robot_position
         robot_angle = data.robot_theta
-        if len(self.path)==0:
+        if len(self.path) == 0:
             print("End reached")
-            return 0,0,True
-        
+            return 0, 0, True
+
         desired_direction = self.compute_desired_direction(
             robot_pose, self.path[0])
         # self.compute_actual_direction(robot_pose)
@@ -85,9 +87,8 @@ class Runner:
         if self.reached_target_coordinate(self.path[0], robot_pose):
             print('Removed point, going to next')
             # self.pid_turn.reset()
-            if(len(self.path) > 0):
+            if (len(self.path) > 0):
                 self.path.pop(0)
-
 
         # print("*"*10)
         # print(robot_pose, self.path[0],)
@@ -95,11 +96,11 @@ class Runner:
         # print(self.turn, )
         # print("*"*10)
         return self.speed, self.turn, False
-    
+
     def save_path_info(self, data):
-        ids=data.landmark_estimated_ids
-        positions=data.landmark_estimated_positions
-        robot_pose=data.robot_position
+        ids = data.landmark_estimated_ids
+        positions = data.landmark_estimated_positions
+        robot_pose = data.robot_position
         for pos_zip in zip(positions, ids):
             col = pos_zip[1] % 3
             if col == 0:
@@ -115,7 +116,6 @@ class Runner:
         for point in self.path:
             plt.scatter(*point, color="purple")
 
-        
         plt.scatter(*self.path[0], c='red', label='start path')
         plt.scatter(*self.path[-1], c='blue', label='end end')
         plt.scatter(*self.path[3], c='coral', label='intermediate path')
@@ -128,5 +128,3 @@ class Runner:
         plt.savefig('path.png')
         print('Fig saved')
         # plt.show()
-
-

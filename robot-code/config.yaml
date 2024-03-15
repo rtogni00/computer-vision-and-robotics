@@ -11,8 +11,6 @@ geometries:
   z_angle: -90 # rotation degrees angle along Z intrinsic axis
   aruco_size: 0.048  # measured in meters
 
-
-
 camera:
   y_offset: 0
   z_offset: 0
@@ -29,15 +27,22 @@ ekf_slam:
 runner:
   speed: 60 # speed during race
 
+# best was 32, 2
 pid: # config of pid
-  kp: 50
-  ki: 0
+  kp: 32  # 40 was best alone
+  ki: 2
   kd: 0
+  removal_distance: 0.25
 
 wanderer:
   speed_lost: 10
   speed_cruise: 15
 
+maze:
+  spatial_step: 0.05 # 5cm 
+  dilations: 5
+  save_fig: True
+
 log:
-  filename: "timestamps_4.log"
+  filename: "timestamps_5.log"
 

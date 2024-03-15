@@ -222,14 +222,17 @@ class EKFSLAM:
         # self.Sigma = (np.eye(3+2*self.n_ids)-K@H)@self.Sigma
 
         # self.mu+=delta_mu
-        delta_mu, self.Sigma = correction_acc(x_m, y_m,
+        delta_mu, Sigma_ = correction_acc(x_m, y_m,
                                               x, y,
                                               theta,
                                               r_i, beta_i,
                                               self.n_ids,
                                               index,
                                               self.Q, self.Sigma)
-        self.mu += delta_mu
+        # print('mu', self.mu.shape)
+        # print('delta_mu', delta_mu.shape)
+        self.mu += np.squeeze(delta_mu)
+        self.Sigma=Sigma_
 
     @timeit
     def get_robot_pose(self, fastmode=False):
@@ -311,16 +314,13 @@ class EKFSLAM:
         self.n_ids = n_ids
         self.mu = mu
         self.Sigma = sigma
+        self.Sigma[3:,3:]=0
 
 # helper function to get correct difference of two angle
 
 
-@timeit
-@jit(nopython=True)
-def subtract(theta_1, theta_2):
-    diff = (theta_1-theta_2) % (2*np.pi)
-    diff = np.where(diff > np.pi, diff - 2 * np.pi, diff)
-    return diff
+# @timeit
+# @jit(nopython=True)
 
 
 # @timeit
@@ -332,7 +332,7 @@ def subtract(theta_1, theta_2):
 
 
 @timeit
-@jit(nopython=True)
+@jit(nopython=True, cache=True)
 def correction_acc(x_m: float, y_m: float,
                    x: float, y: float,
                    theta: float,
@@ -340,6 +340,13 @@ def correction_acc(x_m: float, y_m: float,
                    n_ids: int,
                    index: int,
                    Q, Sigma):
+    def subtract(theta_1: float, theta_2: float)-> np.float64:
+        diff = (theta_1-theta_2) % (2*np.pi)
+        diff = np.where(diff > np.pi, diff - 2 * np.pi, diff)
+        return diff
+    
+    # diff = np.where((theta_1-theta_2) % (2*np.pi) > np.pi, (theta_1-theta_2) % (2*np.pi) - 2 * np.pi, (theta_1-theta_2) % (2*np.pi))
+
     # define the return values of h
     r = np.sqrt((x_m-x)**2+(y_m-y)**2)
     beta = subtract(np.arctan2((y_m-y), (x_m-x)), theta)
@@ -363,16 +370,31 @@ def correction_acc(x_m: float, y_m: float,
 
     n = 2*index
     m = max(3+2*n_ids-n-5, 0)
+    # print('s robot', H_s_robot.shape)
+    # print('zeros n',np.zeros((2, n)).shape)
+    # print('zeros m',np.zeros((2, m)).shape)
 
-    H_top = np.concatenate([H_s_robot, np.zeros((2, n))], axis=0)
-    H_bottom = np.concatenate([H_s_marker, np.zeros((2, m))], axis=0)
-    H = np.stack([H_top, H_bottom], axis=0)
+    # if n!=0:
+    #     H_top = np.concatenate((H_s_robot, np.zeros((2, n))), axis=1)
+    # else:
+    #     H_top=H_s_robot
+
+    # if m!=0:
+    #     H_bottom = np.concatenate((H_s_marker, np.zeros((2, m))), axis=1)
+    # else:
+    #     H_bottom=H_s_marker
+
+    # print('top', H_top.shape)
+    # print('bottom', H_bottom.shape)
+    H = np.concatenate((H_s_robot, np.zeros((2, n)),
+                       H_s_marker, np.zeros((2, m))), axis=1)
+    # H = np.stack((H_top, H_bottom), axis=0)
     # H=np.concatenate([H_top, H_bottom], axis=1)
 
     # H = np.block([H_s_robot, np.zeros((2, n)),
     #               H_s_marker, np.zeros((2, m))])
     # H_s = np.block([H_s_robot, H_s_marker])
-    H_s = np.concatenate([H_s_robot, H_s_marker], axis=0)
+    H_s = np.concatenate((H_s_robot, H_s_marker), axis=1)
 
     inf = 3+2*index
     sup = 3+2*index+2
@@ -382,14 +404,26 @@ def correction_acc(x_m: float, y_m: float,
     sigma_s_top_right = Sigma[0:3, inf:sup]
     sigma_s_low_left = Sigma[inf:sup, 0:3]
 
-    sigma_s_top=np.concatenate([sigma_s_top_left, sigma_s_top_right])
-    sigma_s_bottom=np.concatenate([sigma_s_low_left, sigma_s_low_right])
-    sigma_s=np.stack([sigma_s_top, sigma_s_bottom], axis=0)
+    sigma_s_top = np.concatenate((sigma_s_top_left, sigma_s_top_right), axis=1)
+    sigma_s_bottom = np.concatenate(
+        (sigma_s_low_left, sigma_s_low_right), axis=1)
+    sigma_s = np.concatenate((sigma_s_top, sigma_s_bottom), axis=0)
     # sigma_s = np.block([[sigma_s_top_left, sigma_s_top_right],
     #                     [sigma_s_low_left, sigma_s_low_right]])
 
-    K = Sigma@H.T@np.linalg.inv(H_s@sigma_s@(H_s.T)+Q)
-    delta_mu = K@(np.array([r_i-r, subtract(beta_i, beta)]))
+    Z = H_s@sigma_s@(H_s.T)+Q
+    # print('Z:',Z.shape)
+    # print("sigma", Sigma.shape)
+    # print("h", H.shape)
+    # print('h_s', H_s.shape)
+
+    K = Sigma@H.T@np.linalg.inv(Z)
+    angle = subtract(beta_i, beta)
+    temp=np.zeros((2,1))
+    temp[0,0]=r_i-r
+    temp[1,0]=angle
+    # temp = np.array((r_i-r, angle), dtype=np.float64)
+    delta_mu = np.dot(K, temp)
     Sigma = (np.eye(3+2*n_ids)-K@H)@Sigma
 
     return delta_mu, Sigma

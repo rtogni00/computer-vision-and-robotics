@@ -7,8 +7,8 @@ from scipy import ndimage
 
 
 class MazeRunner():
-    def __init__(self, data):
-        self.spatial_step = 0.05  # 5cm of the grid resolution
+    def __init__(self, data, config):
+        self.spatial_step = config.maze.spatial_step #0.05  # 5cm of the grid resolution
         # get data from data object
         self.positions = np.array(data.landmark_estimated_positions)
         self.ids = np.array(data.landmark_estimated_ids)
@@ -21,6 +21,7 @@ class MazeRunner():
         self.min_x = None
         self.min_y = None
         self.mask = None
+        self.n_dilations=config.maze.dilations
 
     def matrix_to_meter(self, index_x, index_y):
         x = self.spatial_step*index_x+self.min_x#+self.spatial_step/2
@@ -94,7 +95,7 @@ class MazeRunner():
                                   for j in range(self.n_y)])
 
         # erosion to avoid stepping over the track
-        mask_internal = ndimage.binary_dilation(mask_internal, iterations=4)
+        mask_internal = ndimage.binary_dilation(mask_internal, iterations=self.n_dilations)
 
         mask = mask_internal + mask_external
 
@@ -126,7 +127,8 @@ class MazeRunner():
         path_meter = [self.matrix_to_meter(*xy) for xy in path_matrix]
 
         # trim the complexity of the path
-        path_meter = path_meter[::3]
+        path_meter = path_meter[::4]
         path_meter.append(path_meter[0])
+        path_meter=path_meter[1:] # remove the first point for our convenience: it is always bad
         print("Path computed, ready to start race")
         return path_meter
