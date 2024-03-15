@@ -94,7 +94,7 @@ class MazeRunner():
                                   for j in range(self.n_y)])
 
         # erosion to avoid stepping over the track
-        mask_internal = ndimage.binary_dilation(mask_internal, iterations=2)
+        mask_internal = ndimage.binary_dilation(mask_internal, iterations=3)
 
         mask = mask_internal + mask_external
 

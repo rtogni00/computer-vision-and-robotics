@@ -43,7 +43,7 @@ class Main():
         self.keypress_listener = KeypressListener()
         self.publisher = Publisher()
         self.wanderer = Wanderer()
-        self.starter=None
+        self.starter = None
 
         self.DT = self.config.robot.delta_t  # delta time in seconds
 
@@ -202,7 +202,13 @@ class Main():
         n_ids = loaded_data['n_ids']
         mu = loaded_data['mu']
         sigma = loaded_data['sigma']
-        return (ids, index_to_ids, n_ids, mu, sigma)
+        # np.fill_diagonal(sigma, 0.1)
+        sigma[0, 0] = 100000000# to avoid map destruction upon map loading and repositioning
+        sigma[1, 1] = 100000000# to avoid map destruction upon map loading and repositioning
+        sigma[2, 2] = 100000000# to avoid map destruction upon map loading and repositioning
+        # sigma[5:3,0:3] = 10000# to avoid map destruction upon map loading and repositioning
+        
+        return (ids, index_to_ids, n_ids, mu, np.copy(sigma))
 
     @timeit
     def parse_keypress(self, raw_img, count, data):
@@ -277,7 +283,7 @@ class Main():
             self.save_state(data)
             print("[green]Saved ids and landmark positions")
 
-        if self.mode== TaskPart.Manual:
+        if self.mode == TaskPart.Manual:
             if self.speed != self.new_speed or self.turn != self.new_turn:
                 self.speed = self.new_speed
                 self.turn = self.new_turn

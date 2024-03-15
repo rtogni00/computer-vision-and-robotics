@@ -1,7 +1,6 @@
 import heapq
 import numpy as np
 import matplotlib.pyplot as plt
-import math
 
 
         
@@ -23,7 +22,8 @@ def astar(maze, start, end):
 
     def neighbors_available(position, maze, moves):
         neighbors = []
-        for move in moves:
+        diagonal=[]
+        for move in moves[0:4]:
             x_test = position[0]+move[0]
             y_test = position[1]+move[1]
             maze_test = maze[x_test, y_test]
@@ -31,8 +31,21 @@ def astar(maze, start, end):
                 if y_test >= 0 and y_test < maze.shape[1]-1:
                     if maze_test != 1:
                         neighbors.append((x_test, y_test))
+                        diagonal.append(False)
+                        
+                        
+        for move in moves[4:]:
+            x_test = position[0]+move[0]
+            y_test = position[1]+move[1]
+            maze_test = maze[x_test, y_test]
+            if x_test >= 0 and x_test < maze.shape[0]-1:
+                if y_test >= 0 and y_test < maze.shape[1]-1:
+                    if maze_test != 1:
+                        neighbors.append((x_test, y_test))
+                        diagonal.append(True)
 
-        return neighbors
+
+        return zip(neighbors, diagonal)
 
     heapq.heappush(oheap, (fscore[start], start))
 
@@ -45,11 +58,14 @@ def astar(maze, start, end):
                 data.append(current)
                 current = came_from[current]
             data.append(start)
-            return [(x[1], x[0]) for x in data[::-1]]
+            return [(x[1], x[0]) for x in data]#[::-1]]
 
         close_set.add(current)
-        for neighbor in neighbors_available(current, maze, moves):
-            tentative_g_score = gscore[current] + 1
+        for neighbor,diag in neighbors_available(current, maze, moves):
+            if diag:   
+                tentative_g_score = gscore[current] + 1.4
+            else:
+                tentative_g_score= gscore[current] + 1
 
             if neighbor in close_set and tentative_g_score >= gscore.get(neighbor, 0):
                 continue

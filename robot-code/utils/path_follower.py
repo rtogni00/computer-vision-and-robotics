@@ -15,14 +15,19 @@ from utils.pid_controller import PIDController
 class Runner:
     def __init__(self, data, start, end):
         # self.robot = robot
-        self.speed = 15
+        self.speed = 20
         self.turn = 0
         # TODO choose start and end in the_maze_runner
         print('Computing the path')
         self.path = MazeRunner(data).create_path(start, end)  # in meters
+        np.savetxt('path_coords.txt', self.path)
+        for p in self.path:
+            print(p)
+        np.savetxt('robot_pose.txt', data.robot_position)
+        # np.savetxt("robot_angle.txt", np.array(data.robot_theta))
         print('Path computed, ready to run the race')
         # kp_initial, ki_initial and kd_initial are hyperparameters to be tuned
-        self.pid_turn = PIDController(1.5, 0.1, 0.01)
+        self.pid_turn = PIDController(80, 0, 0.0)
         # self.pid_turn
 
     def compute_desired_direction(self, current_pose, target_coordinate):
@@ -37,6 +42,9 @@ class Runner:
     #     return current_pose[2]
 
     def compute_error_angle(self, desired_direction, actual_direction):
+
+        desired_direction = (desired_direction + np.pi) % (2 * np.pi) - np.pi
+        actual_direction = (actual_direction + np.pi) % (2 * np.pi) - np.pi
         # Calculate the error angle between the desired and actual directions
         error_angle = desired_direction - actual_direction
         # Normalize the error angle to be within [-pi, pi]
@@ -45,8 +53,9 @@ class Runner:
 
     def reached_target_coordinate(self, target, robot_pose):
         """Check if the robot has reached its target"""
-        print("DISTANCE TO TARGET:",np.sqrt(np.sum((target-robot_pose)**2)))
-        if np.sqrt(np.sum((target-robot_pose)**2)) < 0.10:  # if closer than 5 cm form the checkpoint
+        print("DISTANCE TO TARGET:", np.sqrt(np.sum((target-robot_pose)**2)))
+        # if closer than 5 cm form the checkpoint
+        if np.sqrt(np.sum((target-robot_pose)**2)) < 0.10:
             return True
         else:
             return False
@@ -56,7 +65,6 @@ class Runner:
         # get current poistion and orientation
         robot_pose = data.robot_position
         robot_angle = data.robot_theta
-        end_reached = False
 
         desired_direction = self.compute_desired_direction(
             robot_pose, self.path[0])
@@ -66,17 +74,24 @@ class Runner:
         error_angle = self.compute_error_angle(
             desired_direction, actual_direction)
 
-        correction = int(self.pid_turn.update(error_angle, dt))
-        self.turn -= correction  # check if it + or - correction
+        # correction =
+        # check if it + or - correction
+        self.turn = int(self.pid_turn.update(error_angle, dt=0))
 
         if self.reached_target_coordinate(self.path[0], robot_pose):
             print('Removed point, going to next')
             self.pid_turn.reset()
-            self.path.pop(0)
+            # self.turn = 0
+            if(len(self.path) > 0):
+                self.path.pop(0)
+            else:
+                print("End reached!")
+                return self.speed, self.turn, True
 
-        print(f"PID CONTROLLER: robot_pose {robot_pose},\
-            robot_angle {robot_angle}, \
-            speed {self.speed}, turn {self.turn},\
-            desired_dir {desired_direction}, \
-            err_ang {error_angle}, corr {correction}, path_0 {self.path[0]}")
-        return self.speed, self.turn, end_reached
+
+        print("*"*100)
+        print(robot_pose, self.path[0],)
+        print("---->", robot_angle, desired_direction, error_angle)
+        print(self.turn, )
+        print("*"*100)
+        return self.speed, self.turn, False
