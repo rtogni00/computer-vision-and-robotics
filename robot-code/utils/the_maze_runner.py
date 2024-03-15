@@ -127,5 +127,6 @@ class MazeRunner():
 
         # trim the complexity of the path
         path_meter = path_meter[::3]
+        path_meter.append(path_meter[0])
         print("Path computed, ready to start race")
         return path_meter

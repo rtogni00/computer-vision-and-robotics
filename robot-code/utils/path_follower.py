@@ -27,7 +27,7 @@ class Runner:
         # np.savetxt("robot_angle.txt", np.array(data.robot_theta))
         print('Path computed, ready to run the race')
         # kp_initial, ki_initial and kd_initial are hyperparameters to be tuned
-        self.pid_turn = PIDController(40, 1, 0.0)
+        self.pid_turn = PIDController(20, 0.5, 0.0)
         # self.pid_turn
 
     def compute_desired_direction(self, current_pose, target_coordinate):

@@ -82,7 +82,7 @@ class Main():
                     dt = self.DT - elapsed_time
                     time.sleep(dt)  # moves while sleeping
                 else:
-                    # print(f"[red]{count} dt = {elapsed_time}, RUN")
+                    print(f"[red]{count} dt = {elapsed_time}, RUN")
                     pass
 
                 count += 1
@@ -126,7 +126,8 @@ class Main():
                 print('END REACHED')
                 self.speed, self.turn = 0, 0
                 self.starter = GoToStart(data)
-                self.mode = TaskPart.ToStartLine
+                # self.mode = TaskPart.ToStartLine
+                self.mode = TaskPart.PrepareRace
 
         if self.mode == TaskPart.ToStartLine:
             print('I am in to start line')

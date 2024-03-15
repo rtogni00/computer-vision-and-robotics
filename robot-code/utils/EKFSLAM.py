@@ -254,7 +254,7 @@ class EKFSLAM:
         # get eigenvalues and eigenvectors of covariance matrix
         eigvec_x, eigvec_y = eigen_vec[:, i]
         angle = np.arctan2(eigvec_y, eigvec_x)
-        return np.sqrt(np.real(eigen_vals[i])), np.sqrt(np.real(eigen_vals[j])), angle
+        return np.sqrt(np.abs(eigen_vals[i])), np.sqrt(np.abs(eigen_vals[j])), angle
 
     # return the list of all known ids
     @timeit

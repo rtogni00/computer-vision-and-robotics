@@ -37,30 +37,3 @@ def ordinator(l_input, max_distance=0.5, min_dist_=100):
             last = _l_input.pop(index)
             new_order.append(last)
     return new_order[:]
-
-
-def line_ordinator(l_input, max_distance=0.6, min_dist_=100):
-    _l_input = list(l_input[:])  # copy input, avoid input changing side effects
-
-    xy_aruco=np.array(_l_input)
-    avg_xy=np.mean(xy_aruco, axis=0)
-    
-    xy_aruco_filtered = [xy for xy in _l_input if dist_nodes(xy, avg_xy)<0.7]
-    
-    xy_mid_point = np.mean(np.array(xy_aruco_filtered), axis=0)
-    start = None
-    max_dist = 0
-    popper=None
-    for i, el in enumerate(xy_aruco_filtered):
-        d = dist_nodes(el, xy_mid_point)
-        if d > max_dist:
-            max_dist = d
-            start = el
-            popper=i
-            
-    xy_aruco_filtered.pop(popper)
-    xy_aruco_filtered.append(start)
-    new_order = ordinator(xy_aruco_filtered[::-1], max_distance, min_dist_)
-
-    return new_order
-

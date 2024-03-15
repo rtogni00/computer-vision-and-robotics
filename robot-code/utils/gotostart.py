@@ -4,7 +4,7 @@ import ev3_dc as ev3
 import numpy as np
 from rich import print
 from utils.tempo import *
-from utils.magic import ordinator
+from utils.magic import *
 
 
 class GoToStart:
@@ -24,7 +24,7 @@ class GoToStart:
         mask_start_line = (self.ids < 100) & (self.ids > 0)
         positions_start_line = self.positions[mask_start_line]
         pos_start_line_ordered = np.array(
-            ordinator(positions_start_line, max_distance=0.6))  # ordinator has higher max_dist because is not a closed loop
+            line_ordinator(positions_start_line, max_distance=0.6))  # ordinator has higher max_dist because is not a closed loop
         first = pos_start_line_ordered[0]
         last = pos_start_line_ordered[-1]
 

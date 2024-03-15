@@ -13,12 +13,12 @@ from utils.tempo import *
 class Wanderer:
     def __init__(self):
         # self.robot = robot
-        self.speed = 15
+        self.speed = 30
         self.turn = 0
         self.speed_lost = 10
-        self.speed_cruise = 15
-        self.which_side = 'outer'  # by default start following the outer perimeter
-        self.grace_time = 10  # seconds of grace time
+        self.speed_cruise = 30
+        self.which_side = 'inner'  # by default start following the outer perimeter
+        self.grace_time = 30  # seconds of grace time
         self.time0= timer()
 
     @timeit
@@ -98,10 +98,10 @@ class Wanderer:
 
             # if closer than 0.25m
             # TODO: improve stopping condition
-            if dist_from_arrival < 0.4:
-                if self.which_side == 'outer':
-                    print('Switch to inner side')
-                    self.which_side = 'inner'
+            if dist_from_arrival < 0.3:
+                if self.which_side == 'inner':
+                    print('Switch to outer side')
+                    self.which_side = 'outer'
                     self.time0 = timer()
                 elif timer()-self.time0 > self.grace_time:
                     print('Stopping now')

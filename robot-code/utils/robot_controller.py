@@ -138,6 +138,19 @@ class RobotController:
                         # correct each detected landmark that is already added
                         self.slam.correction(
                             (landmark_rs[i], landmark_alphas[i]), id)
+        elif fastmode: # fastmode true
+            n_ids=len(ids)
+            if n_ids<4:
+                limit_ids=len(ids)
+            else:
+                limit_ids=3
+            for i, id in enumerate(ids[0:limit_ids]):
+                if id in self.past_ids:
+                    if id in landmark_estimated_ids:
+                        # correct each detected landmark that is already added
+                        self.slam.correction(
+                            (landmark_rs[i], landmark_alphas[i]), id)
+
             
         self.past_ids=ids
 
