@@ -16,6 +16,8 @@ from utils.keypress_listener import KeypressListener
 from rich import print
 from utils.utils import load_config
 
+import aruco_follower
+
 
 from enum import Enum
 
@@ -36,6 +38,7 @@ class Main():
         self.robot = RobotController(self.config)
         self.keypress_listener = KeypressListener()
         self.publisher = Publisher()
+        self.wanderer = aruco_follower.Wanderer(self.robot)
 
         self.DT = self.config.robot.delta_t  # delta time in seconds
 
@@ -109,7 +112,9 @@ class Main():
             self.robot.move(self.speed, self.turn)
 
         if self.mode == TaskPart.Exploration:
-            pass
+            self.speed, self.turn = self.wanderer.tramp(raw_img)
+            self.robot.move(self.speed, self.turn)
+            # pass
 
         if self.mode == TaskPart.ToStartLine:
             pass
