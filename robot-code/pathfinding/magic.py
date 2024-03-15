@@ -7,14 +7,11 @@ def dist_nodes(a, b) -> float:
     return np.sqrt(((a-b)**2).sum())
 
 # disentangling function for internal and external path with custum max and min distances
-
-
 def ordinator(l_input, max_distance=0.5, min_dist_=100):
 
     orig_size = len(l_input)
     _l_input = list(l_input[:])  # copy input to avoid side effects
     new_order = []  # the output order
-
     last = _l_input.pop(0)  # start from the first recorded node
     new_order.append(last)
     while len(_l_input) > 0:
@@ -51,7 +48,7 @@ def line_ordinator(l_input, max_distance=0.6, min_dist_=100):
 
     xy_mid_point = np.mean(np.array(xy_aruco_filtered), axis=0)
     start = None
-    max_dist = 0.3
+    max_dist = 0
     popper = None
     for i, el in enumerate(xy_aruco_filtered):
         d = dist_nodes(el, xy_mid_point)
@@ -60,8 +57,7 @@ def line_ordinator(l_input, max_distance=0.6, min_dist_=100):
             start = el
             popper = i
     # remove only if more distant than 0.3m
-    if popper is not None:
-        xy_aruco_filtered.pop(popper)
+    xy_aruco_filtered.pop(popper)
 
     xy_aruco_filtered.append(start)
     new_order = ordinator(xy_aruco_filtered[::-1], max_distance, min_dist_)

@@ -49,7 +49,7 @@ class RobotController:
         self.camera = Camera(self.config.camera.exposure_time,
                              self.config.camera.gain)
         self.vision = Vision(self.camera.CAMERA_MATRIX, self.camera.DIST_COEFFS,
-                             self.config.camera, self.config.robotgeometries)
+                             self.config.camera, self.config.geometries)
 
         try:
             self.__ev3_obj__ = ev3.EV3(protocol=ev3.USB, sync_mode="STD")

@@ -40,7 +40,7 @@ class MazeRunner():
     def create_mask(self):
         # distinguish internal external obstable and start markers
         positions_array = np.array(self.positions)
-
+        
         mask_external = (self.ids % 3 == 2) & (
             self.ids >= 100) & (self.ids <= 1000)
         mask_internal = (self.ids % 3 == 0) & (
