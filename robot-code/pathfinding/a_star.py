@@ -1,4 +1,5 @@
 import numpy as np
+import matplotlib.pyplot as plt
 
 class Node():
     """A node class for A* Pathfinding"""
