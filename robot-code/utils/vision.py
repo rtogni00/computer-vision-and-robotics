@@ -67,6 +67,8 @@ class Vision:
     # function to transform from one system of reference to another
 
     def to_tf(self, rvec, tvec, order="xyz"):
+        """Returns transformation matrix from camera to marker"""
+        
         tf = np.identity(4, dtype=float)
         r = Rotation.from_euler(order, rvec, degrees=False)
         rot_matrix = r.as_matrix()
@@ -143,6 +145,7 @@ class Vision:
         return numLabels, centroids, stats
 
     def detect_arucos(self, img: np.ndarray, draw_img=None):
+        # TODO: check to_tf and frame coordinated system used
         # call to cv2
         corners, ids, _ = self.aruco_det.detectMarkers(img)
 
