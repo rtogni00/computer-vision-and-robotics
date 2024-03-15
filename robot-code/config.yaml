@@ -17,12 +17,20 @@ camera:
   y_offset: 0
   z_offset: 0
   y_angle: 0
-  exposure_time: 150
+  exposure_time: 50
   gain: 100
 
 ekf_slam:
   robot_width: 0.137 # width of the robot in meters (from centers of two wheels)
   motor_std: 0.1 # meters
-  dist_std: 0.5 # meters
-  angle_std: 10 # degrees
+  dist_std: 0.15 # meters TODO: set to 10cm
+  angle_std: 5 # degrees TODO: 1 degree
+
+runner:
+  speed: 40 # speed during race
+
+pid: # config of pid
+  kp: 60
+  ki: 3
+  kd: 10
 

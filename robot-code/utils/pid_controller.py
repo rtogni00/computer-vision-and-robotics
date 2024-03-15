@@ -6,15 +6,18 @@ class PIDController:
         self.previous_error = 0
         self.integral = 0
 
-    def update(self, error, dt=0):
-        self.integral += error #* dt
-        derivative = (error - self.previous_error) #/ dt
+    def update(self, error, dt):
+        self.integral += error * dt
+        derivative = (error - self.previous_error) / dt
         output = self.kp * error + self.ki * self.integral + self.kd * derivative
         self.previous_error = error
+
+        # do not overshoot the turn 
         if output<-200:
-            output=-180
+            output=-200
         if output>200:
-            output=180
+            output=200
+
         return output
 
     def reset(self):

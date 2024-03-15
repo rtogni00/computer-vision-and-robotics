@@ -13,10 +13,10 @@ from utils.tempo import *
 class Wanderer:
     def __init__(self):
         # self.robot = robot
-        self.speed = 30
+        self.speed = 25
         self.turn = 0
         self.speed_lost = 10
-        self.speed_cruise = 30
+        self.speed_cruise = 25
         self.which_side = 'inner'  # by default start following the outer perimeter
         self.grace_time = 30  # seconds of grace time
         self.time0= timer()
@@ -66,18 +66,16 @@ class Wanderer:
             else:
                 self.turn = 80
 
+            # arucos too close
             if abs(rho_ids[first]*np.sin(alpha_ids[first])) < 0.13 and (rho_ids[first]*np.cos(alpha_ids[first])) < 0.4:
                 self.turn = int(self.turn+10)*direction * side
-                print(":warning:[bright_red]Too close")
 
-            if rho_ids[first] > 0.35:
+            if rho_ids[first] > 0.35: # far arucos
                 self.turn = int(self.turn * direction/2)
-                print(":warning:[bright_red]Far arucos")
             else:
                 self.turn = int(self.turn*direction)
 
-        else:
-            print(':warning:[blue]I can\'t see a thing')
+        else: # does not see anything
             self.turn = -150*side
             self.speed = self.speed_lost
 
@@ -96,14 +94,14 @@ class Wanderer:
             finish_line = np.mean(pos_arrival_ids, axis=0)
             dist_from_arrival = np.sqrt(np.sum((finish_line-robot_pose)**2))
 
-            # if closer than 0.25m
-            # TODO: improve stopping condition
-            if dist_from_arrival < 0.3:
+            # if closer than 0.6m then switch side or stop
+            if dist_from_arrival < 0.6:
                 if self.which_side == 'inner':
                     print('Switch to outer side')
                     self.which_side = 'outer'
                     self.time0 = timer()
-                elif timer()-self.time0 > self.grace_time:
+                elif data.theta_gyro <- 7/2*np.pi:
+                #timer()-self.time0 > self.grace_time:
                     print('Stopping now')
                     return 0, 0, True
 

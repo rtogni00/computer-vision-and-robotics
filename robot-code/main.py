@@ -46,6 +46,7 @@ class Main():
         self.starter = None
 
         self.DT = self.config.robot.delta_t  # delta time in seconds
+        self.dt_ekfslam = 0
 
         self.speed = 0
         self.turn = 0
@@ -60,7 +61,8 @@ class Main():
         self.mode = TaskPart.Manual
 
         self.run_loop()
-
+    
+    @timeit
     def run_loop(self):
         print("starting...")
 
@@ -109,7 +111,7 @@ class Main():
             time_ekf = timer()
             draw_img = raw_img
             data = self.robot.run_ekf_slam(raw_img, fastmode=True)
-            dt_ekfslam = timer()-time_ekf
+            self.dt_ekfslam = timer()-time_ekf
         else:
             draw_img = raw_img.copy()
             data = self.robot.run_ekf_slam(raw_img, draw_img)
@@ -126,25 +128,31 @@ class Main():
                 print('END REACHED')
                 self.speed, self.turn = 0, 0
                 self.starter = GoToStart(data)
-                # self.mode = TaskPart.ToStartLine
-                self.mode = TaskPart.PrepareRace
+                self.mode = TaskPart.ToStartLine
+                # self.mode = TaskPart.PrepareRace
 
         if self.mode == TaskPart.ToStartLine:
             print('I am in to start line')
-            self.speed, self.turn, start_line_reached = self.starter.run(data)
-            self.robot.move(self.speed, self.turn)
+            angle_to_start = np.deg2rad(self.starter.angle_to_start(data))
+            # self.robot.move(self.speed, self.turn)
+            print('angle to start', angle_to_start)
+            if abs(angle_to_start) > 10:
+                self.robot.vehicle.drive_turn(
+                    angle_to_start, 0.05, speed=5).start(thread=False)
 
-            if start_line_reached:
-                print('Switching to prepare race')
-                self.mode = TaskPart.PrepareRace
+            # if start_line_reached:
+            print('Switching to prepare race')
+            self.mode = TaskPart.PrepareRace
 
         if self.mode == TaskPart.Race:
-            self.speed, self.turn, end_reached = self.runner.run(
-                data, dt_ekfslam)
+            self.speed, self.turn, end_reached = self.runner.run_path(
+                data, self.dt_ekfslam)
             self.robot.move(self.speed, self.turn)
             if end_reached:
                 self.mode = TaskPart.Manual
-                self.robot.move(0, 0)
+                self.speed=0
+                self.turn=0
+                self.robot.move(self.speed, self.turn)
                 print("Oh yeah")
 
         if self.mode == TaskPart.PrepareRace:
@@ -153,8 +161,9 @@ class Main():
                 self.starter = GoToStart(data)
 
             start, end = self.starter.get_path_start_end()
-            self.runner = Runner(data, start, end)
+            self.runner = Runner(data, start, end, self.config)
             self.mode = TaskPart.Race
+            print('Race ready')
 
         if self.mode == TaskPart.Load:
             recalled_memories = self.load_state()
@@ -204,11 +213,14 @@ class Main():
         mu = loaded_data['mu']
         sigma = loaded_data['sigma']
         # np.fill_diagonal(sigma, 0.1)
-        sigma[0, 0] = 100000000# to avoid map destruction upon map loading and repositioning
-        sigma[1, 1] = 100000000# to avoid map destruction upon map loading and repositioning
-        sigma[2, 2] = 100000000# to avoid map destruction upon map loading and repositioning
+        # to avoid map destruction upon map loading and repositioning
+        sigma[0, 0] = 100000000
+        # to avoid map destruction upon map loading and repositioning
+        sigma[1, 1] = 100000000
+        # to avoid map destruction upon map loading and repositioning
+        sigma[2, 2] = 100000000
         # sigma[5:3,0:3] = 10000# to avoid map destruction upon map loading and repositioning
-        
+
         return (ids, index_to_ids, n_ids, mu, np.copy(sigma))
 
     @timeit

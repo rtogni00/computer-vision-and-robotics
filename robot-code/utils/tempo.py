@@ -1,5 +1,11 @@
 from functools import wraps
 import time
+import logging
+
+
+logging.basicConfig(filename='timestamps.log', encoding='utf-8',
+                    level=logging.DEBUG, 
+                    format="%(message)s")
 
 
 def timeit(func):
@@ -9,6 +15,7 @@ def timeit(func):
         result = func(*args, **kwargs)
         end_time = time.perf_counter()
         total_time = end_time - start_time
-        print(f'{total_time:.5f} s {func.__name__}')
+        logging.debug(f'{func.__name__}\t{total_time:.6f}')
+        # print(f'{total_time:.6f} s {func.__name__}')
         return result
     return timeit_wrapper

@@ -107,7 +107,7 @@ class RobotController:
 
         l = alpha_l*radius
         r = alpha_r*radius
-        theta_gyro = np.deg2rad(self.gyro.angle)%(2*np.pi)
+        theta_gyro = np.deg2rad(self.gyro.angle)
 
         return (l, r, theta_gyro)
 
@@ -128,8 +128,10 @@ class RobotController:
         landmark_estimated_ids = self.slam.get_landmark_ids()
 
         # fastmode = only perform prediction step
+        n_ids=len(ids)
         if not fastmode:
-            for i, id in enumerate(ids):
+            limit_ids=2*n_ids//3
+            for i, id in enumerate(ids[0:limit_ids]):
                 if id in self.past_ids:
                     if id not in landmark_estimated_ids:
                         self.slam.add_landmark(
@@ -139,7 +141,6 @@ class RobotController:
                         self.slam.correction(
                             (landmark_rs[i], landmark_alphas[i]), id)
         elif fastmode: # fastmode true
-            n_ids=len(ids)
             if n_ids<4:
                 limit_ids=len(ids)
             else:
@@ -154,7 +155,7 @@ class RobotController:
             
         self.past_ids=ids
 
-        landmark_estimated_positions, landmark_estimated_stdevs = self.slam.get_landmark_poses()
+        landmark_estimated_positions, landmark_estimated_stdevs = self.slam.get_landmark_poses(fastmode)
     
         data = SimpleNamespace()
         data.landmark_ids = ids

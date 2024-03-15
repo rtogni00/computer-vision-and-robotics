@@ -33,6 +33,7 @@ class EKFSLAM:
         self.SIGMA_SQUARED_Y = 100
         self.error_l = MOTOR_STD
         self.error_r = MOTOR_STD
+        self.std_lr = MOTOR_STD**2
 
         self.DIST_STD = DIST_STD
         self.ANGLE_STD = np.radians(ANGLE_STD)
@@ -52,12 +53,12 @@ class EKFSLAM:
         self.mu, self.Sigma = self._predict(l, r,
                                             self.WIDTH, self.WHEEL_RADIUS,
                                             x, y, theta,
-                                            self.error_l, self.error_r,
+                                            self.std_lr,
                                             # self.ids,
                                             self.mu, self.Sigma)
 
     @timeit
-    def _predict(self, l, r, WIDTH, WHEEL_RADIUS, x, y, theta, error_l, error_r, mu, Sigma):
+    def _predict(self, l, r, WIDTH, WHEEL_RADIUS, x, y, theta, std_lr, mu, Sigma):
 
         w = WIDTH  # robot width from center of the two wheels
         alpha = (r-l)/w
@@ -118,10 +119,11 @@ class EKFSLAM:
         N = self.n_ids
         if N > 0:
             G = np.block([[G, np.zeros((3, 2*N))],
-                         [np.zeros((2*N, 3)), np.identity(2*N)]])
+                         [np.zeros((2*N, 3)), np.eye(2*N)]])
             V = np.append(V, np.zeros((2*N, 2)), axis=0)
 
-        diag = np.diag(np.array([np.power(error_l, 2), np.power(error_r, 2)]))
+        # diag = np.diag(np.array([np.power(error_l, 2), np.power(error_r, 2)]))
+        diag = np.eye(2)*std_lr
         Sigma = np.dot(np.dot(G, Sigma), G.T) + np.dot(np.dot(V, diag), V.T)
 
         mu[0], mu[1], mu[2] = x, y, theta
@@ -131,7 +133,7 @@ class EKFSLAM:
     @timeit
     def add_landmark(self, position: tuple, id: str):
         # measurement: tuple, id: str): # changed to a shorter signature of the function
-        if int(id) <= 1000 and int(id)>0:
+        if int(id) <= 1000 and int(id) > 0:
             x, y = position  # array with x and y
 
             # extend self.mu and self.Sigma with the new landmark
@@ -209,11 +211,10 @@ class EKFSLAM:
 
         Z = H_s@sigma_s@(H_s.T)+self.Q
 
-        K = self.Sigma@((H.T)@(np.linalg.inv(Z)))
+        K = self.Sigma@H.T@np.linalg.inv(Z)
 
-        self.mu = self.mu + \
-            K@(np.array([r_i-r, self.subtract(beta_i, beta)]))
-        self.Sigma = (np.identity(3+2*self.n_ids)-K@H)@self.Sigma
+        self.mu += K@(np.array([r_i-r, self.subtract(beta_i, beta)]))
+        self.Sigma = (np.eye(3+2*self.n_ids)-K@H)@self.Sigma
 
     @timeit
     def get_robot_pose(self):
@@ -226,18 +227,22 @@ class EKFSLAM:
         return robot_x, robot_y, robot_theta % (2*np.pi), error  # wrt world
 
     @timeit
-    def get_landmark_poses(self):
+    def get_landmark_poses(self, fastmode=False):
         landmark_estimated_positions = []
         landmark_estimated_stdevs = []
         # for i, id in enumerate(self.get_landmark_ids()):
-        for i in range(len(self.ids)):
-            landmark_xy = self.mu[3+2*i: 3+2*i+2]
-            sigma_xy = self.Sigma[3+2*i:3+2*i+2, 3+2*i:3+2*i+2]
-            landmark_error = self.get_error_ellipse(sigma_xy)
-
-            landmark_estimated_positions.append(landmark_xy)
-            landmark_estimated_stdevs.append(landmark_error)
-
+        if not fastmode:
+            for i in range(self.n_ids):
+                landmark_xy = self.mu[3+2*i: 3+2*i+2]
+                landmark_estimated_positions.append(landmark_xy)
+                sigma_xy = self.Sigma[3+2*i:3+2*i+2, 3+2*i:3+2*i+2]
+                landmark_error = self.get_error_ellipse(sigma_xy)
+                landmark_estimated_stdevs.append(landmark_error)
+        else:
+            for i in range(self.n_ids):
+                landmark_xy = self.mu[3+2*i: 3+2*i+2]
+                landmark_estimated_positions.append(landmark_xy)
+            landmark_estimated_stdevs = [[0, 0, 0]] * self.n_ids
         return landmark_estimated_positions, landmark_estimated_stdevs
 
     @timeit
@@ -252,7 +257,8 @@ class EKFSLAM:
             i = 1
             j = 0
         # get eigenvalues and eigenvectors of covariance matrix
-        eigvec_x, eigvec_y = eigen_vec[:, i]
+        eigvec_x, eigvec_y = np.real(eigen_vec[:, i])
+        # print("eigvec_y, eigvec_x",eigvec_y, eigvec_x)
         angle = np.arctan2(eigvec_y, eigvec_x)
         return np.sqrt(np.abs(eigen_vals[i])), np.sqrt(np.abs(eigen_vals[j])), angle
 
@@ -265,8 +271,7 @@ class EKFSLAM:
     # helper function to get correct difference of two angle
     def subtract(self, theta_1, theta_2):
         diff = (theta_1-theta_2) % (2*np.pi)
-        if diff > np.pi:
-            diff = diff-(2*np.pi)
+        diff = np.where(diff > np.pi, diff - 2 * np.pi, diff)
         return diff
 
     def get_sigma(self):

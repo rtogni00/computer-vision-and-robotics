@@ -74,48 +74,20 @@ class GoToStart:
             self.target_start = intersect_2
             self.target_end = intersect_1
 
+    @timeit
     def get_path_start_end(self):
         return self.target_start, self.target_end
 
-    def run(self, data):
+    def angle_to_start(self, data):
         # get current position and orientation
         self.robot_pose = data.robot_position
         x_robot, y_robot = self.robot_pose
-        robot_theta = data.robot_theta % (2*np.pi)
-        y_target = self.target_start[1]
-        x_target = self.target_start[0]
-        # use to decide whether to only rotate
-        distance_to_target = np.sqrt(
-            np.sum((self.robot_pose-self.target_start)**2))
+        robot_theta = (data.robot_theta + np.pi) % (2*np.pi) - np.pi
+        x_target = self.target_end[0]
+        y_target = self.target_end[1]
+        
+        angle_to_target = np.arctan2(y_target-y_robot, x_target-x_robot)
 
-        if distance_to_target < 0.05:
-            self.status = 2
+        tot_angle = (angle_to_target - robot_theta + np.pi) % (2*np.pi) - np.pi
 
-        if self.status == 0:  # first rotation to target
-            print("Entering status 0")
-            angle_to_target = np.arctan2(y_target-y_robot, x_target-x_robot)
-            print("angle to start", angle_to_target)
-            print("abs difference", abs(angle_to_target-robot_theta))
-
-            if (abs(angle_to_target-robot_theta) > self.angle_limit):
-                return 3, -200, False  # speed, angle, end_condition
-            else:
-                self.status = 1
-                return 0, 0, False
-
-        elif self.status == 1:  # translation
-            print("Entering status 1")
-            return 10, 0, False
-
-        elif self.status == 2:  # second rotation
-            print("Entering status 2")
-            if (abs(robot_theta) > self.angle_limit):
-                print("Angle limit:", self.angle_limit)
-                print("Delta angle:",abs(robot_theta) > self.angle_limit)
-                return 3, -200, False  # speed, angle, end_condition
-            else:
-                return 0, 0, True
-        else:
-            raise Exception(
-                'Something went horribly wrong in going to starting line')
-            # return 0, 0, False
+        return tot_angle
