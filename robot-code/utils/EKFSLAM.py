@@ -1,7 +1,7 @@
 import numpy as np
 from rich import print
 from timeit import default_timer as timer
-
+from utils.tempo import *
 
 class EKFSLAM:
     def __init__(self,
@@ -24,6 +24,8 @@ class EKFSLAM:
         self.Sigma = init_covariance.copy()
 
         self.ids = []
+        self.index_to_ids={}
+        self.n_ids=0
         self.SIGMA_SQUARED_X = 100
         self.SIGMA_SQUARED_Y = 100
         self.error_l = MOTOR_STD
@@ -41,17 +43,19 @@ class EKFSLAM:
 
         return
 
+    @timeit
     def predict(self, l ,r):
         x, y, theta, std = self.get_robot_pose()
         self.mu, self.Sigma = self._predict(l, r, 
                                             self.WIDTH, self.WHEEL_RADIUS,
                                             x, y, theta, 
                                             self.error_l, self.error_r,
-                                            self.ids, 
+                                            # self.ids, 
                                             self.mu, self.Sigma)
 
     
-    def _predict(self, l, r , WIDTH, WHEEL_RADIUS, x, y, theta, error_l, error_r, ids, mu, Sigma):
+    @timeit
+    def _predict(self, l, r , WIDTH, WHEEL_RADIUS, x, y, theta, error_l, error_r, mu, Sigma):
 
         w = WIDTH  # robot width from center of the two wheels
         alpha = (r-l)/w
@@ -65,7 +69,7 @@ class EKFSLAM:
             sin_theta_rlw = np.sin(theta+alpha)
             cos_theta_rlw = np.cos(theta+alpha)
             
-            l = np.mean(np.array([l,r]))
+            l = (l+r)/2
             x += l*(cos_theta)
             x += l*(sin_theta)
 
@@ -109,7 +113,7 @@ class EKFSLAM:
                       [-1/w, 1/w]])
         
 
-        N = len(ids)
+        N = self.n_ids
         if N > 0:
             G = np.block([[G, np.zeros((3,2*N))], [np.zeros((2*N,3)), np.identity(2*N)]])
             V = np.append(V, np.zeros((2*N,2)), axis=0)
@@ -121,6 +125,7 @@ class EKFSLAM:
 
         return mu, Sigma
 
+    @timeit
     def add_landmark(self, position: tuple, id: str):
         # measurement: tuple, id: str): # changed to a shorter signature of the function
         if int(id) <= 1000:
@@ -140,11 +145,15 @@ class EKFSLAM:
 
             # add the landmark id to self.ids
             self.ids.append(id)
+            self.index_to_ids[id]=self.n_ids
+            self.n_ids+=1
             print(f"Landmark with id {id} added")
 
+    @timeit
     def correction(self, landmark_position_measured: tuple, id: int):
         # index of identified aruco
-        index = self.ids.index(id)
+        # index = self.ids.index(id)
+        index=self.index_to_ids[id]
 
         # current world position of robot
         x, y, theta, _ = self.get_robot_pose()
@@ -178,7 +187,7 @@ class EKFSLAM:
                               [beta_x_m, beta_y_m]])
 
         n = 2*index
-        m = max(3+2*len(self.ids)-n-5, 0)
+        m = max(3+2*self.n_ids-n-5, 0)
 
         H = np.block([H_s_robot, np.zeros((2, n)),
                      H_s_marker, np.zeros((2, m))])
@@ -201,9 +210,9 @@ class EKFSLAM:
         
         self.mu = self.mu + \
             K@(np.array([r_i-r, self.subtract(beta_i, beta)]))
-        self.Sigma = (np.identity(3+2*len(self.ids))-K@H)@self.Sigma 
+        self.Sigma = (np.identity(3+2*self.n_ids)-K@H)@self.Sigma 
 
-
+    @timeit
     def get_robot_pose(self):
         # read out the robot position and angle from mu variable
         # read out robot error from Sigma
@@ -213,10 +222,12 @@ class EKFSLAM:
 
         return robot_x, robot_y, robot_theta, error  # wrt world
 
+    @timeit
     def get_landmark_poses(self):
         landmark_estimated_positions = []
         landmark_estimated_stdevs = []
-        for i, id in enumerate(self.get_landmark_ids()):
+        # for i, id in enumerate(self.get_landmark_ids()):
+        for i in range(self.n_ids):
             landmark_xy = self.mu[3+2*i: 3+2*i+2]
             sigma_xy = self.Sigma[3+2*i:3+2*i+2, 3+2*i:3+2*i+2]
             landmark_error = self.get_error_ellipse(sigma_xy)
@@ -226,6 +237,7 @@ class EKFSLAM:
 
         return landmark_estimated_positions, landmark_estimated_stdevs
 
+    @timeit
     def get_error_ellipse(self, covariance):
         # check the first eigenvalue is the largest
         eigen_vals, eigen_vec = np.linalg.eig(covariance)
@@ -242,9 +254,11 @@ class EKFSLAM:
         return np.sqrt(np.real(eigen_vals[i])), np.sqrt(np.real(eigen_vals[j])), angle
 
     # return the list of all known ids
+    @timeit
     def get_landmark_ids(self):
-        return np.array(self.ids)
+        return self.ids
 
+    @timeit
     # helper function to get correct difference of two angle
     def subtract(self, theta_1, theta_2):
         diff = (theta_1-theta_2) % (2*np.pi)
