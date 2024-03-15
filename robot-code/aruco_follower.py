@@ -21,7 +21,7 @@ class Wanderer:
     def choose_traj(self, img):
         # TODO In the future we can get all this info directly from ekf_slam
         ids, rho, alpha, coords = self.robot.vision.detections(
-            img, None, [0, 0], kind='aruco')
+            img, None, [0, 0, 0], kind='aruco')
         # print(ids, coords)
         # inner_ids=(ids%3==0)& (ids<1000) # left
         outer_ids = (ids % 3 == 2) & (ids < 1000) &(ids>100) # right
