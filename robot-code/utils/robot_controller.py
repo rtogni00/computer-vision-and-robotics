@@ -87,9 +87,15 @@ class RobotController:
         self.recorder.save_step(img, speed, turn)
 
     def get_motor_movement(self) -> tuple:
-        pass
-        l = 0
-        r = 0
+        motor_pose=self.vehicle.motor_pos
+
+        alpha_l=np.deg2rad(motor_pose.left)
+        alpha_r=np.deg2rad(motor_pose.right)
+        radius = self.config.robot.wheel_radius
+        
+        l = alpha_l*radius
+        r = alpha_r*radius
+        
         return (l, r)
 
     def run_ekf_slam(self, img, draw_img=None, fastmode=False):
