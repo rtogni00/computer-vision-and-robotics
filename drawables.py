@@ -197,10 +197,17 @@ class Points(DrawableObject):
                     color = self.id_to_color(self.ids[at_step][i])
 
                 c = self.points[at_step][i]
-                self.cursor_objects.append(self.canvas.create_oval(
-                    c[0] - self.radius, c[1] - self.radius,
-                    c[0] + self.radius, c[1] + self.radius,
-                    fill=color))
+                if self.ids[at_step][i] is None or self.ids[at_step][i] > 1000:
+                    self.cursor_objects.append(self.canvas.create_oval(
+                        c[0] - self.radius, c[1] - self.radius,
+                        c[0] + self.radius, c[1] + self.radius,
+                        fill=color))
+                else:
+                    self.cursor_objects.append(self.canvas.create_rectangle(
+                        c[0] - self.radius, c[1] - self.radius,
+                        c[0] + self.radius, c[1] + self.radius,
+                        fill=color))
+                    
                 if self.ids is not None:
                     if self.ids[at_step][i] is not None:
                         self.cursor_objects.append(self.canvas.create_text(c[0]+25,c[1],fill="black",font="Helvetica 10", text=str(self.ids[at_step][i])))
