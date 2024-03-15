@@ -114,11 +114,16 @@ class Main():
             self.robot.move(self.speed, self.turn)
 
         if self.mode == TaskPart.Exploration:
-            self.speed, self.turn = self.wanderer.tramp(data)
+            self.speed, self.turn, end_reached = self.wanderer.tramp(data)
             self.robot.move(self.speed, self.turn)
+            if end_reached:
+                self.mode = TaskPart.ToStartLine
 
         if self.mode == TaskPart.ToStartLine:
-            pass
+            # TODO implement algorithm to reach start line
+            start_line_reached=False
+            if start_line_reached:
+                self.mode=TaskPart.Race
 
         if self.mode == TaskPart.Race:
             pass

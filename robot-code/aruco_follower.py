@@ -97,15 +97,16 @@ class Wanderer:
             dist_from_arrival = np.sqrt(np.sum((finish_line-robot_pose)**2))
 
             # if closer than 0.25m
-            if dist_from_arrival < 0.25:
+            # TODO: improve stopping condition
+            if dist_from_arrival < 0.4:
                 if self.which_side == 'outer':
                     print('Switch to inner side')
                     self.which_side = 'inner'
                     self.time0 = timer()
                 elif timer()-self.time0 > self.grace_time:
                     print('Stopping now')
-                    return 0, 0
+                    return 0, 0, True
 
         self.choose_traj(data)
 
-        return self.speed, self.turn
+        return self.speed, self.turn, False
