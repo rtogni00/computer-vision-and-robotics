@@ -17,7 +17,7 @@ class Subscriber():
     def __init__(self) -> None:
 
         # pub/sub:
-        self.image_hub = imagezmq.ImageHub(open_port='tcp://100.70.240.82:5555', REQ_REP=False)
+        self.image_hub = imagezmq.ImageHub(open_port='tcp://100.64.0.3:5555', REQ_REP=False)
 
         self.image_count = 0
         self.first_image = True
@@ -25,7 +25,12 @@ class Subscriber():
         self.fps = None
 
     def run(self):
-        msg, jpg_buffer = self.image_hub.recv_jpg()
+        try:
+            msg, jpg_buffer = self.image_hub.recv_jpg()
+
+        except Exception as e:
+            print("caught exception", e)
+            return None, None
         # print("msg", msg)
 
         if self.first_image:

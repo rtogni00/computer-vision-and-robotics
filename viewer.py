@@ -11,6 +11,7 @@ import signal
 import sys
 import jsonpickle
 import message # used for unpickling json str to message obj
+from rich import print
 
 from subscriber import Subscriber
 from drawables import Trajectory, ScannerData, Points, Particles
@@ -46,8 +47,8 @@ class GuiPart:
         self.sensor_canvas = tkinter.Canvas(frame1, height=self.sensor_canvas_extents[1],bg="white")
         self.sensor_canvas.pack(side=tkinter.RIGHT, anchor=tkinter.NE, fill=tkinter.BOTH, expand=True, pady=2, padx=2)
 
-        self.frame2 = tkinter.Frame(root)
-        self.frame2.pack(fill=tkinter.BOTH, expand=True)
+        # self.frame2 = tkinter.Frame(root)
+        # self.frame2.pack(fill=tkinter.BOTH, expand=True)
         # self.scale = tkinter.Scale(self.frame2, orient=tkinter.HORIZONTAL, command =self.slider_moved)
         # self.scale.pack(fill=tkinter.X)
         # self.info = tkinter.Label(self.frame2)
@@ -83,13 +84,19 @@ class GuiPart:
     def resize_event(self, event):
         if(event.widget == self.root and (self.width != event.width or self.height != event.height)
             and (event.width != 0 or event.height != 0)):
+            print("resize event!")
 
             self.width, self.height = event.width, event.height
             self.resize()
+        else:
+            print("false? resize event?", event.widget == self.root, self.width, self.height, event.width, event.height)
 
 
+    
     def resize(self):
-        fixed_height_part = self.frame2.winfo_height() + 10 # add 10 to make sure none of the image is cropped
+        pass
+        # fixed_height_part = self.frame2.winfo_height() + 10 # add 10 to make sure none of the image is cropped
+        fixed_height_part = 0
 
         max_canvas_width = (self.width)/2
         max_canvas_height = (self.height - fixed_height_part)/2
@@ -97,20 +104,22 @@ class GuiPart:
         self.world_canvas_extents = (max_canvas_width, max_canvas_height)
         self.sensor_canvas_extents = (max_canvas_width, max_canvas_height)
 
-        self.world_canvas.config(width=self.world_canvas_extents[0], height=self.world_canvas_extents[1])
-        self.sensor_canvas.config(width=self.sensor_canvas_extents[0], height=self.sensor_canvas_extents[1])
+        # self.world_canvas.config(width=self.world_canvas_extents[0], height=self.world_canvas_extents[1])
+        # self.sensor_canvas.config(width=self.sensor_canvas_extents[0], height=self.sensor_canvas_extents[1])
 
         camera_img_ratio = self.camera_img_size[0]/self.camera_img_size[1]
-        # print("camera_img_ratio", camera_img_ratio)
+        print("camera_img_ratio", camera_img_ratio)
 
-        self.camera_canvas_extents = (int(max_canvas_height * camera_img_ratio), int(max_canvas_height+2))
-        self.camera_canvas.config(width=self.camera_canvas_extents[0], height=self.camera_canvas_extents[1])
+        # TODO: this resize function breaks everything when dragging window to top
+        # TODO: something to do with camera_canvas_extents
+        # self.camera_canvas_extents = (int(max_canvas_height * camera_img_ratio), int(max_canvas_height+2))
+        # self.camera_canvas.config(width=self.camera_canvas_extents[0], height=self.camera_canvas_extents[1])
 
         # print("camera_canvas_extents ratio", self.camera_canvas_extents[0]/self.camera_canvas_extents[1])
         # print("camera_canvas_extents ratio", self.camera_canvas.winfo_width()/self.camera_canvas.winfo_height())
 
-        self.log_canvas_extents = (self.width - self.camera_canvas_extents[0],  self.camera_canvas_extents[1])
-        self.log_canvas.config(width=self.log_canvas_extents[0], height=self.log_canvas_extents[1])
+        # self.log_canvas_extents = (self.width - self.camera_canvas_extents[0],  self.camera_canvas_extents[1])
+        # self.log_canvas.config(width=self.log_canvas_extents[0], height=self.log_canvas_extents[1])
 
     def slider_moved(self, index):
         """Callback for moving the scale slider."""
@@ -220,9 +229,9 @@ class GuiPart:
             
             # position with direction, use robot_pose instead of robot_position
             # red points with ellipse
-            draw_objects.append(Trajectory(np.expand_dims(robot_pose, axis=0), 
-                self.world_canvas, 
-                self.world_extents, 
+            draw_objects.append(Trajectory(np.expand_dims(robot_pose, axis=0),
+                self.world_canvas,
+                self.world_extents,
                 self.world_canvas_extents,
                 standard_deviations=np.expand_dims(robot_stdev, axis=0),
                 cursor_color="blue", background_color="lightblue",
@@ -248,7 +257,7 @@ class GuiPart:
 
             # landmark world ellipses and red points
             scale = self.world_canvas_extents[0] / self.world_extents[0]
-            draw_objects.append(Points(np.expand_dims(landmark_estimated_positions, axis=0), 
+            draw_objects.append(Points(np.expand_dims(landmark_estimated_positions, axis=0),
                                 self.world_canvas, "#cc0000",
                                 ids=np.expand_dims(landmark_estimated_ids, axis=0),
                                 ellipses=np.expand_dims(landmark_estimated_stdevs, axis=0),
@@ -296,7 +305,7 @@ class GuiPart:
                 text += "robot pos: (" + str(np.round(msg.robot_position[0], 2)) + ", " + str(np.round(msg.robot_position[1], 2)) + ")\n"
                 self.log_canvas.delete("TEXT")
                 self.log_canvas.create_text(10,10,fill="black", anchor=tkinter.NW,
-                        text=text, tags="TEXT")
+                        text=text, font=("Purisa", 12), tags="TEXT")
 
                 if msg:
                     self.load_new_data(msg)
@@ -320,6 +329,8 @@ class ThreadedClient:
         the GUI as well. We spawn a new thread for the worker (I/O).
         """
         self.root = root
+
+        root.protocol("WM_DELETE_WINDOW", self.endApplication)
 
         # Create the queue
         self.queue = Queue.Queue()
@@ -349,12 +360,12 @@ class ThreadedClient:
         """
         self.gui.processIncoming()
         if not self.running:
-            # This is the brutal stop of the system. You may want to do
-            # some cleanup before actually shutting it down.
+            # clean up and exit
             self.subscriber.close()
+            # self.root.quit()
 
             print("exiting...")
-            sys.exit(1)
+            sys.exit()
 
         self.root.after(10, self.periodicCall)
 
@@ -367,7 +378,8 @@ class ThreadedClient:
         while self.running:
             # Asynchronous stuff here
             msg_str, img = self.subscriber.run()
-            self.queue.put((msg_str, img))
+            if msg_str is not None:
+                self.queue.put((msg_str, img))
 
     def endApplication(self):
         self.running = 0
@@ -375,6 +387,7 @@ class ThreadedClient:
 if __name__ == '__main__':
     client = None
     root = tkinter.Tk()
+    
     # root.tk.call('tk', 'scaling', 2.0) # doesn't do anything
 
     client = ThreadedClient(root)
