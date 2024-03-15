@@ -39,13 +39,14 @@ class RobotController:
 
         self.detected_ids = set()
 
+        self.robotgeometries = config.geometries
 
     def __enter__(self) -> RobotController:
 
         self.camera = Camera(self.config.camera.exposure_time,
                              self.config.camera.gain)
         self.vision = Vision(self.camera.CAMERA_MATRIX, self.camera.DIST_COEFFS,
-                             self.config.camera)
+                             self.config.camera, self.robotgeometries)
 
         try:
             self.__ev3_obj__ = ev3.EV3(protocol=ev3.USB, sync_mode="STD")
@@ -54,9 +55,9 @@ class RobotController:
 
         if self.__ev3_obj__:
             self.vehicle = ev3.TwoWheelVehicle(
-                self.config.robot.wheel_radius, # radius wheel
-                self.config.robot.width, # middle-to-middle tread measured
-                speed = 10,
+                self.config.robot.wheel_radius,  # radius wheel
+                self.config.robot.width,  # middle-to-middle tread measured
+                speed=10,
                 ev3_obj=self.__ev3_obj__
             )
 
@@ -93,22 +94,23 @@ class RobotController:
 
     def run_ekf_slam(self, img, draw_img=None, fastmode=False):
         # movements is what is refered to as u = (l, r) in the document
-        l,r = self.get_motor_movement()
+        l, r = self.get_motor_movement()
         movements = l - self.old_l, r - self.old_r
         self.old_l, self.old_r = l, r
         if movements[0] != 0.0 or movements[1] != 0:
             self.slam.predict(*movements)
 
-        ids, landmark_rs, landmark_alphas, landmark_positions = self.vision.detections(img, draw_img, self.slam.get_robot_pose())
+        ids, landmark_rs, landmark_alphas, landmark_positions = self.vision.detections(
+            img, draw_img, self.slam.get_robot_pose())
 
         robot_x, robot_y, robot_theta, robot_stdev = self.slam.get_robot_pose()
         landmark_estimated_ids = self.slam.get_landmark_ids()
         landmark_estimated_positions, landmark_estimated_stdevs = self.slam.get_landmark_poses()
 
-        
         for i, id in enumerate(ids):
             if id not in self.slam.get_landmark_ids():
-                self.slam.add_landmark(landmark_positions[i], (landmark_rs[i], landmark_alphas[i]), id)
+                self.slam.add_landmark(
+                    landmark_positions[i], (landmark_rs[i], landmark_alphas[i]), id)
                 print(f"Landmark with id {id} added")
             else:
                 # correct each detected landmark that is already added
