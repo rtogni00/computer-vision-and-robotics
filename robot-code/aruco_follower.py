@@ -13,8 +13,10 @@ class Wanderer:
     def __init__(self, robot):
         self.robot = robot
         self.side = 0
-        self.speed = 50
+        self.speed = 70
         self.turn = 0
+        self.speed_lost=20
+        self.speed_cruise=70
 
     def choose_traj(self, img):
         # TODO In the future we can get all this info directly from ekf_slam
@@ -22,11 +24,12 @@ class Wanderer:
             img, None, [0, 0], kind='aruco')
         # print(ids, coords)
         # inner_ids=(ids%3==0)& (ids<1000) # left
-        outer_ids = (ids % 3 == 2) & (ids < 1000)  # right
+        outer_ids = (ids % 3 == 2) & (ids < 1000) &(ids>100) # right
         # print("Outer ids:", outer_ids)
         # rho_inner_ids=rho[inner_ids]
 
-        if len(outer_ids) >= 2: 
+        if np.sum(outer_ids) >= 2: 
+            self.speed=self.speed_cruise
             rho_outer_ids = rho[outer_ids]
             alpha_outer_ids=alpha[outer_ids]
             # x_inner=coords[inner_ids][0]
@@ -87,7 +90,8 @@ class Wanderer:
 
         else:
             print(':warning:[bright_red]I can\'t see a thing')
-            self.turn = 200*self.side
+            self.turn = -200*self.side
+            self.speed=self.speed_lost
 
             # Closer aruco on the right
 
