@@ -81,7 +81,7 @@ class Trajectory(DrawableObject):
                 stddev = self.standard_deviations[at_step]
                 # Note this assumes correct aspect ratio.
                 factor = self.canvas_extents[0] / self.world_extents[0]
-                print("factor", factor)
+                # print("factor", factor)
                 if len(stddev) == 2:
                     # main_axis_angle = 0
                     points = self.get_ellipse_points(p, 0, stddev[0] * factor, stddev[1] * factor)

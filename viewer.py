@@ -22,18 +22,20 @@ class GuiPart:
         self.queue = queue
         self.root = root
 
+        self.height_padding = 8
+        self.width_padding = 8
+
         self.window_extents = (1200, 1000)
         # The extents of the world and sensor canvas.
-        self.world_canvas_extents = (400, (self.window_extents[1]- 1)/2)
-        self.sensor_canvas_extents = (400, (self.window_extents[1]- 1)/2)
-        self.camera_canvas_extents = (848, (self.window_extents[1]- 1)/2)
-        self.log_canvas_extents = (400, (self.window_extents[1]- 1)/2)
+        self.world_canvas_extents = (400, int((self.window_extents[1]- 1)/2))
+        self.sensor_canvas_extents = (400, int((self.window_extents[1]- 1)/2))
+        self.camera_canvas_extents = (848, int((self.window_extents[1]- 1)/2))
+        self.log_canvas_extents = (400, int((self.window_extents[1]- 1)/2))
 
         # camera image size
         self.camera_img_size = (848, 480)
 
         self.camera_img_ratio = self.camera_img_size[0]/self.camera_img_size[1]
-        print("camera_img_ratio", self.camera_img_ratio)
 
 
         # The world extents of the scene in meters
@@ -82,42 +84,40 @@ class GuiPart:
         root.update_idletasks()
 
         self.width, self.height = self.root.winfo_width(), self.root.winfo_height()
+        self.compute_window_spacing()
+        self.resize()
+
         root.bind("<Configure>", self.resize_event)
 
-    #     self.compute_window_spacing()
-
     
-    # def compute_window_spacing(self):
-    #     root_w = self.root.winfo_width()
-    #     root_h = self.root.winfo_height()
+    def compute_window_spacing(self):
+        root_w = self.root.winfo_width()
+        root_h = self.root.winfo_height()
 
-    #     print(root_w, root_h)
+        frame_width = self.world_canvas.winfo_width() + self.sensor_canvas.winfo_width()
+        frame_height = self.world_canvas.winfo_height() + self.camera_canvas.winfo_height()
 
-    #     frame_width = self.world_canvas.winfo_width() + self.sensor_canvas.winfo_width()
-    #     frame_height = self.world_canvas.winfo_height() + self.camera_canvas.winfo_height()
+        # print(root_w - frame_width, root_h - frame_height)
 
-    #     print(frame_width, frame_height)
-
+        self.width_padding = root_w - frame_width
+        self.height_padding = root_h - frame_height
+        
 
     def resize_event(self, event):
         if(event.widget == self.root and (self.width != event.width or self.height != event.height)
             and (event.width != 0 or event.height != 0)):
-            # print("resize event!")
 
             self.width, self.height = event.width, event.height
             self.resize()
-        # else:
-        #     print("false? resize event?", event.widget == self.root, self.width, self.height, event.width, event.height)
+
+            self.root.update_idletasks()
 
 
     
     def resize(self):
 
-        fixed_height_part = 8
-        fixed_weight_part = 8
-
-        frame_width = self.width - fixed_weight_part
-        frame_height = self.height - fixed_height_part
+        frame_width = self.width - self.width_padding
+        frame_height = self.height - self.height_padding
 
         # frame_width = self.world_canvas.winfo_width() + self.sensor_canvas.winfo_width()
         # frame_height = self.world_canvas.winfo_height() + self.camera_canvas.winfo_height()
@@ -135,7 +135,6 @@ class GuiPart:
         self.world_canvas_extents = (max_canvas_width, max_canvas_height)
         self.sensor_canvas_extents = (max_canvas_width, max_canvas_height)
 
-        # todo: these seem to not crash stuff on mac
         self.world_canvas.config(width=self.world_canvas_extents[0], height=self.world_canvas_extents[1])
         self.sensor_canvas.config(width=self.sensor_canvas_extents[0], height=self.sensor_canvas_extents[1])
 
@@ -157,7 +156,6 @@ class GuiPart:
             log_canvas_width = frame_width - camera_canvas_width
 
 
-        # TODO: Does this still break resizing to full screen on linux?
         self.camera_canvas.config(width=camera_canvas_width, height=camera_canvas_height)
         self.log_canvas.config(width=log_canvas_width, height=log_canvas_height)
 
@@ -319,25 +317,34 @@ class GuiPart:
         """Handle all messages currently in the queue, if any."""
         while self.queue.qsize():
             try:
-                msg_str, img = self.queue.get(0)
-                # Check contents of message and do whatever is needed. As a
-                # simple test, print it (in real life, you would
-                # suitably update the GUI's display in a richer fashion).
+                # we only want the latest image. delete the rest.
+                # we are using a LIFO queue (last in, first out)
+                msg_str, img = self.queue.get() # remove and return item from queue
+                with self.queue.mutex:
+                    self.queue.queue.clear()
+
                 msg = jsonpickle.decode(msg_str)
                 date_time = datetime.fromtimestamp(msg.timestamp)
                 date_time_str = date_time.strftime("%m/%d/%Y, %H:%M:%S.%f")
 
-                cv2image= cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
-                img = Image.fromarray(cv2image)
-                self.camera_img_size = img.size
-                img = img.resize((int(self.camera_canvas_extents[0]), int(self.camera_canvas_extents[1])), Image.ANTIALIAS)
+                now = datetime.now()
+                delay = now - date_time
+                delay_milliseconds = int(delay.total_seconds() * 1000)
 
+
+                cv2image = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
+                self.camera_img_size = img.shape[:2]
+                cv2image = cv2.resize(cv2image, self.camera_canvas_extents, interpolation = cv2.INTER_NEAREST) # INTER_NEAREST is fastest
+                img = Image.fromarray(cv2image)
+                
                 # Convert image to PhotoImage
                 self.imgtk = ImageTk.PhotoImage(image = img)
-                self.camera_canvas.delete("IMG")
+                # self.camera_canvas.delete("IMG")
                 self.camera_canvas.create_image(0, 0, image=self.imgtk, anchor=tkinter.NW, tags="IMG")
                 
-                text = date_time_str + "\n"
+                text = ""
+                text += "delay: " + str(delay_milliseconds) + "ms" + "\n"
+                text += date_time_str + "\n"
                 text += "img size: " + str(self.camera_img_size) + "\n"
                 text += "id: " + str(msg.id) + "\n"
                 text += "start: " + str(msg.start) + "\n"
@@ -351,8 +358,7 @@ class GuiPart:
                     self.load_new_data(msg)
 
             except Queue.Empty:
-                # just on general principles, although we don't
-                # expect this branch to be taken in this case
+                # waiting for item to be added to queue
                 pass
 
 
@@ -373,7 +379,7 @@ class ThreadedClient:
         root.protocol("WM_DELETE_WINDOW", self.endApplication)
 
         # Create the queue
-        self.queue = Queue.Queue()
+        self.queue = Queue.LifoQueue()
 
         # Set up the GUI part
         self.gui = GuiPart(root, self.queue, self.endApplication)
@@ -407,7 +413,7 @@ class ThreadedClient:
             print("exiting...")
             sys.exit()
 
-        self.root.after(10, self.periodicCall)
+        self.root.after(20, self.periodicCall)
 
     def workerThread1(self):
         """
