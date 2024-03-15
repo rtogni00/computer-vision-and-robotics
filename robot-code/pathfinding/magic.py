@@ -7,7 +7,7 @@ def dist_nodes(a, b) -> float:
     return np.sqrt(((a-b)**2).sum())
 
 
-def ordinator(l_input, max_distance=0.5, min_dist=100):
+def ordinator(l_input, max_distance=0.5, min_dist_=100):
     """Disentangling function for internal and external path
     Use proper max_distance
     """
@@ -18,7 +18,7 @@ def ordinator(l_input, max_distance=0.5, min_dist=100):
     last = _l_input.pop(0)  # start from the first recorded node
     new_order.append(last)
     while len(_l_input) > 0:
-        min_dist = 100
+        min_dist = min_dist_
         index = orig_size
         for i, point in enumerate(_l_input):
             distance_temp = dist_nodes(last, point)

@@ -3,71 +3,20 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 
-# function to find quadrand
-def quadrant(position, max_x, max_y, min_x, min_y):
-    center_y = min_x+(max_y-min_y)/2
-    center_x = min_y+(max_x-min_x)/2
-    x, y = position[0:2]
-    if x >= center_x and y < center_y:
-        return 1
-    elif x >= center_x and y >= center_y:
-        return 2
-    elif x < center_x and y >= center_y:
-        return 3
-    elif x < center_x and y < center_y:
-        return 4
-
-# function heuristics
-
-def distance_from_arrival(position, arrival, max_x, max_y, min_x, min_y, visited_quadrant):
-    quadrant_temp = quadrant(position, max_x, max_y, min_x, min_y)
-
-    if quadrant_temp not in visited_quadrant:
-        visited_quadrant.append(quadrant_temp)
-
-    distance = 0
-
-    delta_x = max_x-min_x
-    delta_y = max_y-min_y
-
-    center_y = min_x+delta_y/2
-    center_x = min_y+delta_x/2
-
-    x, y = position[0:2]
-    x_arrival, y_arrival = arrival[0:2]
-
-    if quadrant_temp == 1:
-        # variable 1
-        distance += abs(max_x-x)+abs(center_y-y)
-        # 2 & 3
-        distance += abs(delta_y)
-        distance += abs(delta_x)
-        # 4
-        distance += abs(min_x)
-        distance += abs(center_y)
-    elif quadrant_temp == 2:
-        # 2 variable
-        distance += abs(max_y-y)+abs(x-center_x)
-        # 3
-        distance += delta_x/2
-        distance += delta_y/2
-        # 4
-        distance += abs(min_x)
-        distance += abs(center_y)
-
-    elif quadrant_temp == 3:
-        # 3 variable
-        distance += abs(x-min_x)+abs(y-center_y)
-        # 4
-        distance += abs(min_x)
-        distance += abs(center_y)
-    elif quadrant_temp == 4:
-        if 2 in visited_quadrant:
-            distance += abs(x)+abs(y)
-        else:
-            distance += abs(x-max_x) + abs(y-center_y)
-
-    return distance, visited_quadrant
+def heuristic_(maze, current, start):
+    row=maze.shape[0]
+    max_i = 0
+    min_i = 0
+    for i in range(row):
+        if (maze[i,:]==0).any():
+            max_i= i
+            break
+    for i in range(row,0,-1):
+        if (maze[i,:]==0).any():
+            min_i = i
+            break
+    
+        
 
 
 def heuristic(a, b):
