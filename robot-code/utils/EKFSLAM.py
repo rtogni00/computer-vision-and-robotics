@@ -142,7 +142,6 @@ class EKFSLAM:
             self.ids.append(id)
             print(f"Landmark with id {id} added")
 
-
     def correction(self, landmark_position_measured: tuple, id: int):
         # index of identified aruco
         index = self.ids.index(id)
@@ -209,15 +208,23 @@ class EKFSLAM:
         # read out robot error from Sigma
         robot_x, robot_y, robot_theta = self.mu[:3].copy()
         sigma = self.Sigma[:2, :2]
-        var_x, var_y, angle = self.get_error_ellipse(sigma)
-        robot_stdev = [np.sqrt(var_x), np.sqrt(var_y), angle]
+        error = self.get_error_ellipse(sigma)
 
-        return robot_x, robot_y, robot_theta, robot_stdev  # wrt world
+        return robot_x, robot_y, robot_theta, error  # wrt world
 
     def get_landmark_poses(self):
-        pass
-        landmark_estimated_positions, landmark_estimated_stdevs = [1], [1]
+        landmark_estimated_positions = []
+        landmark_estimated_stdevs = []
+        for i, id in enumerate(self.get_landmark_ids()):
+            landmark_xy = self.mu[3+2*i: 3+2*i+2]
+            sigma_xy = self.Sigma[3+2*i:3+2*i+2, 3+2*i:3+2*i+2]
+            landmark_error = self.get_error_ellipse(sigma_xy)
+
+            landmark_estimated_positions.append(landmark_xy)
+            landmark_estimated_stdevs.append(landmark_error)
+
         return landmark_estimated_positions, landmark_estimated_stdevs
+        # return [[0,0], [1,1]],[[0.5,0.5,0],[0.2,0.7,0]]
 
     def get_error_ellipse(self, covariance):
         # check the first eigenvalue is the largest
@@ -230,10 +237,10 @@ class EKFSLAM:
             i = 1
             j = 0
         # get eigenvalues and eigenvectors of covariance matrix
-        print("*************", eigen_vec[i][1], eigen_vec[i][0])
-
-        angle = np.arctan2(eigen_vec[i][1], eigen_vec[i][0])
-        return np.sqrt(eigen_vals[i]), np.sqrt(eigen_vals[j]), angle
+        eigvec_x, eigvec_y = eigen_vec[:, i]
+        angle = np.arctan2(eigvec_y, eigvec_x)
+        print(eigen_vals)
+        return np.sqrt(np.real(eigen_vals[i])), np.sqrt(np.real(eigen_vals[j])), angle
 
     # return the list of all known ids
     def get_landmark_ids(self):
