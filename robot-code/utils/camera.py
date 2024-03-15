@@ -26,7 +26,8 @@ class Camera:
 
         self.cap = None
 
-        self.queue = Queue.LifoQueue() # thread safe
+        # self.queue = Queue.LifoQueue() # thread safe
+        self.queue = None
         self.is_running = False
 
         with open("./camera_intrinsics.yml", "r") as stream:
@@ -41,7 +42,7 @@ class Camera:
 
         # self.exposure = 400 # higher is brighter
 
-        self.set_camera_properties(self.exposure_time)
+        self.set_camera_properties(self.exposure_time, self.gain)
 
         self.time_last = timer()
 
@@ -54,7 +55,7 @@ class Camera:
         self.start()
 
 
-    def set_camera_properties(self, exposure_time=157):
+    def set_camera_properties(self, exposure_time=157, gain=50):
         """
         $ v4l2-ctl --all
         brightness 0x00980900 (int)    : min=-64 max=64 step=1 default=0 value=0
@@ -80,7 +81,7 @@ class Camera:
         exposure_time_absolute 0x009a0902 (int)    : min=1 max=5000 step=1 default=157 value=157 flags=inactive
         exposure_dynamic_framerate 0x009a0903 (bool)   : default=0 value=1
         """
-        subprocess.call(f"v4l2-ctl -d {self.DEVICE} -c auto_exposure=1,exposure_time_absolute={exposure_time},gain=50", shell=True)
+        subprocess.call(f"v4l2-ctl -d {self.DEVICE} -c auto_exposure=1,exposure_time_absolute={exposure_time},gain={gain}", shell=True)
 
         self.cap = cv2.VideoCapture(self.DEVICE, cv2.CAP_V4L2)
 
@@ -103,18 +104,26 @@ class Camera:
             elapsed_time = time_now - self.time_last
             cam_fps = int(np.rint(1/elapsed_time))
 
-            self.queue.put((ret, frame, cam_fps, time_now))
+            # self.queue.put((ret, frame, cam_fps, time_now))
             # we use a queue because it is thread safe
+            self.queue = (ret, frame, cam_fps, time_now)
 
             self.time_last = time_now
 
+            if cam_fps < 10:
+                print(f"[red] cam_fps {cam_fps}")
+
 
     def read(self):
-        if self.queue.qsize():
-            ret, frame, cam_fps, img_created = self.queue.get()
-            with self.queue.mutex:
-                self.queue.queue.clear()
+        if self.queue is not None:
+            ret, frame, cam_fps, img_created = self.queue
+            self.queue = None
             return ret, cv2.flip(frame, -1), cam_fps, img_created
+        # if self.queue.qsize():
+        #     ret, frame, cam_fps, img_created = self.queue.get()
+        #     with self.queue.mutex:
+        #         self.queue.queue.clear()
+        #     return ret, cv2.flip(frame, -1), cam_fps, img_created
         else:
             return None, None, None, None
 
@@ -124,8 +133,8 @@ class Camera:
         self.ret , self.frame = self.cap.read()
 
 
-    def auto_set_brightness(self):
-        brightness = self.brightness(self.frame)
+    def auto_set_exposure(self):
+        brightness = self.get_brightness(self.frame)
 
         print("brightness", brightness)
 
@@ -133,20 +142,19 @@ class Camera:
         while brightness < 100:
             exposure_time += 200
 
-            print(f"increasing exposure to {self.exposure_time}")
+            print(f"[blue]increasing exposure to {self.exposure_time}")
 
             self.close()
             self.set_camera_properties(exposure_time)
             self.exposure_time = exposure_time
             self.start()
             self.warm_up()
-            brightness = self.brightness(self.frame)
+            brightness = self.get_brightness(self.frame)
 
             print("brightness", brightness)
 
 
-
-    def brightness(self, img):
+    def get_brightness(self, img):
         # https://stackoverflow.com/questions/14243472/estimate-brightness-of-an-image-opencv
         if len(img.shape) == 3:
             # Colored RGB or BGR (*Do Not* use HSV images with this function)
@@ -156,9 +164,63 @@ class Camera:
             # Grayscale
             return np.average(img)
 
+
+    def get_brightness_parameters(self, image, clip_hist_percent=10):
+        """
+        https://stackoverflow.com/questions/57030125/automatically-adjusting-brightness-of-image-with-opencv
+        Perform contast enhancement of the image.
+        """
+        gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+
+        # Calculate grayscale histogram
+        hist = cv2.calcHist([gray],[0],None,[256],[0,256])
+        hist_size = len(hist)
+
+        # Calculate cumulative distribution from the histogram
+        accumulator = []
+        accumulator.append(float(hist[0]))
+        for index in range(1, hist_size):
+            accumulator.append(accumulator[index -1] + float(hist[index]))
+
+        # Locate points to clip
+        maximum = accumulator[-1]
+        clip_hist_percent *= (maximum/100.0)
+        clip_hist_percent /= 2.0
+
+        # Locate left cut
+        minimum_gray = 0
+        while accumulator[minimum_gray] < clip_hist_percent:
+            minimum_gray += 1
+
+        # Locate right cut
+        maximum_gray = hist_size -1
+        while accumulator[maximum_gray] >= (maximum - clip_hist_percent):
+            maximum_gray -= 1
+
+        # Calculate alpha and beta values
+        alpha = 255 / (maximum_gray - minimum_gray)
+        beta = -minimum_gray * alpha
+
+        self.auto_brightness_alpha = alpha
+        self.auto_brightness_beta = beta
+
+        print(f"[blue]auto brightness: alpha:{alpha}, beta:{beta}")
+
+    def apply_brightness_params(self, img):
+        if self.auto_brightness_alpha and self.auto_brightness_beta is not None:
+            auto_result = cv2.convertScaleAbs(img, alpha=self.auto_brightness_alpha, beta=self.auto_brightness_beta)
+            return auto_result
+        return img
+
     def close(self):
+        print("[blue]camera closing...")
         self.is_running = False
+
+        self.camera_thread.join() # wait for thread to finish
+
         self.cap.release()
+        print("[blue]camera closed")
+
 
     def start(self):
         self.is_running = True
