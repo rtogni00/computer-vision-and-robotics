@@ -80,7 +80,7 @@ class Vision:
         X = np.squeeze(mu * x_tilde) + self.C_tilde
         return X
 
-    def detections(self, img: np.ndarray, draw_img: np.ndarray, x: tuple, kind: str = "aruco") -> tuple:
+    def detections(self, img: np.ndarray, draw_img: None, x: tuple, kind: str = "aruco") -> tuple:
 
         # detect arucos and circles
         ids, x_r2m, y_r2m = self.detect_arucos(img, draw_img)
