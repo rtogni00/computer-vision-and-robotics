@@ -28,8 +28,8 @@ class MazeRunner():
         return (x, y)
 
     def meter_to_matrix(self, x, y):
-        index_x = int((self.min_x-x)/self.spatial_step)
-        index_y = int((self.min_y-y)/self.spatial_step)
+        index_x = int(abs(self.min_x-x)/self.spatial_step)
+        index_y = int(abs(self.min_y-y)/self.spatial_step)
         return (index_x, index_y)
 
     def create_mask(self):
@@ -106,7 +106,6 @@ class MazeRunner():
 
         self.mask = mask+mask_line_obs
 
-
     def create_path(self, start, end):
         # compute the mask
         print('Start computing the maze')
@@ -115,11 +114,14 @@ class MazeRunner():
         # get the matrix path with mask
         print('Computing a star')
         path_matrix = astar(self.mask, self.meter_to_matrix(*start), self.meter_to_matrix(*end))
-
+        if not path_matrix:
+            print('Path not found')
+            print(self.meter_to_matrix(*start), self.meter_to_matrix(*end))
+            np.savetxt('mask.txt', self.mask)
         # return the path in geometric coordinates
         path_meter = [self.matrix_to_meter(*xy) for xy in path_matrix]
 
         # trim the complexity of the path
-        path_meter=path_meter[::3]
+        path_meter = path_meter[::3]
         print("Path computed, ready to start race")
         return path_meter

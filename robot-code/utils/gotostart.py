@@ -6,6 +6,7 @@ from rich import print
 from utils.tempo import *
 from utils.magic import ordinator
 
+
 class GoToStart:
     def __init__(self, data):
         self.positions = np.array(data.landmark_estimated_positions)
@@ -23,12 +24,12 @@ class GoToStart:
         mask_start_line = (self.ids < 100) & (self.ids > 0)
         positions_start_line = self.positions[mask_start_line]
         pos_start_line_ordered = np.array(
-            ordinator(positions_start_line, max_distance=0.3))
+            ordinator(positions_start_line, max_distance=0.6))  # ordinator has higher max_dist because is not a closed loop
         first = pos_start_line_ordered[0]
         last = pos_start_line_ordered[-1]
 
         radius = np.sqrt((first[0]-last[0])**2+(last[1]-first[1])**2)
-
+        print("first and last:", first, last, radius)
         return (first, last, radius)
 
     def get_centers(self, first, last, r):
@@ -76,7 +77,6 @@ class GoToStart:
     def get_path_start_end(self):
         return self.target_start, self.target_end
 
-
     def run(self, data):
         # get current position and orientation
         self.robot_pose = data.robot_position
@@ -85,7 +85,8 @@ class GoToStart:
         y_target = self.target_start[1]
         x_target = self.target_start[0]
         # use to decide whether to only rotate
-        distance_to_target = np.sqrt(np.sum((self.robot_pose-self.target_start)**2))
+        distance_to_target = np.sqrt(
+            np.sum((self.robot_pose-self.target_start)**2))
 
         if distance_to_target < 0.05:
             self.status = 2
@@ -106,10 +107,12 @@ class GoToStart:
             print("Entering status 1")
             return 10, 0, False
 
-        elif self.status == 2:  # second roatation
+        elif self.status == 2:  # second rotation
             print("Entering status 2")
             if (abs(robot_theta) > self.angle_limit):
-                return 15, -200, False  # speed, angle, end_condition
+                print("Angle limit:", self.angle_limit)
+                print("Delta angle:",abs(robot_theta) > self.angle_limit)
+                return 3, -200, False  # speed, angle, end_condition
             else:
                 return 0, 0, True
         else:

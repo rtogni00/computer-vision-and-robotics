@@ -107,7 +107,7 @@ class RobotController:
 
         l = alpha_l*radius
         r = alpha_r*radius
-        theta_gyro = -np.deg2rad(self.gyro.angle)
+        theta_gyro = np.deg2rad(self.gyro.angle)%(2*np.pi)
 
         return (l, r, theta_gyro)
 

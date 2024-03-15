@@ -43,6 +43,7 @@ class Main():
         self.keypress_listener = KeypressListener()
         self.publisher = Publisher()
         self.wanderer = Wanderer()
+        self.starter=None
 
         self.DT = self.config.robot.delta_t  # delta time in seconds
 
@@ -81,7 +82,7 @@ class Main():
                     dt = self.DT - elapsed_time
                     time.sleep(dt)  # moves while sleeping
                 else:
-                    print(f"[red]{count} dt = {elapsed_time}, RUN")
+                    # print(f"[red]{count} dt = {elapsed_time}, RUN")
                     pass
 
                 count += 1
@@ -104,9 +105,11 @@ class Main():
             print("[red]image is None!")
             return
 
-        if self.mode == TaskPart.Race or self.mode == TaskPart.ToStartLine:
+        if self.mode == TaskPart.Race:
+            time_ekf = timer()
             draw_img = raw_img
             data = self.robot.run_ekf_slam(raw_img, fastmode=True)
+            dt_ekfslam = timer()-time_ekf
         else:
             draw_img = raw_img.copy()
             data = self.robot.run_ekf_slam(raw_img, draw_img)
@@ -134,19 +137,23 @@ class Main():
                 print('Switching to prepare race')
                 self.mode = TaskPart.PrepareRace
 
-        if self.mode == TaskPart.PrepareRace:
-            print('Preparing race')
-            start, end = self.starter.get_path_start_end()
-            self.runner = Runner(data, start, end)
-            self.mode = TaskPart.Race
-
         if self.mode == TaskPart.Race:
-            self.speed, self.turn, end_reached = self.runner.run(data)
+            self.speed, self.turn, end_reached = self.runner.run(
+                data, dt_ekfslam)
             self.robot.move(self.speed, self.turn)
             if end_reached:
                 self.mode = TaskPart.Manual
-                self.robot.move(0,0)
+                self.robot.move(0, 0)
                 print("Oh yeah")
+
+        if self.mode == TaskPart.PrepareRace:
+            print('Preparing race')
+            if self.starter == None:
+                self.starter = GoToStart(data)
+
+            start, end = self.starter.get_path_start_end()
+            self.runner = Runner(data, start, end)
+            self.mode = TaskPart.Race
 
         if self.mode == TaskPart.Load:
             recalled_memories = self.load_state()
@@ -257,8 +264,8 @@ class Main():
             self.mode = TaskPart.Load
             print("[green]MODE: Load map")
         elif char == "p":
-            self.mode = TaskPart.ToStartLine
-            print("[green]MODE: To start line")
+            self.mode = TaskPart.PrepareRace
+            print("[green]MODE: Prepare race path")
         elif char == "e":
             self.mode = TaskPart.Exploration
             print("[green]MODE: Exploration")
@@ -270,10 +277,11 @@ class Main():
             self.save_state(data)
             print("[green]Saved ids and landmark positions")
 
-        if self.speed != self.new_speed or self.turn != self.new_turn:
-            self.speed = self.new_speed
-            self.turn = self.new_turn
-            print("speed:", self.speed, "turn:", self.turn)
+        if self.mode== TaskPart.Manual:
+            if self.speed != self.new_speed or self.turn != self.new_turn:
+                self.speed = self.new_speed
+                self.turn = self.new_turn
+                print("speed:", self.speed, "turn:", self.turn)
 
 
 if __name__ == '__main__':
