@@ -12,6 +12,8 @@ from utils.robot_dummy import DummyVehicle
 
 from timeit import default_timer as timer
 
+from utils.tempo import *
+
 
 class RobotController:
     def __init__(self, config) -> None:
@@ -38,6 +40,7 @@ class RobotController:
         self.old_l, self.old_r = 0, 0
 
         self.detected_ids = set()
+        self.past_ids=[]
 
         self.robotgeometries = config.geometries
 
@@ -86,10 +89,12 @@ class RobotController:
         if self.camera:
             self.camera.close()
 
+    @timeit
     def move(self, speed, turn, img=None):
         self.vehicle.move(speed, turn)
         self.recorder.save_step(img, speed, turn)
 
+    @timeit
     def get_motor_movement(self) -> tuple:
         motor_pose = self.vehicle.motor_pos
 
@@ -103,6 +108,7 @@ class RobotController:
 
         return (l, r, theta_gyro)
 
+    @timeit
     def run_ekf_slam(self, img, draw_img=None, fastmode=False):
         # movements is what is refered to as u = (l, r) in the document
         l, r, theta_gyro = self.get_motor_movement()
@@ -111,10 +117,11 @@ class RobotController:
         if movements[0] != 0.0 or movements[1] != 0:
             self.slam.predict(*movements)
 
+        robot_pose=self.slam.get_robot_pose()
         ids, landmark_rs, landmark_alphas, landmark_positions = self.vision.detections(
-            img, draw_img, self.slam.get_robot_pose(), kind='all')
+            img, draw_img, robot_pose, kind='all')
 
-        robot_x, robot_y, robot_theta, robot_stdev = self.slam.get_robot_pose()
+        robot_x, robot_y, robot_theta, robot_stdev = robot_pose
         # print("Angle from robot:", np.rad2deg(robot_theta))
         # print("Angle from gyro: ", np.rad2deg(theta_gyro))
         landmark_estimated_ids = self.slam.get_landmark_ids()
@@ -122,14 +129,16 @@ class RobotController:
 
         for i, id in enumerate(ids):
             # if id<=1000:
-            if id not in self.slam.get_landmark_ids():
+            # if id not in self.slam.get_landmark_ids() and id in self.past_ids:
+            if id not in landmark_estimated_ids and id in self.past_ids:
                 self.slam.add_landmark(
                     landmark_positions[i], id)
-            else:
+            elif id in landmark_estimated_ids:
                 # correct each detected landmark that is already added
                 self.slam.correction(
                     (landmark_rs[i], landmark_alphas[i]), id)
         
+        self.past_ids=ids
 
         data = SimpleNamespace()
         data.landmark_ids = ids
