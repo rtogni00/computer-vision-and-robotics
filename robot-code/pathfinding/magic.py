@@ -1,18 +1,18 @@
 import numpy as np
 
+# Compute distance between 2 points in np.array
+
 
 def dist_nodes(a, b) -> float:
-    """Compute distance between 2 points in np.array
-    """
     return np.sqrt(((a-b)**2).sum())
+
+# disentangling function for internal and external path with custum max and min distances
 
 
 def ordinator(l_input, max_distance=0.5, min_dist_=100):
-    """Disentangling function for internal and external path
-    Use proper max_distance
-    """
+
     orig_size = len(l_input)
-    _l_input = list(l_input[:])  # copy input, avoid input changing side effects
+    _l_input = list(l_input[:])  # copy input to avoid side effects
     new_order = []  # the output order
 
     last = _l_input.pop(0)  # start from the first recorded node
@@ -38,29 +38,32 @@ def ordinator(l_input, max_distance=0.5, min_dist_=100):
             new_order.append(last)
     return new_order[:]
 
-
+# topologically order points in a line
 def line_ordinator(l_input, max_distance=0.6, min_dist_=100):
-    _l_input = list(l_input[:])  # copy input, avoid input changing side effects
+    # copy input, avoid input changing side effects
+    _l_input = list(l_input[:])
 
-    xy_aruco=np.array(_l_input)
-    avg_xy=np.mean(xy_aruco, axis=0)
-    
-    xy_aruco_filtered = [xy for xy in _l_input if dist_nodes(xy, avg_xy)<0.7]
-    
+    xy_aruco = np.array(_l_input)
+    avg_xy = np.mean(xy_aruco, axis=0)
+
+    # filter any false positives, namely if they are more than 0.7m far apart from the mean
+    xy_aruco_filtered = [xy for xy in _l_input if dist_nodes(xy, avg_xy) < 0.7]
+
     xy_mid_point = np.mean(np.array(xy_aruco_filtered), axis=0)
     start = None
-    max_dist = 0
-    popper=None
+    max_dist = 0.3
+    popper = None
     for i, el in enumerate(xy_aruco_filtered):
         d = dist_nodes(el, xy_mid_point)
         if d > max_dist:
             max_dist = d
             start = el
-            popper=i
-            
-    xy_aruco_filtered.pop(popper)
+            popper = i
+    # remove only if more distant than 0.3m
+    if popper is not None:
+        xy_aruco_filtered.pop(popper)
+
     xy_aruco_filtered.append(start)
     new_order = ordinator(xy_aruco_filtered[::-1], max_distance, min_dist_)
 
     return new_order
-

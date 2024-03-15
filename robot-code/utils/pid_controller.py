@@ -19,7 +19,3 @@ class PIDController:
             output=200
 
         return output
-
-    def reset(self):
-        self.previous_error = 0
-        self.integral = 0

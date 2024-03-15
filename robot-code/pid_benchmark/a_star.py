@@ -4,7 +4,7 @@ import matplotlib.pyplot as plt
 
 
         
-# arbitrary euclidian heuristic
+
 def heuristic(a, b):
     return abs(a[0] - b[0]) + abs(a[1] - b[1])
 
@@ -12,7 +12,6 @@ def heuristic(a, b):
 def astar(maze, start, end):
     start=start[::-1]
     end=end[::-1]
-    # allowed moves in the maze
     moves = [(0, 1), (0, -1), (1, 0), (-1, 0),
              (1, 1), (-1, -1), (-1, 1), (1, -1)]
     close_set = set()
@@ -21,7 +20,6 @@ def astar(maze, start, end):
     fscore = {start: heuristic(start, end)}
     oheap = []
 
-    # helper function to get the actual allowed movements when considering the maze
     def neighbors_available(position, maze, moves):
         neighbors = []
         diagonal=[]
@@ -35,7 +33,7 @@ def astar(maze, start, end):
                         neighbors.append((x_test, y_test))
                         diagonal.append(False)
                         
-                      
+                        
         for move in moves[4:]:
             x_test = position[0]+move[0]
             y_test = position[1]+move[1]
@@ -49,14 +47,11 @@ def astar(maze, start, end):
 
         return zip(neighbors, diagonal)
 
-    # store the exploration of the maze
     heapq.heappush(oheap, (fscore[start], start))
 
-    # actual algorithm a star
     while oheap:
         current = heapq.heappop(oheap)[1]
 
-        # end of the loop: returns result
         if current == end:
             data = []
             while current in came_from:
@@ -66,10 +61,7 @@ def astar(maze, start, end):
             return [(x[1], x[0]) for x in data]#[::-1]]
 
         close_set.add(current)
-
-        # compute the f,g,h weights
         for neighbor,diag in neighbors_available(current, maze, moves):
-            # give different weights to straight and diagonal movements
             if diag:   
                 tentative_g_score = gscore[current] + 1.4
             else:
@@ -84,10 +76,9 @@ def astar(maze, start, end):
                 fscore[neighbor] = tentative_g_score + heuristic(neighbor, end)
                 heapq.heappush(oheap, (fscore[neighbor], neighbor))
 
-    # if no path is found return false
     return False
 
-# easy function to plot on a testing maze
+
 def maze_plot(maze, start, end):
     path = astar(maze, start, end) # Invert x and y for map
     # path.append(start[::-1])

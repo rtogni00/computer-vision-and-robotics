@@ -39,10 +39,8 @@ class RobotController:
 
         self.old_l, self.old_r = 0, 0
 
-        self.detected_ids = set()
         self.past_ids=[]
 
-        self.robotgeometries = config.geometries
         self.radius = self.config.robot.wheel_radius
 
 
@@ -51,7 +49,7 @@ class RobotController:
         self.camera = Camera(self.config.camera.exposure_time,
                              self.config.camera.gain)
         self.vision = Vision(self.camera.CAMERA_MATRIX, self.camera.DIST_COEFFS,
-                             self.config.camera, self.robotgeometries)
+                             self.config.camera, self.config.robotgeometries)
 
         try:
             self.__ev3_obj__ = ev3.EV3(protocol=ev3.USB, sync_mode="STD")
@@ -99,6 +97,7 @@ class RobotController:
         self.vehicle.move(speed, turn)
         self.recorder.save_step(img, speed, turn)
 
+    # compute the l,r,theta_gyro for the ev3
     @timeit
     def get_motor_movement(self) -> tuple:
         motor_pose = self.vehicle.motor_pos
@@ -118,10 +117,11 @@ class RobotController:
         l, r, theta_gyro = self.get_motor_movement()
         movements = l - self.old_l, r - self.old_r
         self.old_l, self.old_r = l, r
-        if movements[0] != 0.0 or movements[1] != 0:
+        if movements[0] != 0.0 or movements[1] != 0.0:
             self.slam.predict(*movements)
 
         robot_pose=self.slam.get_robot_pose()
+        # detect only aruco for faster computation
         ids, landmark_rs, landmark_alphas, landmark_positions = self.vision.detections(
             img, draw_img, robot_pose, kind='aruco')
 
@@ -131,19 +131,21 @@ class RobotController:
         # fastmode = only perform prediction step
         n_ids=len(ids)
         if not fastmode:
+            # only perform on two thirds of detected landmarks
             limit_ids=2*n_ids//3
             for i, id in enumerate(ids[0:limit_ids]):
                 if id in self.past_ids:
                     if id not in landmark_estimated_ids:
                         self.slam.add_landmark(
                             landmark_positions[i], id)
-                    else:#if id in landmark_estimated_ids:
+                    else:
                         # correct each detected landmark that is already added
                         self.slam.correction(
                             (landmark_rs[i], landmark_alphas[i]), id)
         elif fastmode: # fastmode true
-            if n_ids<4:
-                limit_ids=len(ids)
+            # only perform correction on max 3 landmarks
+            if n_ids < 4:    
+                limit_ids=n_ids
             else:
                 limit_ids=3
             for i, id in enumerate(ids[0:limit_ids]):

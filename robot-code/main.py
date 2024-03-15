@@ -9,14 +9,12 @@ from timeit import default_timer as timer
 from numba import typed
 from datetime import datetime
 
-from utils.robot_controller import RobotController
-
-
 from publisher import Publisher
-from utils.keypress_listener import KeypressListener
 from rich import print
-from utils.utils import load_config
 
+from utils.keypress_listener import KeypressListener
+from utils.utils import load_config
+from utils.robot_controller import RobotController
 from utils.aruco_follower import Wanderer
 from utils.path_follower import Runner
 from utils.gotostart import GoToStart
@@ -61,7 +59,7 @@ class Main():
         self.mode = TaskPart.Manual
 
         self.run_loop()
-    
+
     @timeit
     def run_loop(self):
         print("starting...")
@@ -118,23 +116,24 @@ class Main():
 
         self.parse_keypress(raw_img, count, data)
 
+        # manual driving
         if self.mode == TaskPart.Manual:
             self.robot.move(self.speed, self.turn)
 
+        # autonomous exploration with reactive control
         if self.mode == TaskPart.Exploration:
             self.speed, self.turn, end_reached = self.wanderer.tramp(data)
             self.robot.move(self.speed, self.turn)
-            if end_reached>5:
+            if end_reached > 5:
                 print('END REACHED')
                 self.speed, self.turn = 0, 0
                 self.starter = GoToStart(data)
                 self.mode = TaskPart.ToStartLine
-                # self.mode = TaskPart.PrepareRace
-
+        
+        # check orientation when at start line 
         if self.mode == TaskPart.ToStartLine:
             print('I am in to start line')
             angle_to_start = np.rad2deg(self.starter.angle_to_start(data))
-            # self.robot.move(self.speed, self.turn)
             print('angle to start', angle_to_start)
             if abs(angle_to_start) > 10:
                 self.robot.vehicle.drive_turn(
@@ -144,14 +143,15 @@ class Main():
             print('Switching to prepare race')
             self.mode = TaskPart.PrepareRace
 
+        # race
         if self.mode == TaskPart.Race:
             self.speed, self.turn, end_reached = self.runner.run_path(
                 data, self.dt_ekfslam)
             self.robot.move(self.speed, self.turn)
             if end_reached:
                 self.mode = TaskPart.Manual
-                self.speed=0
-                self.turn=0
+                self.speed = 0
+                self.turn = 0
                 self.robot.move(self.speed, self.turn)
                 print("Oh yeah")
 
@@ -193,8 +193,6 @@ class Main():
 
         msg_str = jsonpickle.encode(msg)
         self.publisher.publish_img(msg_str, draw_img)
-        # print('-----------')
-        # return data
 
     def save_state(self, data):
         data = {"positions": data.landmark_estimated_positions,
@@ -212,14 +210,10 @@ class Main():
         n_ids = loaded_data['n_ids']
         mu = loaded_data['mu']
         sigma = loaded_data['sigma']
-        # np.fill_diagonal(sigma, 0.1)
         # to avoid map destruction upon map loading and repositioning
         sigma[0, 0] = 100000000
-        # to avoid map destruction upon map loading and repositioning
         sigma[1, 1] = 100000000
-        # to avoid map destruction upon map loading and repositioning
         sigma[2, 2] = 100000000
-        # sigma[5:3,0:3] = 10000# to avoid map destruction upon map loading and repositioning
 
         return (ids, index_to_ids, n_ids, mu, np.copy(sigma))
 
@@ -260,7 +254,6 @@ class Main():
         elif char == "q":
             self.new_speed = 0
             self.new_turn = 0
-            # self.is_running = False
         elif char == "k":
             self.new_speed = 0
             self.new_turn = 0

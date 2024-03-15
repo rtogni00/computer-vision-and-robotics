@@ -1,8 +1,6 @@
 import numpy as np
 from rich import print
-from timeit import default_timer as timer
 from utils.tempo import *
-import jsonpickle
 import pickle
 from numba import jit
 
@@ -24,7 +22,6 @@ class EKFSLAM:
 
         # Initialize state (mean and covariance)
         self.mu = init_state.copy()
-
         self.Sigma = init_covariance.copy()
 
         self.ids = []
@@ -52,22 +49,8 @@ class EKFSLAM:
     @timeit
     def predict(self, l, r):
         x, y, theta, _ = self.get_robot_pose(fastmode=True)
-        # self.mu, self.Sigma =
-        # self._predict(l, r,
-        #               self.WIDTH, #self.WHEEL_RADIUS,
-        #               x, y, theta,
-        #               self.std_lr)#,
-        # self.ids,
-        #   self.mu, self.Sigma)
-
-    # @timeit
-    # # def _predict(self, l, r, WIDTH, WHEEL_RADIUS, x, y, theta, std_lr, mu, Sigma):
-    # def _predict(self, l, r, WIDTH, x, y, theta, std_lr):#, mu, Sigma):
-
         alpha = (r-l)/self.WIDTH
 
-        # prediction for robot coordinates only
-        # new position and covariance matrix
         # difference in left and right angle  0.1 deg
         # if abs(l - r) <= np.deg2rad(0.1) * WHEEL_RADIUS:
         if np.abs(l-r) <= 0.00004:
@@ -126,17 +109,13 @@ class EKFSLAM:
                          [np.zeros((2*N, 3)), np.eye(2*N)]])
             V = np.append(V, np.zeros((2*N, 2)), axis=0)
 
-        # diag = np.diag(np.array([np.power(error_l, 2), np.power(error_r, 2)]))
         self.Sigma = np.dot(np.dot(G, self.Sigma), G.T) + \
             np.dot(np.dot(V, self.diag), V.T)
 
         self.mu[0], self.mu[1], self.mu[2] = x, y, theta
 
-        # return mu, Sigma
-
     @timeit
     def add_landmark(self, position: tuple, id: str):
-        # measurement: tuple, id: str): # changed to a shorter signature of the function
         if int(id) <= 1000 and int(id) > 0:
             x, y = position  # array with x and y
 
@@ -173,71 +152,22 @@ class EKFSLAM:
         # mu = [0,0,0, id1, id1, id2, id2, ..., idn, idn]
         x_m, y_m = self.mu[3+2*index:3+2*index+2]
 
-        # define the return values of h
-        # r = np.sqrt((x_m-x)**2+(y_m-y)**2)
-        # beta = subtract(np.arctan2((y_m-y), (x_m-x)), theta)
-
-        # # define the entries of jacobian
-        # r_x = -(x_m-x)/r
-        # r_y = -(y_m-y)/r
-        # r_theta = 0
-        # r_x_m = -r_x
-        # r_y_m = -r_y
-        # beta_x = (y_m-y)/r**2
-        # beta_y = -(x_m-x)/r**2
-        # beta_theta = -1
-        # beta_x_m = -beta_x
-        # beta_y_m = -beta_y
-
-        # H_s_robot = np.array([[r_x, r_y, r_theta,],
-        #                      [beta_x, beta_y, beta_theta,]])
-        # H_s_marker = np.array([[r_x_m, r_y_m],
-        #                       [beta_x_m, beta_y_m]])
-
-        # n = 2*index
-        # m = max(3+2*self.n_ids-n-5, 0)
-
-        # H = np.block([H_s_robot, np.zeros((2, n)),
-        #              H_s_marker, np.zeros((2, m))])
-        # H_s = np.block([H_s_robot, H_s_marker])
-
-        # inf = 3+2*index
-        # sup = 3+2*index+2
-
-        # sigma_s_top_left = self.Sigma[0:3, 0:3]
-        # sigma_s_low_right = self.Sigma[inf:sup, inf:sup]
-        # sigma_s_top_right = self.Sigma[0:3, inf:sup]
-        # sigma_s_low_left = self.Sigma[inf:sup, 0:3]
-
-        # sigma_s = np.block([[sigma_s_top_left, sigma_s_top_right],
-        #                     [sigma_s_low_left, sigma_s_low_right]])
-
-        # Z = H_s@sigma_s@(H_s.T)+self.Q
-
-        # K = self.Sigma@H.T@np.linalg.inv(Z)
-
-        # K = compute_matrix_mul(H_s, sigma_s, self.Q, self.Sigma, H)
-
-        # self.mu += K@(np.array([r_i-r, subtract(beta_i, beta)]))
-        # self.Sigma = (np.eye(3+2*self.n_ids)-K@H)@self.Sigma
-
-        # self.mu+=delta_mu
+        # using jit acceleration to speed up the heavy lifting
         delta_mu, Sigma_ = correction_acc(x_m, y_m,
-                                              x, y,
-                                              theta,
-                                              r_i, beta_i,
-                                              self.n_ids,
-                                              index,
-                                              self.Q, self.Sigma)
-        # print('mu', self.mu.shape)
-        # print('delta_mu', delta_mu.shape)
-        self.mu += np.squeeze(delta_mu)
-        self.Sigma=Sigma_
+                                          x, y,
+                                          theta,
+                                          r_i, beta_i,
+                                          self.n_ids,
+                                          index,
+                                          self.Q, self.Sigma)
 
+        self.mu += np.squeeze(delta_mu)
+        self.Sigma = Sigma_
+
+    # read out the robot position and angle from mu
+    # read out robot error from Sigma
     @timeit
     def get_robot_pose(self, fastmode=False):
-        # read out the robot position and angle from mu variable
-        # read out robot error from Sigma
         robot_x, robot_y, robot_theta = self.mu[:3].copy()
         if not fastmode:
             sigma = self.Sigma[:2, :2]
@@ -251,23 +181,20 @@ class EKFSLAM:
     def get_landmark_poses(self, fastmode=False):
         landmark_estimated_positions = []
         landmark_estimated_stdevs = []
-        # for i, id in enumerate(self.get_landmark_ids()):
         if not fastmode:
             for i in range(self.n_ids):
                 sigma_xy = self.Sigma[3+2*i:3+2*i+2, 3+2*i:3+2*i+2]
                 landmark_error = self.get_error_ellipse(sigma_xy)
                 landmark_estimated_stdevs.append(landmark_error)
-            # landmark_xy = self.mu[3+2*i: 3+2*i+2]
-            # landmark_estimated_positions.append(landmark_xy)
+
             landmark_estimated_positions = self.mu[3:].reshape(self.n_ids, 2)
         else:
-            # for i in range(self.n_ids):
-            #     landmark_xy = self.mu[3+2*i: 3+2*i+2]
-            #     landmark_estimated_positions.append(landmark_xy)
+
             landmark_estimated_positions = self.mu[3:].reshape(self.n_ids, 2)
             landmark_estimated_stdevs = [[0, 0, 0]] * self.n_ids
         return landmark_estimated_positions, landmark_estimated_stdevs
 
+    # important for graphical representations
     @timeit
     def get_error_ellipse(self, covariance):
         # check the first eigenvalue is the largest
@@ -281,7 +208,6 @@ class EKFSLAM:
             j = 0
         # get eigenvalues and eigenvectors of covariance matrix
         eigvec_x, eigvec_y = np.real(eigen_vec[:, i])
-        # print("eigvec_y, eigvec_x",eigvec_y, eigvec_x)
         angle = np.arctan2(eigvec_y, eigvec_x)
         return np.sqrt(np.abs(eigen_vals[i])), np.sqrt(np.abs(eigen_vals[j])), angle
 
@@ -290,12 +216,15 @@ class EKFSLAM:
     def get_landmark_ids(self):
         return self.ids
 
+    # return the sigma matrix of uncertainties
     def get_sigma(self):
         return self.Sigma
 
+    # return the mu matrix of robot and acos positions
     def get_mu(self):
         return self.mu
 
+    # save state on file
     def dump(self):
         print('DUMPING STATE ON FILE')
         data = {"ids": self.ids,
@@ -303,32 +232,20 @@ class EKFSLAM:
                 "n_ids": self.n_ids,
                 "mu": self.mu,
                 "sigma": self.Sigma}
-        # print(data)
         with open('SLAM_DUMP.pickle', 'wb') as pickle_file:  # dump of all the robot has recorded
             pickle.dump(data, pickle_file)
         print("DUMPING FINISHED")
 
+    # injecct the loaded map tp the EKFSLAM object
     def load_map(self, ids, index_to_ids, n_ids, mu, sigma):
         self.ids = ids
         self.index_to_ids = index_to_ids
         self.n_ids = n_ids
         self.mu = mu
         self.Sigma = sigma
-        self.Sigma[3:,3:]=0
+        self.Sigma[3:, 3:] = 0
 
-# helper function to get correct difference of two angle
-
-
-# @timeit
-# @jit(nopython=True)
-
-
-# @timeit
-# @jit(nopython=True)
-# def compute_matrix_mul(H_s, sigma_s, Q, Sigma, H):
-#     # Z =
-#     K = Sigma@H.T@np.linalg.inv(H_s@sigma_s@(H_s.T)+Q)
-#     return K
+# jit for heavy lifting
 
 
 @timeit
@@ -340,12 +257,11 @@ def correction_acc(x_m: float, y_m: float,
                    n_ids: int,
                    index: int,
                    Q, Sigma):
-    def subtract(theta_1: float, theta_2: float)-> np.float64:
+    # helper function for the difference between 2 angles
+    def subtract(theta_1: float, theta_2: float) -> np.float64:
         diff = (theta_1-theta_2) % (2*np.pi)
         diff = np.where(diff > np.pi, diff - 2 * np.pi, diff)
         return diff
-    
-    # diff = np.where((theta_1-theta_2) % (2*np.pi) > np.pi, (theta_1-theta_2) % (2*np.pi) - 2 * np.pi, (theta_1-theta_2) % (2*np.pi))
 
     # define the return values of h
     r = np.sqrt((x_m-x)**2+(y_m-y)**2)
@@ -370,30 +286,9 @@ def correction_acc(x_m: float, y_m: float,
 
     n = 2*index
     m = max(3+2*n_ids-n-5, 0)
-    # print('s robot', H_s_robot.shape)
-    # print('zeros n',np.zeros((2, n)).shape)
-    # print('zeros m',np.zeros((2, m)).shape)
-
-    # if n!=0:
-    #     H_top = np.concatenate((H_s_robot, np.zeros((2, n))), axis=1)
-    # else:
-    #     H_top=H_s_robot
-
-    # if m!=0:
-    #     H_bottom = np.concatenate((H_s_marker, np.zeros((2, m))), axis=1)
-    # else:
-    #     H_bottom=H_s_marker
-
-    # print('top', H_top.shape)
-    # print('bottom', H_bottom.shape)
     H = np.concatenate((H_s_robot, np.zeros((2, n)),
                        H_s_marker, np.zeros((2, m))), axis=1)
-    # H = np.stack((H_top, H_bottom), axis=0)
-    # H=np.concatenate([H_top, H_bottom], axis=1)
 
-    # H = np.block([H_s_robot, np.zeros((2, n)),
-    #               H_s_marker, np.zeros((2, m))])
-    # H_s = np.block([H_s_robot, H_s_marker])
     H_s = np.concatenate((H_s_robot, H_s_marker), axis=1)
 
     inf = 3+2*index
@@ -408,21 +303,14 @@ def correction_acc(x_m: float, y_m: float,
     sigma_s_bottom = np.concatenate(
         (sigma_s_low_left, sigma_s_low_right), axis=1)
     sigma_s = np.concatenate((sigma_s_top, sigma_s_bottom), axis=0)
-    # sigma_s = np.block([[sigma_s_top_left, sigma_s_top_right],
-    #                     [sigma_s_low_left, sigma_s_low_right]])
 
     Z = H_s@sigma_s@(H_s.T)+Q
-    # print('Z:',Z.shape)
-    # print("sigma", Sigma.shape)
-    # print("h", H.shape)
-    # print('h_s', H_s.shape)
 
     K = Sigma@H.T@np.linalg.inv(Z)
     angle = subtract(beta_i, beta)
-    temp=np.zeros((2,1))
-    temp[0,0]=r_i-r
-    temp[1,0]=angle
-    # temp = np.array((r_i-r, angle), dtype=np.float64)
+    temp = np.zeros((2, 1))
+    temp[0, 0] = r_i-r
+    temp[1, 0] = angle
     delta_mu = np.dot(K, temp)
     Sigma = (np.eye(3+2*n_ids)-K@H)@Sigma
 

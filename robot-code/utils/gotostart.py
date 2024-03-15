@@ -1,25 +1,20 @@
-from utils.the_maze_runner import MazeRunner
-from cycler import V
-import ev3_dc as ev3
 import numpy as np
-from rich import print
 from utils.tempo import *
 from utils.magic import *
 
 
 class GoToStart:
     def __init__(self, data):
+        # initialize with the most recent data
         self.positions = np.array(data.landmark_estimated_positions)
         self.robot_pose = data.robot_position
-        # self.robot_theta = data.robot_theta
         self.ids = np.array(data.landmark_estimated_ids)
         self.target_start = None
         self.target_end = None
+        # execute the function to get end and start for the maze
         self.get_arrival_coords()
-        # print("TARGET:",self.target, "TYPE:", type(self.target))
-        self.status = 0
-        self.angle_limit = np.deg2rad(5)
 
+    # Find the extremes of the start line, i.e. the centers of the two circumferences
     def find_extremes(self):
         mask_start_line = (self.ids < 100) & (self.ids > 0)
         positions_start_line = self.positions[mask_start_line]
@@ -29,9 +24,10 @@ class GoToStart:
         last = pos_start_line_ordered[-1]
 
         radius = np.sqrt((first[0]-last[0])**2+(last[1]-first[1])**2)
-        # print("first and last:", first, last, radius)
+        
         return (first, last, radius)
 
+    # find the coordinates of the two points of intersection of the circumferences
     def get_centers(self, first, last, r):
         x1, y1 = first
         x2, y2 = last
@@ -40,10 +36,10 @@ class GoToStart:
         centerdy = y1 - y2
         R = np.sqrt(centerdx**2 + centerdy**2)
         if not (abs(r1 - r2) <= R and R <= r1 + r2):
-            """ No intersections """
+            # No intersections
             return []
 
-        """ intersection(s) should exist """
+        # Intersection(s) should exist
         R2 = R**2
         R4 = R2**2
         a = (r1**2 - r2**2) / (2 * R2)
@@ -62,6 +58,7 @@ class GoToStart:
 
         return [np.array([ix1, iy1]), np.array([ix2, iy2])]
 
+    # define the points used as start and end by A*
     def get_arrival_coords(self):
         intersect_1, intersect_2 = self.get_centers(*self.find_extremes())
         d1 = np.sqrt(np.sum((self.robot_pose-intersect_1)**2))
@@ -73,7 +70,8 @@ class GoToStart:
         else:
             self.target_start = intersect_2
             self.target_end = intersect_1
-
+            
+    # return the start and end positiions
     @timeit
     def get_path_start_end(self):
         return self.target_start, self.target_end
