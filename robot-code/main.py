@@ -52,7 +52,6 @@ class Main():
         self.is_running = True
 
         self.map = None
-        self.message = None
 
         self.mode = TaskPart.Manual
 
@@ -100,8 +99,8 @@ class Main():
         if raw_img is None:
             print("[red]image is None!")
             return
-        
-        #check timer for ex
+
+        # check timer for ex
         # time0 = timer()
         if self.mode == TaskPart.Race:
             draw_img = raw_img
@@ -157,16 +156,16 @@ class Main():
             text=f"cam fps: {cam_fps}\ntheta gyro: {data.theta_gyro}\ntheta robo: {data.robot_theta}"
         )
 
-        self.message = {"positions": data.landmark_estimated_positions,
-                        "ids": data.landmark_estimated_ids,
-                        "robot_pose": data.robot_position,
-                        "robot_theta": data.robot_theta}
 
         msg_str = jsonpickle.encode(msg)
         self.publisher.publish_img(msg_str, draw_img)
         print('-----------')
 
-    def save_state(self, data):
+    def save_state(self):
+        data = {"positions": data.landmark_estimated_positions,
+                "ids": data.landmark_estimated_ids,
+                "robot_pose": data.robot_position,
+                "robot_theta": data.robot_theta}
         with open('pathfinding/SLAM'+str(datetime.now().strftime("%Y%m%d_%H%M%S"))+'.pickle', 'wb') as pickle_file:
             pickle.dump(data, pickle_file)
 
@@ -246,7 +245,7 @@ class Main():
             cv2.imwrite(
                 'pics/pic_'+str(datetime.now().strftime("%Y%m%d_%H%M%S"))+'.png', raw_img)
         elif char == "j":
-            self.save_state(self.message)
+            self.save_state()
             print("[green]Saved ids and landmark positions")
 
         if self.speed != self.new_speed or self.turn != self.new_turn:
