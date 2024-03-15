@@ -44,5 +44,5 @@ maze:
   save_fig: True
 
 log:
-  filename: "timestamps_5.log"
+  filename: "timestamps_without_vs.log"
 
