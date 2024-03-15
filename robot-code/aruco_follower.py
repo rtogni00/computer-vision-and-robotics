@@ -6,11 +6,14 @@ from utils import vision
 import utils.utils
 import numpy as np
 import sys
+from rich import print
+
 
 class Wanderer:
     def __init__(self, robot):
         self.robot = robot
-        self.speed = 25
+        self.side = 0
+        self.speed = 50
         self.turn = 0
 
     def choose_traj(self, img):
@@ -23,7 +26,7 @@ class Wanderer:
         # print("Outer ids:", outer_ids)
         # rho_inner_ids=rho[inner_ids]
 
-        if len(outer_ids) >= 2:
+        if len(outer_ids) >= 2: 
             rho_outer_ids = rho[outer_ids]
             alpha_outer_ids=alpha[outer_ids]
             # x_inner=coords[inner_ids][0]
@@ -44,6 +47,12 @@ class Wanderer:
 
             y_2_outer = y_outer[second_outer]
             y_1_outer = y_outer[first_outer]
+
+            if self.side == 0:
+                if y_1_outer > 0:
+                    self.side = -1 # left
+                else:
+                    self.side = 1 # right
 
             target_x = x_2_outer - x_1_outer
             target_y = y_2_outer - y_1_outer
@@ -66,19 +75,19 @@ class Wanderer:
                 self.turn = 80
                 # print("Turning 120 degrees")
 
+            if abs(rho_outer_ids[first_outer]*np.sin(alpha_outer_ids[first_outer])) < 0.13 and (rho_outer_ids[first_outer]*np.cos(alpha_outer_ids[first_outer])) < 0.4:
+                self.turn = int(self.turn+5)*direction * self.side
+                print(":warning:[bright_red]Too close")
+
             if rho_outer_ids[first_outer] > 0.35:
                 self.turn = int(self.turn * direction/2)
-                print("[green]I see arucos far away! Correcting direction[/green]")
+                print(":warning:[bright_red]Far arucos")
             else:
                 self.turn = int(self.turn*direction)
 
-            if abs(rho_outer_ids[first_outer]*np.sin(alpha_outer_ids[first_outer])) < 0.13 and (rho_outer_ids[first_outer]*np.cos(alpha_outer_ids[first_outer])) < 0.4:
-                self.turn = int(self.turn+5)*direction
-                print("[green]Too close!!! Correcting direction[/green]")
-
         else:
-            print('I can\'t see a thing')
-            self.turn = 200
+            print(':warning:[bright_red]I can\'t see a thing')
+            self.turn = 200*self.side
 
             # Closer aruco on the right
 
