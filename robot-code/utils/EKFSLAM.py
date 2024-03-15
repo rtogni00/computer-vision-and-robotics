@@ -20,10 +20,10 @@ class EKFSLAM:
 
         # Initialize state (mean and covariance)
         self.mu = init_state.copy()
-        # self.mu_prime = init_state.copy()
+        self.mu_prime = init_state.copy()
 
         self.Sigma = init_covariance.copy()
-        # self.Sigma_prime = init_covariance.copy()
+        self.Sigma_prime = init_covariance.copy()
 
         self.ids = []
         self.SIGMA_SQUARED_X = 100
@@ -119,7 +119,7 @@ class EKFSLAM:
             self.mu_prime = np.append(self.mu_prime, [x, y])
 
             dim = self.Sigma.shape
-            dim_prime = self.Sigma.shape
+            dim_prime = self.Sigma_prime.shape
             Sigma = np.zeros(np.add(dim, 2))
             Sigma_prime = np.zeros(np.add(dim_prime, 2))
 
@@ -214,7 +214,6 @@ class EKFSLAM:
         return landmark_estimated_positions, landmark_estimated_stdevs
 
     def get_error_ellipse(self, covariance):
-        # get eigenvalues and eigenvectors of covariance matrix
         # check the first eigenvalue is the largest
         eigen_vals, eigen_vec = np.linalg.eig(covariance)
 
@@ -224,6 +223,7 @@ class EKFSLAM:
         else:
             i = 1
             j = 0
+        print("*************",eigen_vec[i][1], eigen_vec[i][0])        # get eigenvalues and eigenvectors of covariance matrix
 
         angle = np.arctan2(eigen_vec[i][1], eigen_vec[i][0])
         return np.sqrt(eigen_vals[i]), np.sqrt(eigen_vals[j]), angle
