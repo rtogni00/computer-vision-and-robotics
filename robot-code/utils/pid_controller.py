@@ -11,6 +11,10 @@ class PIDController:
         derivative = (error - self.previous_error) #/ dt
         output = self.kp * error + self.ki * self.integral + self.kd * derivative
         self.previous_error = error
+        if output<-200:
+            output=-180
+        if output>200:
+            output=180
         return output
 
     def reset(self):

@@ -15,7 +15,7 @@ from utils.pid_controller import PIDController
 class Runner:
     def __init__(self, data, start, end):
         # self.robot = robot
-        self.speed = 20
+        self.speed = 40
         self.turn = 0
         # TODO choose start and end in the_maze_runner
         print('Computing the path')
@@ -27,7 +27,7 @@ class Runner:
         # np.savetxt("robot_angle.txt", np.array(data.robot_theta))
         print('Path computed, ready to run the race')
         # kp_initial, ki_initial and kd_initial are hyperparameters to be tuned
-        self.pid_turn = PIDController(80, 0, 0.0)
+        self.pid_turn = PIDController(40, 1, 0.0)
         # self.pid_turn
 
     def compute_desired_direction(self, current_pose, target_coordinate):
@@ -55,7 +55,7 @@ class Runner:
         """Check if the robot has reached its target"""
         print("DISTANCE TO TARGET:", np.sqrt(np.sum((target-robot_pose)**2)))
         # if closer than 5 cm form the checkpoint
-        if np.sqrt(np.sum((target-robot_pose)**2)) < 0.10:
+        if np.sqrt(np.sum((target-robot_pose)**2)) < 0.20:
             return True
         else:
             return False
@@ -65,7 +65,10 @@ class Runner:
         # get current poistion and orientation
         robot_pose = data.robot_position
         robot_angle = data.robot_theta
-
+        if len(self.path)==0:
+            print("End reached")
+            return 0,0,True
+        
         desired_direction = self.compute_desired_direction(
             robot_pose, self.path[0])
         # self.compute_actual_direction(robot_pose)
@@ -84,13 +87,10 @@ class Runner:
             # self.turn = 0
             if(len(self.path) > 0):
                 self.path.pop(0)
-            else:
-                print("End reached!")
-                return self.speed, self.turn, True
 
 
         print("*"*100)
-        print(robot_pose, self.path[0],)
+        # print(robot_pose, self.path[0],)
         print("---->", robot_angle, desired_direction, error_angle)
         print(self.turn, )
         print("*"*100)

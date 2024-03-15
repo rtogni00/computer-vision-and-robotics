@@ -23,8 +23,8 @@ class MazeRunner():
         self.mask = None
 
     def matrix_to_meter(self, index_x, index_y):
-        x = self.spatial_step*index_x+self.min_x+self.spatial_step/2
-        y = self.spatial_step*index_y+self.min_y+self.spatial_step/2
+        x = self.spatial_step*index_x+self.min_x#+self.spatial_step/2
+        y = self.spatial_step*index_y+self.min_y#+self.spatial_step/2
         return (x, y)
 
     def meter_to_matrix(self, x, y):
@@ -94,14 +94,18 @@ class MazeRunner():
                                   for j in range(self.n_y)])
 
         # erosion to avoid stepping over the track
-        mask_internal = ndimage.binary_dilation(mask_internal, iterations=3)
+        mask_internal = ndimage.binary_dilation(mask_internal, iterations=4)
 
         mask = mask_internal + mask_external
 
         # addition of obstacles markers and start line to split the track
         mask_line_obs = np.zeros_like(mask, dtype=bool)
-        for x_i, y_i in np.vstack((positions_start_line, positions_obstacle)):
-            mask_line_obs += np.array([[Point(x_i, y_i).buffer(0.1).contains(Point(x[i], y[j]))
+        for x_i, y_i in positions_obstacle:
+            mask_line_obs += np.array([[Point(x_i, y_i).buffer(0.20).contains(Point(x[i], y[j]))
+                                        for i in range(self.n_x)] for j in range(self.n_y)])
+            
+        for x_i, y_i in positions_start_line:
+            mask_line_obs += np.array([[Point(x_i, y_i).buffer(0.10).contains(Point(x[i], y[j]))
                                         for i in range(self.n_x)] for j in range(self.n_y)])
 
         self.mask = mask+mask_line_obs
