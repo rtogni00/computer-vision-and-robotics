@@ -1,9 +1,16 @@
+import os
 import cv2
 import subprocess
 import threading
+import numpy as np
+import yaml
+from rich import print
+
 
 class Camera:
     def __init__(self) -> None:
+
+        self.camera_matrix, self.dist_coeffs = self.read_camera_intrinsics()
 
         self.IM_WIDTH = 848 # better FOV than 640
         self.IM_HEIGHT = 480
@@ -40,3 +47,18 @@ class Camera:
     def close(self):
         self.is_running = False
         self.cap.release()
+
+    @staticmethod
+    def read_camera_intrinsics(camera_intrinsics_file="./camera_intrinsics.yml"):
+
+        with open(camera_intrinsics_file, "r") as stream:
+            try:
+                camera_intrinsics = yaml.safe_load(stream)
+            except yaml.YAMLError as exc:
+                print(exc)
+
+        camera_matrix = np.array(camera_intrinsics["camera_matrix"]["data"]).reshape((camera_intrinsics["camera_matrix"]["rows"], camera_intrinsics["camera_matrix"]["cols"]))
+
+        dist_coeffs = np.array(camera_intrinsics["distortion_coefficients"]["data"]).reshape((camera_intrinsics["distortion_coefficients"]["rows"], camera_intrinsics["distortion_coefficients"]["cols"]))
+
+        return camera_matrix, dist_coeffs

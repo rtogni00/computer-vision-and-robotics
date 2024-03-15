@@ -1,4 +1,5 @@
 import cv2
+import sys
 import time
 import numpy as np
 import jsonpickle
@@ -9,10 +10,15 @@ from keypress_listener import KeypressListener
 
 class Main():
     def __init__(self) -> None:
+        # keypress listener will break the terminal if we don't close it on exception
+        sys.excepthook = self.except_hook
 
         self.keypress_listener = KeypressListener()
         self.publisher = Publisher()
         self.camera = Camera()
+
+        print("camera_matrix", self.camera.camera_matrix)
+        print("camera_", self.camera.dist_coeffs)
 
         self.run()
 
@@ -67,6 +73,9 @@ class Main():
                 break
         
         # tidy up
+        self.close()
+
+    def except_hook(self, type, value, tb):
         self.close()
 
     def close(self):
