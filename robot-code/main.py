@@ -113,7 +113,7 @@ class Main():
             self.robot.move(self.speed, self.turn)
 
         if self.mode == TaskPart.Exploration:
-            self.speed, self.turn = self.wanderer.tramp(raw_img)
+            self.speed, self.turn = self.wanderer.tramp(data)
             self.robot.move(self.speed, self.turn)
             # pass
 
