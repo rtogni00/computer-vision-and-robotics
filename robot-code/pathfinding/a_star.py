@@ -1,122 +1,163 @@
+import heapq
 import numpy as np
 import matplotlib.pyplot as plt
 
-class Node():
-    """A node class for A* Pathfinding"""
 
-    def __init__(self, parent=None, position=None):
-        self.parent = parent
-        self.position = position
+# function to find quadrand
+def quadrant(position, max_x, max_y, min_x, min_y):
+    center_y = min_x+(max_y-min_y)/2
+    center_x = min_y+(max_x-min_x)/2
+    x, y = position[0:2]
+    if x >= center_x and y < center_y:
+        return 1
+    elif x >= center_x and y >= center_y:
+        return 2
+    elif x < center_x and y >= center_y:
+        return 3
+    elif x < center_x and y < center_y:
+        return 4
 
-        self.g = 0 # dist from origin
-        self.h = 0 # heuristic
-        self.f = 0 # total cost
+# function heuristics
 
-    def __eq__(self, other):
-        return self.position == other.position
+def distance_from_arrival(position, arrival, max_x, max_y, min_x, min_y, visited_quadrant):
+    quadrant_temp = quadrant(position, max_x, max_y, min_x, min_y)
+
+    if quadrant_temp not in visited_quadrant:
+        visited_quadrant.append(quadrant_temp)
+
+    distance = 0
+
+    delta_x = max_x-min_x
+    delta_y = max_y-min_y
+
+    center_y = min_x+delta_y/2
+    center_x = min_y+delta_x/2
+
+    x, y = position[0:2]
+    x_arrival, y_arrival = arrival[0:2]
+
+    if quadrant_temp == 1:
+        # variable 1
+        distance += abs(max_x-x)+abs(center_y-y)
+        # 2 & 3
+        distance += abs(delta_y)
+        distance += abs(delta_x)
+        # 4
+        distance += abs(min_x)
+        distance += abs(center_y)
+    elif quadrant_temp == 2:
+        # 2 variable
+        distance += abs(max_y-y)+abs(x-center_x)
+        # 3
+        distance += delta_x/2
+        distance += delta_y/2
+        # 4
+        distance += abs(min_x)
+        distance += abs(center_y)
+
+    elif quadrant_temp == 3:
+        # 3 variable
+        distance += abs(x-min_x)+abs(y-center_y)
+        # 4
+        distance += abs(min_x)
+        distance += abs(center_y)
+    elif quadrant_temp == 4:
+        if 2 in visited_quadrant:
+            distance += abs(x)+abs(y)
+        else:
+            distance += abs(x-max_x) + abs(y-center_y)
+
+    return distance, visited_quadrant
+
+
+def heuristic(a, b):
+    return abs(a[0] - b[0]) + abs(a[1] - b[1])
 
 
 def astar(maze, start, end):
-    """Returns a list of tuples as a path from the given start to the given end in the given maze"""
+    moves = [(0, 1), (0, -1), (1, 0), (-1, 0),
+             (1, 1), (-1, -1), (-1, 1), (1, -1)]
+    close_set = set()
+    came_from = {}
+    gscore = {start: 0}
+    fscore = {start: heuristic(start, end)}
+    oheap = []
 
-    # Create start and end node
-    start_node = Node(None, start)
-    start_node.g = start_node.h = start_node.f = 0
-    end_node = Node(None, end)
-    end_node.g = end_node.h = end_node.f = 0
+    def neighbors_available(position, maze, moves):
+        neighbors = []
+        for move in moves:
+            x_test = position[0]+move[0]
+            y_test = position[1]+move[1]
+            maze_test = maze[x_test, y_test]
+            if x_test >= 0 and x_test < maze.shape[0]-1:
+                if y_test >= 0 and y_test < maze.shape[1]-1:
+                    if maze_test != 1:
+                        neighbors.append((x_test, y_test))
 
-    # Initialize both open and closed list
-    open_list = []
-    closed_list = []
+        return neighbors
 
-    # Add the start node
-    open_list.append(start_node)
+    heapq.heappush(oheap, (fscore[start], start))
 
-    # Loop until you find the end
-    while len(open_list) > 0:
+    while oheap:
+        current = heapq.heappop(oheap)[1]
 
-        # Get the current node
-        current_node = open_list[0]
-        current_index = 0
-        for index, item in enumerate(open_list):
-            if item.f < current_node.f:
-                current_node = item
-                current_index = index
+        if current == end:
+            data = []
+            while current in came_from:
+                data.append(current)
+                current = came_from[current]
+            return data
 
-        # Pop current off open list, add to closed list
-        open_list.pop(current_index)
-        closed_list.append(current_node)
+        close_set.add(current)
+        for neighbor in neighbors_available(current, maze, moves):
+            tentative_g_score = gscore[current] + 1
 
-        # Found the goal
-        if current_node == end_node:
-            path = []
-            current = current_node
-            while current is not None:
-                path.append(current.position)
-                current = current.parent
-            return path[::-1] # Return reversed path
-
-        # Generate children
-        children = []
-        for new_position in [(0, -1), (0, 1), (-1, 0), (1, 0), (-1, -1), (-1, 1), (1, -1), (1, 1)]: # Adjacent squares
-
-            # Get node position
-            node_position = (current_node.position[0] + new_position[0], current_node.position[1] + new_position[1])
-
-            # Make sure within range
-            if node_position[0] > (len(maze) - 1) or node_position[0] < 0 or node_position[1] > (len(maze[len(maze)-1]) -1) or node_position[1] < 0:
+            if neighbor in close_set and tentative_g_score >= gscore.get(neighbor, 0):
                 continue
 
-            # Make sure walkable terrain
-            if maze[node_position[0]][node_position[1]] != 0:
-                continue
+            if tentative_g_score < gscore.get(neighbor, 0) or neighbor not in [i[1]for i in oheap]:
+                came_from[neighbor] = current
+                gscore[neighbor] = tentative_g_score
+                fscore[neighbor] = tentative_g_score + heuristic(neighbor, end)
+                heapq.heappush(oheap, (fscore[neighbor], neighbor))
 
-            # Create new node
-            new_node = Node(current_node, node_position)
+    return False
 
-            # Append
-            children.append(new_node)
 
-        # Loop through children
-        for child in children:
+def maze_plot(maze, start, end):
+    path = astar(maze, start[::-1], end[::-1]) # Invert x and y for map
+    path.append(start[::-1])
+    plt.imshow(maze, origin='lower')
 
-            # Child is on the closed list
-            for closed_child in closed_list:
-                if child == closed_child:
-                    continue
-
-            # Create the f, g, and h values
-            child.g = current_node.g + 1
-            child.h = ((child.position[0] - end_node.position[0]) ** 2) + ((child.position[1] - end_node.position[1]) ** 2)
-            child.f = child.g + child.h
-
-            # Child is already in the open list
-            for open_node in open_list:
-                if child == open_node and child.g > open_node.g:
-                    continue
-
-            # Add the child to the open list
-            open_list.append(child)
+    for i in path:
+        plt.scatter(i[1], i[0], color='red')
+    plt.show()
+    
+    path = [(x[1],x[0]) for x in path]
+    print(path[::-1])
 
 
 def main():
 
-    maze = np.array([[0, 0, 0, 0, 1, 0, 0, 0, 0, 0],
-            [0, 0, 0, 0, 1, 0, 0, 0, 0, 0],
-            [0, 0, 0, 0, 1, 0, 0, 0, 0, 0],
-            [0, 0, 0, 0, 1, 0, 0, 0, 0, 0],
-            [0, 0, 0, 0, 1, 0, 0, 0, 0, 0],
-            [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-            [0, 0, 0, 0, 1, 0, 0, 0, 0, 0],
-            [0, 0, 0, 0, 1, 0, 0, 0, 0, 0],
-            [0, 0, 0, 0, 1, 0, 0, 0, 0, 0],
-            [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]])
+    # frame = np.ones(12,12)
+
+    maze = np.array([[0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0],
+                     [0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0],
+                     [0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0],
+                     [0, 0, 1, 0, 0, 0, 0, 1, 0, 1, 0, 0],
+                     [0, 0, 1, 0, 0, 0, 0, 1, 1, 1, 1, 0],
+                     [0, 0, 1, 0, 0, 1, 0, 0, 0, 0, 0, 0],
+                     [0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0],
+                     [0, 0, 1, 0, 0, 1, 0, 0, 0, 1, 0, 0],
+                     [0, 0, 1, 0, 0, 1, 0, 0, 0, 0, 0, 0],
+                     [0, 0, 1, 1, 0, 0, 0, 0, 1, 0, 0, 0],
+                     [0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0],
+                     [1, 1, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0]])
 
     start = (0, 0)
-    end = (7, 6)
+    end = (10, 10)
 
-    path = astar(maze, start, end)
-    print(path)
+    maze_plot(maze, start, end)
 
 
 if __name__ == '__main__':
