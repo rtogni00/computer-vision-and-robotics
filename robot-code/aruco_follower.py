@@ -7,17 +7,6 @@ import utils.utils
 import numpy as np
 import sys
 
-# robot = ev3.EV3(protocol=ev3.USB, sync_mode="STD")
-
-# vehicle = ev3.TwoWheelVehicle(
-#     0.028,  # radius_wheel_measured
-#     0.137,  # tread
-#     protocol=ev3.USB,
-#     # sync_mode="STD",
-# )
-
-# vehicle.drive_straight(0.2, speed=10, brake=True).start(thread=False)
-# vehicle.drive_turn(-90, 0.1).start(thread=False)
 
 config = utils.utils.load_config("config.yaml")
 cam = camera.Camera(config.camera.exposure_time,
@@ -25,7 +14,7 @@ cam = camera.Camera(config.camera.exposure_time,
 vis = vision.Vision(cam.CAMERA_MATRIX, cam.DIST_COEFFS,
                     config.camera, config.geometries)
 
-_, raw_img, cam_fps, img_created = cam.read()
+# _, raw_img, cam_fps, img_created = cam.read()
 
 # time.sleep(0.1)
 
@@ -138,3 +127,49 @@ with ev3.TwoWheelVehicle(
             print('\n' + '**** lost connection ****')
             vehicle.stop()
             sys.exit()
+
+
+
+class Wanderer:
+    def __init__(self,robot):
+        self.robot=robot
+        self.speed = 0
+        self.turn = 0
+        self.config = utils.utils.load_config("config.yaml")
+        self.cam = camera.Camera(self.config.camera.exposure_time,
+                    self.config.camera.gain)
+        self.vis = vision.Vision(self.cam.CAMERA_MATRIX, self.cam.DIST_COEFFS,
+                    self.config.camera, self.config.geometries)
+        
+
+    def choose_traj(self, img):
+        ids, rho, alpha, coords = vis.detections(img, None, [0, 0], kind='aruco') # In the future we can get all this info directly from ekf_slam
+        inner_ids=(ids%3==0)& (ids<1000) # left
+        outer_ids=(ids%3==2)& (ids<1000) # right
+
+        x_inner=coords[inner_ids][0]
+        y_inner=coords[inner_ids][1]
+
+        x_outer=coords[outer_ids][0]
+        y_outer=coords[outer_ids][1]
+        
+        # Closer aruco on the left
+
+        
+
+
+
+        # Closer aruco on the right
+
+    def lost_wanderer(self):
+        self.robot.move(self.speed, self.turn)
+
+    def tramp(self, img):
+        # analyze the image to get aruco positions
+
+        # choose the movement
+        
+        # keep track of the movement status
+
+        # issue the movement command
+        self.robot.move(self.speed, self.turn)
