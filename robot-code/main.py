@@ -11,6 +11,7 @@ from datetime import datetime
 
 from utils.robot_controller import RobotController
 
+
 from publisher import Publisher
 from utils.keypress_listener import KeypressListener
 from rich import print
@@ -84,7 +85,7 @@ class Main():
             print("*** END PROGRAM ***")
 
     def run(self, count, time0):
-
+        print('count ', count)
         if not self.robot.recorder.playback:
             # read webcam and get distance from aruco markers
             _, raw_img, cam_fps, img_created = self.robot.camera.read()  # BGR color
@@ -143,7 +144,7 @@ class Main():
             robot_theta=data.robot_theta,
             robot_stdev=data.robot_stdev,
 
-            text=f"cam fps: {cam_fps}"
+            text=f"cam fps: {cam_fps}\ntheta gyro: {data.theta_gyro}\ntheta robo: {data.robot_theta}"
         )
 
         msg_str = jsonpickle.encode(msg)
@@ -197,7 +198,17 @@ class Main():
         elif char == "q":
             self.new_speed = 0
             self.new_turn = 0
+            # self.is_running = False
+        elif char == "k":
+            self.new_speed = 0
+            self.new_turn = 0
             self.is_running = False
+        elif char == "z":
+            self.new_speed = 4
+            self.new_turn = 200
+        elif char == "x":
+            self.new_speed = 4
+            self.new_turn = -200
         elif char == "m":
             self.new_speed = 0
             self.new_turn = 0

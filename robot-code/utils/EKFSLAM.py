@@ -37,7 +37,6 @@ class EKFSLAM:
             [[self.error_l, 0], [0, self.error_r]])
 
         # uncertainty on measurements
-        # TODO cancel Q if not used
         self.Q = np.array([[self.DIST_STD**2, 0], [0, self.ANGLE_STD**2]])
 
         return
@@ -59,7 +58,7 @@ class EKFSLAM:
         
         # prediction for robot coordinates only
         # new position and covariance matrix
-        if abs(l- r) <= np.radians(1) * WHEEL_RADIUS: # difference in left and right angle  1°
+        if abs(l- r) <= np.deg2rad(0.1) * WHEEL_RADIUS: # difference in left and right angle  0.1 deg
             
             sin_theta = np.sin(theta)
             cos_theta = np.cos(theta)
@@ -84,10 +83,7 @@ class EKFSLAM:
             x += R_w_2*(np.sin(theta+alpha)-np.sin(theta))
             y += R_w_2*(-np.cos(theta+alpha)+np.cos(theta))
             
-            # TODO: check if theta in -pi pi is needed
-            theta = (theta+alpha) % (2*np.pi)
-            if theta > np.pi:
-                theta = theta-2*np.pi
+            theta = (theta+alpha)
 
             sin_theta = np.sin(theta)
             cos_theta = np.cos(theta)
@@ -116,27 +112,11 @@ class EKFSLAM:
         N = len(ids)
         if N > 0:
             G = np.block([[G, np.zeros((3,2*N))], [np.zeros((2*N,3)), np.identity(2*N)]])
-            # G = np.block(((G, np.zeros((3,2*N))), (np.zeros((2*N,3)), np.identity(2*N))))
             V = np.append(V, np.zeros((2*N,2)), axis=0)
 
         diag = np.diag(np.array([np.power(error_l,2), np.power(error_r,2)]))
         Sigma = np.dot(np.dot(G, Sigma), G.T) + np.dot(np.dot(V, diag), V.T)
 
-        # faster computation for new covariance matrix
-        # sigma_xx = self.Sigma[0:3, 0:3]
-        # sigma_xm = self.Sigma[0:3, 3:]
-        # sigma_mm = self.Sigma[3:, 3:]
-
-        # Sigma_top_left = G@sigma_xx@G.T + V @ self.Sigma_u @ V.T  # final dim 3x3
-        # Sigma_top_right = G@sigma_xm
-        # Sigma_low_left = (G@sigma_xm).T
-
-        # save updated position and covariance matrix
-        # mu_prime = self.mu.copy()
-        # mu_prime[0:3] = np.array([x_prime, y_prime, theta_prime])
-        # self.mu_prime = mu_prime
-        # self.Sigma_prime = np.block([[Sigma_top_left, Sigma_top_right],
-        #                              [Sigma_low_left, sigma_mm]])
         mu[0], mu[1], mu[2] = x, y, theta
 
         return mu, Sigma
@@ -148,23 +128,15 @@ class EKFSLAM:
 
             # extend self.mu and self.Sigma with the new landmark
             self.mu = np.append(self.mu, [x, y])
-            # self.mu_prime = np.append(self.mu_prime, [x, y])
 
             dim = self.Sigma.shape
-            # dim_prime = self.Sigma_prime.shape
             Sigma = np.zeros(np.add(dim, 2))
-            # Sigma_prime = np.zeros(np.add(dim_prime, 2))
 
             Sigma[:dim[0], :dim[1]] = self.Sigma
             Sigma[-2, -2] = self.SIGMA_SQUARED_X
             Sigma[-1, -1] = self.SIGMA_SQUARED_Y
 
-            # Sigma_prime[:dim[0], :dim[1]] = self.Sigma_prime
-            # Sigma_prime[-2, -2] = self.SIGMA_SQUARED_X
-            # Sigma_prime[-1, -1] = self.SIGMA_SQUARED_Y
-
             self.Sigma = Sigma
-            # self.Sigma_prime = Sigma_prime
 
             # add the landmark id to self.ids
             self.ids.append(id)
@@ -173,7 +145,6 @@ class EKFSLAM:
     def correction(self, landmark_position_measured: tuple, id: int):
         # index of identified aruco
         index = self.ids.index(id)
-        print("Index for correction:", index)
 
         # current world position of robot
         x, y, theta, _ = self.get_robot_pose()
@@ -254,7 +225,6 @@ class EKFSLAM:
             landmark_estimated_stdevs.append(landmark_error)
 
         return landmark_estimated_positions, landmark_estimated_stdevs
-        # return [[0,0], [1,1]],[[0.5,0.5,0],[0.2,0.7,0]]
 
     def get_error_ellipse(self, covariance):
         # check the first eigenvalue is the largest
@@ -269,7 +239,6 @@ class EKFSLAM:
         # get eigenvalues and eigenvectors of covariance matrix
         eigvec_x, eigvec_y = eigen_vec[:, i]
         angle = np.arctan2(eigvec_y, eigvec_x)
-        print(eigen_vals)
         return np.sqrt(np.real(eigen_vals[i])), np.sqrt(np.real(eigen_vals[j])), angle
 
     # return the list of all known ids

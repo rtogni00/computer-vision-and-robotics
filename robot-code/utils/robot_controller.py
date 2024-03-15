@@ -60,6 +60,10 @@ class RobotController:
                 speed=10,
                 ev3_obj=self.__ev3_obj__
             )
+            self.gyro = ev3.Gyro(
+                port=ev3.PORT_3,
+                ev3_obj=self.__ev3_obj__
+            )
 
             print("[green]***CONNECTED TO REAL VEHICLE***[/green]")
         else:
@@ -95,12 +99,13 @@ class RobotController:
 
         l = alpha_l*radius
         r = alpha_r*radius
+        theta_gyro = -np.deg2rad(self.gyro.angle)
 
-        return (l, r)
+        return (l, r, theta_gyro)
 
     def run_ekf_slam(self, img, draw_img=None, fastmode=False):
         # movements is what is refered to as u = (l, r) in the document
-        l, r = self.get_motor_movement()
+        l, r, theta_gyro = self.get_motor_movement()
         movements = l - self.old_l, r - self.old_r
         self.old_l, self.old_r = l, r
         if movements[0] != 0.0 or movements[1] != 0:
@@ -110,6 +115,8 @@ class RobotController:
             img, draw_img, self.slam.get_robot_pose(), kind='arucos')
 
         robot_x, robot_y, robot_theta, robot_stdev = self.slam.get_robot_pose()
+        print("Angle from robot:", np.rad2deg(robot_theta))
+        print("Angle from gyro: ", np.rad2deg(theta_gyro))
         landmark_estimated_ids = self.slam.get_landmark_ids()
         landmark_estimated_positions, landmark_estimated_stdevs = self.slam.get_landmark_poses()
 
@@ -117,26 +124,18 @@ class RobotController:
             # if id<=1000:
             if id not in self.slam.get_landmark_ids():
                 self.slam.add_landmark(
-                    landmark_positions[i], id)  # (landmark_rs[i], landmark_alphas[i]), id) # already done the calculation in vision
-                # if id < 1000:
-                #     print(f"Landmark with id {id} added")
+                    landmark_positions[i], id)
             else:
                 # correct each detected landmark that is already added
-                print('Correcting ', id)
                 self.slam.correction(
                     (landmark_rs[i], landmark_alphas[i]), id)
-
-        sigma_to_save = self.slam.get_sigma()
-        # saving sigma to a file
-        # with open("Check_sigma.txt", 'ab') as f:
-        #     f.write(b'\n\n')
-        #     np.savetxt(f, sigma_to_save, fmt='%d')
 
         data = SimpleNamespace()
         data.landmark_ids = ids
         data.landmark_rs = landmark_rs
         data.landmark_alphas = landmark_alphas
         data.landmark_positions = landmark_positions
+
         data.landmark_estimated_ids = landmark_estimated_ids
         data.landmark_estimated_positions = landmark_estimated_positions
         data.landmark_estimated_stdevs = landmark_estimated_stdevs
@@ -144,5 +143,6 @@ class RobotController:
         data.robot_position = np.array([robot_x, robot_y])
         data.robot_theta = robot_theta
         data.robot_stdev = robot_stdev
+        data.theta_gyro = theta_gyro
 
         return data

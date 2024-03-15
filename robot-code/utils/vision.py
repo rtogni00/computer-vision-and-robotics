@@ -93,20 +93,20 @@ class Vision:
             ids_circles=[]
             x_r2circle=[]
             y_r2circle=[]
-
+        
         # concatenate all ids and get all x and y coords
         ids = np.concatenate((ids, ids_circles)).astype(np.int16)
         x_r2landmarks = np.asarray(x_r2m+x_r2circle)
         y_r2landmarks = np.asarray(y_r2m+y_r2circle)
 
-        # coordinates of landmarks wrt to world coordinates
-        x_w2landmarks = x_r2landmarks+x[0]
-        y_w2landmarks = y_r2landmarks+x[1]
 
         # if landmarks were found
+        # landmark_positions are wrt world coordinates
         if len(ids) > 0:
             landmark_rs = np.sqrt(x_r2landmarks**2 + y_r2landmarks**2)
-            landmark_alphas = np.arctan2(y_r2landmarks, x_r2landmarks)
+            landmark_alphas = np.arctan2(y_r2landmarks, x_r2landmarks)#+ np.deg2rad(90)
+            x_w2landmarks = x[0] + landmark_rs * np.cos(x[2]+ landmark_alphas)
+            y_w2landmarks = x[1] + landmark_rs * np.sin(x[2]+ landmark_alphas)
             landmark_positions = np.vstack([x_w2landmarks, y_w2landmarks]).T
         else:
             landmark_rs = []
