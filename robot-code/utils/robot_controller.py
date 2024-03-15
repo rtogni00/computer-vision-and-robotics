@@ -87,15 +87,15 @@ class RobotController:
         self.recorder.save_step(img, speed, turn)
 
     def get_motor_movement(self) -> tuple:
-        motor_pose=self.vehicle.motor_pos
+        motor_pose = self.vehicle.motor_pos
 
-        alpha_l=np.deg2rad(motor_pose.left)
-        alpha_r=np.deg2rad(motor_pose.right)
+        alpha_l = np.deg2rad(motor_pose.left)
+        alpha_r = np.deg2rad(motor_pose.right)
         radius = self.config.robot.wheel_radius
-        
+
         l = alpha_l*radius
         r = alpha_r*radius
-        
+
         return (l, r)
 
     def run_ekf_slam(self, img, draw_img=None, fastmode=False):
@@ -116,11 +116,13 @@ class RobotController:
         for i, id in enumerate(ids):
             if id not in self.slam.get_landmark_ids():
                 self.slam.add_landmark(
-                    landmark_positions[i], (landmark_rs[i], landmark_alphas[i]), id)
-                print(f"Landmark with id {id} added")
+                    landmark_positions[i], id)  # (landmark_rs[i], landmark_alphas[i]), id) # already done the calculation in vision
+                if id < 1000:
+                    print(f"Landmark with id {id} added")
             else:
                 # correct each detected landmark that is already added
-                self.slam.correction((landmark_rs[i], landmark_alphas[i]), id)
+                self.slam.correction(
+                    (landmark_rs[i], landmark_alphas[i]), id)
 
         data = SimpleNamespace()
         data.landmark_ids = ids
