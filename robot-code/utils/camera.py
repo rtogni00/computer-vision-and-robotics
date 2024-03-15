@@ -6,6 +6,7 @@ import yaml
 from rich import print
 from timeit import default_timer as timer
 import queue as Queue
+from utils.tempo import *
 
 
 class Camera:
@@ -113,7 +114,7 @@ class Camera:
             if cam_fps < 10:
                 print(f"[red] cam_fps {cam_fps}")
 
-
+    @timeit
     def read(self):
         if self.queue is not None:
             ret, frame, cam_fps, img_created = self.queue

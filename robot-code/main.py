@@ -9,15 +9,16 @@ from timeit import default_timer as timer
 from numba import typed
 from datetime import datetime
 
-from utils.robot_controller import RobotController
-
 from publisher import Publisher
-from utils.keypress_listener import KeypressListener
 from rich import print
+
+from utils.keypress_listener import KeypressListener
 from utils.utils import load_config
-
-import aruco_follower
-
+from utils.robot_controller import RobotController
+from utils.aruco_follower import Wanderer
+from utils.path_follower import Runner
+from utils.gotostart import GoToStart
+from utils.tempo import *
 
 from enum import Enum
 
@@ -28,6 +29,7 @@ class TaskPart(Enum):
     ToStartLine = 2
     Race = 3
     Load = 4
+    PrepareRace = 5
 
 
 class Main():
@@ -38,9 +40,11 @@ class Main():
         self.robot = RobotController(self.config)
         self.keypress_listener = KeypressListener()
         self.publisher = Publisher()
-        self.wanderer = aruco_follower.Wanderer(self.robot)
+        self.wanderer = Wanderer(self.config)
+        self.starter = None
 
         self.DT = self.config.robot.delta_t  # delta time in seconds
+        self.dt_ekfslam = 0
 
         self.speed = 0
         self.turn = 0
@@ -56,6 +60,7 @@ class Main():
 
         self.run_loop()
 
+    @timeit
     def run_loop(self):
         print("starting...")
 
@@ -77,14 +82,15 @@ class Main():
                     dt = self.DT - elapsed_time
                     time.sleep(dt)  # moves while sleeping
                 else:
-                    print(f"[red]Warning! dt = {elapsed_time}")
+                    print(f"[red]{count} dt = {elapsed_time}, RUN")
+                    pass
 
                 count += 1
 
             print("*** END PROGRAM ***")
 
+    @timeit
     def run(self, count, time0):
-
         if not self.robot.recorder.playback:
             # read webcam and get distance from aruco markers
             _, raw_img, cam_fps, img_created = self.robot.camera.read()  # BGR color
@@ -100,30 +106,69 @@ class Main():
             return
 
         if self.mode == TaskPart.Race:
+            time_ekf = timer()
             draw_img = raw_img
             data = self.robot.run_ekf_slam(raw_img, fastmode=True)
+            self.dt_ekfslam = timer()-time_ekf
         else:
             draw_img = raw_img.copy()
             data = self.robot.run_ekf_slam(raw_img, draw_img)
 
-        self.parse_keypress(raw_img, count)
+        self.parse_keypress(raw_img, count, data)
 
+        # manual driving
         if self.mode == TaskPart.Manual:
             self.robot.move(self.speed, self.turn)
 
+        # autonomous exploration with reactive control
         if self.mode == TaskPart.Exploration:
-            self.speed, self.turn = self.wanderer.tramp(raw_img)
+            self.speed, self.turn, end_reached = self.wanderer.tramp(data)
             self.robot.move(self.speed, self.turn)
-            # pass
-
+            if end_reached > 5:
+                print('END REACHED')
+                self.speed, self.turn = 0, 0
+                self.starter = GoToStart(data)
+                self.mode = TaskPart.ToStartLine
+        
+        # check orientation when at start line 
         if self.mode == TaskPart.ToStartLine:
-            pass
+            print('I am in to start line')
+            angle_to_start = np.rad2deg(self.starter.angle_to_start(data))
+            print('angle to start', angle_to_start)
+            if abs(angle_to_start) > 10:
+                self.robot.vehicle.drive_turn(
+                    angle_to_start, 0.05, speed=5).start(thread=False)
 
+            # if start_line_reached:
+            print('Switching to prepare race')
+            self.mode = TaskPart.PrepareRace
+
+        # race
         if self.mode == TaskPart.Race:
-            pass
+            self.speed, self.turn, end_reached = self.runner.run_path(
+                data, self.dt_ekfslam)
+            self.robot.move(self.speed, self.turn)
+            if end_reached:
+                self.mode = TaskPart.Manual
+                self.speed = 0
+                self.turn = 0
+                self.robot.move(self.speed, self.turn)
+                print("Oh yeah")
+
+        if self.mode == TaskPart.PrepareRace:
+            print('Preparing race')
+            if self.starter == None:
+                self.starter = GoToStart(data)
+
+            start, end = self.starter.get_path_start_end()
+            self.runner = Runner(data, start, end, self.config)
+            self.mode = TaskPart.Race
+            print('Race ready')
 
         if self.mode == TaskPart.Load:
-            pass
+            recalled_memories = self.load_state()
+            self.robot.slam.load_map(*recalled_memories)
+            self.mode = TaskPart.Manual
 
         msg = Message(
             id=count,
@@ -143,25 +188,37 @@ class Main():
             robot_theta=data.robot_theta,
             robot_stdev=data.robot_stdev,
 
-            text=f"cam fps: {cam_fps}"
+            text=f"cam fps: {cam_fps}\ntheta gyro: {data.theta_gyro}\ntheta robo: {data.robot_theta}"
         )
 
         msg_str = jsonpickle.encode(msg)
         self.publisher.publish_img(msg_str, draw_img)
 
     def save_state(self, data):
-        with open("SLAM.pickle", 'wb') as pickle_file:
-            pass
+        data = {"positions": data.landmark_estimated_positions,
+                "ids": data.landmark_estimated_ids,
+                "robot_pose": data.robot_position,
+                "robot_theta": data.robot_theta}
+        with open('pathfinding/SLAM'+str(datetime.now().strftime("%Y%m%d_%H%M%S"))+'.pickle', 'wb') as pickle_file:
+            pickle.dump(data, pickle_file)
 
-        pass
+    def load_state(self, pickle_file_path='SLAM_DUMP.pickle'):
+        with open(pickle_file_path, 'rb') as file:
+            loaded_data = pickle.load(file)
+        ids = loaded_data['ids']
+        index_to_ids = loaded_data['index_to_ids']
+        n_ids = loaded_data['n_ids']
+        mu = loaded_data['mu']
+        sigma = loaded_data['sigma']
+        # to avoid map destruction upon map loading and repositioning
+        sigma[0, 0] = 100000000
+        sigma[1, 1] = 100000000
+        sigma[2, 2] = 100000000
 
-    def load_and_localize(self):
-        with open("SLAM.pickle", 'rb') as f:
-            pass
+        return (ids, index_to_ids, n_ids, mu, np.copy(sigma))
 
-        pass
-
-    def parse_keypress(self, raw_img, count):
+    @timeit
+    def parse_keypress(self, raw_img, count, data):
         char = self.keypress_listener.get_keypress()
 
         turn_step = 40
@@ -197,7 +254,16 @@ class Main():
         elif char == "q":
             self.new_speed = 0
             self.new_turn = 0
+        elif char == "k":
+            self.new_speed = 0
+            self.new_turn = 0
             self.is_running = False
+        elif char == "z":
+            self.new_speed = 4
+            self.new_turn = 200
+        elif char == "x":
+            self.new_speed = 4
+            self.new_turn = -200
         elif char == "m":
             self.new_speed = 0
             self.new_turn = 0
@@ -210,8 +276,8 @@ class Main():
             self.mode = TaskPart.Load
             print("[green]MODE: Load map")
         elif char == "p":
-            self.mode = TaskPart.ToStartLine
-            print("[green]MODE: To start line")
+            self.mode = TaskPart.PrepareRace
+            print("[green]MODE: Prepare race path")
         elif char == "e":
             self.mode = TaskPart.Exploration
             print("[green]MODE: Exploration")
@@ -219,11 +285,15 @@ class Main():
             print("[green]MODE: Saveed picture")
             cv2.imwrite(
                 'pics/pic_'+str(datetime.now().strftime("%Y%m%d_%H%M%S"))+'.png', raw_img)
+        elif char == "j":
+            self.save_state(data)
+            print("[green]Saved ids and landmark positions")
 
-        if self.speed != self.new_speed or self.turn != self.new_turn:
-            self.speed = self.new_speed
-            self.turn = self.new_turn
-            print("speed:", self.speed, "turn:", self.turn)
+        if self.mode == TaskPart.Manual:
+            if self.speed != self.new_speed or self.turn != self.new_turn:
+                self.speed = self.new_speed
+                self.turn = self.new_turn
+                print("speed:", self.speed, "turn:", self.turn)
 
 
 if __name__ == '__main__':

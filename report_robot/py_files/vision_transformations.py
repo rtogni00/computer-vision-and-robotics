@@ -2,12 +2,9 @@ from __future__ import annotations
 import cv2
 import numpy as np
 from rich import print
-from utils.opencv_utils import putBText
 from scipy.spatial.transform import Rotation
 from scipy import optimize
 from enum import Enum
-from utils.tempo import *
-
 
 class Vision:
     def __init__(self, camera_matrix, dist_coeffs, cam_config, robotgeometries) -> None:
@@ -18,7 +15,7 @@ class Vision:
         self.green_lower = np.array([10, 40, 35])
         self.green_upper = np.array([80, 255, 255])
 
-        # get aruco stuff from cv
+        # get aruco information from cv
         self.aruco_dict = cv2.aruco.getPredefinedDictionary(
             cv2.aruco.DICT_ARUCO_ORIGINAL)
         self.aruco_params = cv2.aruco.DetectorParameters()
@@ -32,7 +29,7 @@ class Vision:
         self.Y_rotation = robotgeometries.y_angle
         self.Z_rotation = robotgeometries.z_angle
 
-        pos_r2c = np.array([self.h_r2c, 0, self.v_r2c])  # robot to camera
+        pos_r2c = np.array([self.h_r2c, 0, self.v_r2c])  # y_c = 0
 
         # rotation angles with intrinsic convention from robot to camera
         r = Rotation.from_euler(
@@ -60,11 +57,8 @@ class Vision:
         p_4 = P[:3, 3]  # column 4
 
         self.M_inv = np.linalg.inv(M)
-
         self.C_tilde = -self.M_inv @ p_4
 
-    # function to transform from one system of reference to another
-    @timeit
     def to_tf(self, rvec, tvec, order="xyz"):
         """Returns transformation matrix from camera to marker"""
 
@@ -75,32 +69,23 @@ class Vision:
         tf[:3, 3] = tvec
         return tf
 
-    # convert from image coords to world coords
-    @timeit
     def img_to_world(self, x_img):
         x_tilde = self.M_inv @ x_img
         mu = float(- self.C_tilde[2]/x_tilde[2])  # this solves for Z=0
         X = np.squeeze(mu * x_tilde) + self.C_tilde
         return X
 
-    # detect arucos and obstacles
-    @timeit
     def detections(self, img: np.ndarray, draw_img: None, x: tuple, kind: str = "all") -> tuple:
 
         # detect arucos and circles
         ids, x_r2m, y_r2m = self.detect_arucos(img, draw_img)
-        if kind == "all":
-            ids_circles, x_r2circle, y_r2circle = self.detect_circles(
-                img, draw_img)
+        ids_circles, x_r2circle, y_r2circle = self.detect_circles(
+            img, draw_img)
 
-            # concatenate all ids and get all x and y coords
-            ids = np.concatenate((ids, ids_circles)).astype(np.int16)
-            x_r2landmarks = np.asarray(x_r2m+x_r2circle)
-            y_r2landmarks = np.asarray(y_r2m+y_r2circle)
-        else:
-            ids = np.asarray(ids)
-            x_r2landmarks = np.asarray(x_r2m)
-            y_r2landmarks = np.asarray(y_r2m)
+        # concatenate all ids and get all x and y coords
+        ids = np.concatenate((ids, ids_circles)).astype(np.int16)
+        x_r2landmarks = np.asarray(x_r2m+x_r2circle)
+        y_r2landmarks = np.asarray(y_r2m+y_r2circle)
 
         # if landmarks were found
         # landmark_positions are wrt world coordinates
@@ -117,13 +102,14 @@ class Vision:
             landmark_positions = []
 
         return ids, landmark_rs, landmark_alphas, landmark_positions
-
-    # Takes an input images and returns a list containing the x (left to right) and y (top to bottom)
-    @timeit
+    
     def find_centroids(self, img, range_lower, range_upper):
+        """Takes an input images and returns a list containing the x (left to right) and y (top to bottom)"""
 
         hsv = cv2.cvtColor(img, cv2.COLOR_BGR2HSV)
+
         mask = cv2.inRange(hsv, range_lower, range_upper)
+
 
         circles = cv2.bitwise_and(img, img, mask=mask)
 
@@ -138,17 +124,18 @@ class Vision:
         circles_binary_image = cv2.morphologyEx(
             circles_binary_image, cv2.MORPH_CLOSE, kernel, iterations=3)
 
-        # each pixel in the binary image is assigned a label representing the connected component it belongs to
-        # as many random colors as labels
+        # each pixel in the binary image is assigned a label
         output = cv2.connectedComponentsWithStats(
             circles_binary_image, 8, cv2.CV_32S)
-        
+        # representing the connected component it belongs to.
+        # as many random colors as labels
         (numLabels, labels, stats, centroids) = output
+
         return numLabels, centroids, stats
 
-    # get all the arucos coords
-    @timeit
     def detect_arucos(self, img: np.ndarray, draw_img=None):
+        # TODO: check to_tf and frame coordinated system used
+        # call to cv2
         corners, ids, _ = self.aruco_det.detectMarkers(img)
 
         if draw_img is not None:
@@ -177,9 +164,7 @@ class Vision:
         else:
             ids = []
         return ids, world_coord_x, world_coord_y
-
-    # look for one kind of circles
-    @timeit
+    
     def detect_circle(self, img: np.ndarray, color, lower, upper, draw_img=None):
         output = self.find_centroids(img, lower, upper)
         (numLabels, centroids, stats) = output
@@ -215,8 +200,6 @@ class Vision:
 
         return ids, world_coord_x, world_coord_y
 
-    # look for red and green circles
-    @timeit
     def detect_circles(self, img: np.ndarray, draw_img=None, kind='all'):
 
         ids_r, w_c_r_x, w_c_r_y = self.detect_circle(

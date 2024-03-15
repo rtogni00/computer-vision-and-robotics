@@ -11,18 +11,41 @@ geometries:
   z_angle: -90 # rotation degrees angle along Z intrinsic axis
   aruco_size: 0.048  # measured in meters
 
-
-
 camera:
   y_offset: 0
   z_offset: 0
   y_angle: 0
-  exposure_time: 60
+  exposure_time: 50
   gain: 100
 
 ekf_slam:
   robot_width: 0.137 # width of the robot in meters (from centers of two wheels)
-  motor_std: 0
-  dist_std: 0
-  angle_std: 0
+  motor_std: 0.1 # meters
+  dist_std: 0.2 # meters TODO: set to 10cm
+  angle_std: 5 # degrees TODO: 1 degree
+
+runner:
+  speed: 60 # speed during race
+
+# best was 32, 2
+pid: # config of pid
+  kp: 32  # 40 was best alone
+  ki: 2
+  kd: 0
+  removal_distance: 0.25
+
+wanderer:
+  speed_lost: 10
+  speed_cruise: 15
+
+maze:
+  spatial_step: 0.05 # 5cm 
+  dilations: 5
+  save_fig: True
+  radius_startline: 0.1
+  radius_obstacle: 0.25
+
+log:
+  loggin: True
+  filename: "timestamps_with_vs.log"
 
