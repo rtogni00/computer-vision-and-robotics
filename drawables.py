@@ -1,4 +1,5 @@
 from math import sin, cos, pi, ceil
+import numpy as np
 
 class DrawableObject(object):
     def draw(self, at_step):
@@ -148,6 +149,37 @@ class ScannerData(DrawableObject):
             self.cursor_object = None
         if at_step < len(self.scan_polygons):
             self.cursor_object = self.canvas.create_polygon(self.scan_polygons[at_step], fill="blue")
+
+
+class WorldGrid(DrawableObject):
+    def __init__(self, canvas, canvas_extents, world_extents) -> None:
+        self.canvas = canvas
+        self.canvas_extents = canvas_extents # pixels, eg: (400, 600)
+        self.world_extents = world_extents # meters, eg: (8.0, 8.0)
+
+    def background_draw(self):
+        # draw grid
+        x_pixels_per_meter = self.canvas_extents[0] / self.world_extents[0]
+        y_pixels_per_meter = self.canvas_extents[1] / self.world_extents[1]
+
+        # vertical lines:
+        for x_interval in np.arange(0, self.canvas_extents[0], x_pixels_per_meter):
+            # x1, y1, x2, y2
+            self.canvas.create_line(
+                x_interval, 0,
+                x_interval, self.canvas_extents[1],
+                fill="#D9D9D9")
+        
+        # horizontal lines:
+        for y_interval in np.arange(0, self.canvas_extents[1], y_pixels_per_meter):
+            # x1, y1, x2, y2
+            self.canvas.create_line(
+                0, y_interval,
+                self.canvas_extents[0], y_interval,
+                fill="#D9D9D9")
+            
+    def draw(self, at_step):
+        pass
 
 
 class Points(DrawableObject):
