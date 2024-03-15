@@ -10,9 +10,9 @@ class MazeRunner():
     def __init__(self, data):
         self.spatial_step = 0.02  # 2cm of the grid resolution
         # get data from data object
-        self.positions = data.positions
-        self.ids = data.ids
-        self.robot_pose = data.robot_pose
+        self.positions = data.landmark_estimated_positions
+        self.ids = data.landmark_estimated_ids
+        self.robot_pose = data.robot_position
         # self.path_meter = []
         self.n_x = 0
         self.n_y = 0
@@ -20,6 +20,7 @@ class MazeRunner():
         self.end = ()
         self.min_x = 0
         self.min_y = 0
+        self.mask = None
 
     def matrix_to_meter(self, index_x, index_y):
         x = self.spatial_step*index_x+self.min_x+self.spatial_step/2
@@ -49,7 +50,7 @@ class MazeRunner():
         positions_external = positions_array[mask_external]
         positions_internal = positions_array[mask_internal]
         positions_obstacle = positions_array[mask_obstacle]
-        positions_start_line = positions_array[mask_start_line]
+        # positions_start_line = positions_array[mask_start_line]
 
         pos_list_ext = [pos for pos in positions_external]
         pos_list_int = [pos for pos in positions_internal]
@@ -105,6 +106,29 @@ class MazeRunner():
 
         self.mask = mask+mask_line_obs
 
+
+    # TODO add start and end
+    def get_start(self):
+        self.start = (0, 0)
+        pass
+
+    def get_end(self):
+        self.end = (0, 0)
+        pass
+
+    def create_path(self):
+        # compute the mask
+        self.create_mask()
+        # compite the start and end points
+        self.get_start()
+        self.get_end()
+
+        # get the matrix path with mask
         path_matrix = astar(self.mask, self.start, self.end)
+
+        # return the path in geometric coordinates
         path_meter = [self.matrix_to_meter(*xy) for xy in path_matrix]
+
+        # trim the complexity of the path
+        path_meter=path_meter[::3]
         return path_meter

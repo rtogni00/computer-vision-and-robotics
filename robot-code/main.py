@@ -17,7 +17,9 @@ from utils.keypress_listener import KeypressListener
 from rich import print
 from utils.utils import load_config
 
-import aruco_follower
+from aruco_follower import Wanderer
+from utils.path_follower import Runner
+from utils.gotostart import GoToStart
 from utils.tempo import *
 
 from enum import Enum
@@ -29,6 +31,7 @@ class TaskPart(Enum):
     ToStartLine = 2
     Race = 3
     Load = 4
+    PrepareRace = 5
 
 
 class Main():
@@ -39,7 +42,7 @@ class Main():
         self.robot = RobotController(self.config)
         self.keypress_listener = KeypressListener()
         self.publisher = Publisher()
-        self.wanderer = aruco_follower.Wanderer()
+        self.wanderer = Wanderer()
 
         self.DT = self.config.robot.delta_t  # delta time in seconds
 
@@ -120,13 +123,21 @@ class Main():
                 self.mode = TaskPart.ToStartLine
 
         if self.mode == TaskPart.ToStartLine:
-            # TODO implement algorithm to reach start line
-            start_line_reached=False
+            self.starter = GoToStart(data).get_arrival_coords()
+            self.speed, self.turn, start_line_reached =self.starter.run(data)
+
             if start_line_reached:
-                self.mode=TaskPart.Race
+                self.mode = TaskPart.PrepareRace
+
+        if self.mode == TaskPart.PrepareRace:
+            self.runner = Runner(data)
+            self.mode = TaskPart.Race
 
         if self.mode == TaskPart.Race:
-            pass
+            self.speed, self.turn, end_reached = self.runner.run(data)
+            self.robot.move(self.speed, self.turn)
+            if end_reached:
+                self.mode = TaskPart.Manual
 
         if self.mode == TaskPart.Load:
             recalled_memories = self.load_state()
