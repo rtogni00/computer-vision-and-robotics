@@ -96,14 +96,14 @@ class Trajectory(DrawableObject):
                 if at_step < len(self.standard_deviations) and\
                    len(self.standard_deviations[0]) > 3:
                     angle = min(self.standard_deviations[at_step][3], pi)
-                    points = self.get_ellipse_points(p, p[2], 30.0, 30.0,
-                                                     -angle, angle)
-                    points = [p[0:2]] + points + [p[0:2]]
+                    points = self.get_ellipse_points(p, p[2], 30.0, 30.0, -angle, angle)
+                    points = [p[0:2]] + points + [p[0:2]] #! are these correct??
                     if self.cursor_object3:
                         self.canvas.delete(self.cursor_object3)
                     self.cursor_object3 = self.canvas.create_polygon(
                         *points, fill=self.theta_stddev_color)
                 # Draw heading.
+                #! are these p[2] correct??
                 self.cursor_object2 = self.canvas.create_line(p[0], p[1],
                     p[0] + cos(p[2]) * 50,
                     p[1] - sin(p[2]) * 50,
@@ -149,28 +149,6 @@ class ScannerData(DrawableObject):
         if at_step < len(self.scan_polygons):
             self.cursor_object = self.canvas.create_polygon(self.scan_polygons[at_step], fill="blue")
 
-class Landmarks(DrawableObject):
-    # In contrast other classes, Landmarks stores the original world coords and
-    # transforms them when drawing.
-    def __init__(self, landmarks, canvas, canvas_extents, world_extents, color = "gray"):
-        self.landmarks = landmarks
-        self.canvas = canvas
-        self.canvas_extents = canvas_extents
-        self.world_extents = world_extents
-        self.color = color
-
-    def background_draw(self):
-        pass
-        # for l in self.landmarks:
-        #     if l[0] =='C':
-        #         x, y = l[1:3]
-        #         ll = to_world_canvas((x - l[3], y - l[3]), self.canvas_extents, self.world_extents)
-        #         ur = to_world_canvas((x + l[3], y + l[3]), self.canvas_extents, self.world_extents)
-        #         self.canvas.create_oval(ll[0], ll[1], ur[0], ur[1], fill=self.color)
-
-    def draw(self, at_step):
-        # Landmarks are background only.
-        pass
 
 class Points(DrawableObject):
     # Points, optionally with error ellipses.
@@ -200,7 +178,8 @@ class Points(DrawableObject):
                     c[0] + self.radius, c[1] + self.radius,
                     fill=self.color))
                 if self.ids is not None:
-                    self.cursor_objects.append(self.canvas.create_text(c[0]+25,c[1],fill="black",font="Helvetica 10", text=str(self.ids[at_step][i])))
+                    if self.ids[at_step][i] is not None:
+                        self.cursor_objects.append(self.canvas.create_text(c[0]+25,c[1],fill="black",font="Helvetica 10", text=str(self.ids[at_step][i])))
 
                 # Draw error ellipse if present.
                 if at_step < len(self.ellipses) and i < len(self.ellipses[at_step]):

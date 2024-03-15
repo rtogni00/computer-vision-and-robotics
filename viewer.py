@@ -13,7 +13,7 @@ import jsonpickle
 import message # used for unpickling json str to message obj
 
 from subscriber import Subscriber
-from drawables import Trajectory, ScannerData, Landmarks, Points, Particles
+from drawables import Trajectory, ScannerData, Points, Particles
 
 
 class GuiPart:
@@ -32,7 +32,7 @@ class GuiPart:
         self.camera_img_size = (848, 480)
 
         # The world extents of the scene in meters
-        self.world_extents = (8.0, 8.0) # world extents, in meters
+        self.world_extents = (4.0, 4.0) # world extents, in meters
         self.scanner_range = 2.0 # range of camera, in meters
 
         root.geometry(str(self.window_extents[0]) + "x" + str(self.window_extents[1]))
@@ -194,6 +194,10 @@ class GuiPart:
         # estimated robot position:
         robot_position = self.to_world_canvas(msg.robot_position, single_pos=True) # shape (2,)
         robot_stdev = np.array(msg.robot_stdev) # shape (3,)
+        robot_theta = msg.robot_theta
+        robot_pose = np.append(robot_position, robot_theta)
+
+        #! what is the error in theta?
 
         # print("landmark_ids", landmark_ids.shape)
         # print("landmark_rel_positions", landmark_rel_positions.shape)
@@ -207,32 +211,48 @@ class GuiPart:
         # print("robot_stdev", robot_stdev.shape)
 
         if len(landmark_rel_positions) > 0 and len(landmark_rel_positions[0]) > 0:
-            draw_objects.append(Points(list([landmark_rel_positions]), self.sensor_canvas, "#cc0000", ids=np.expand_dims(landmark_ids, axis=0)))
+            draw_objects.append(Points(list([landmark_rel_positions]), self.sensor_canvas, "#262339", ids=np.expand_dims(landmark_ids, axis=0)))
 
         #! we add a dimension to each array. This way we *could* save all the draw objects and iterate over them...
         if robot_position is not None:
             # black points
             # draw_objects.append(Points(robot_world_points, self.world_canvas, "#262339"))
-
+            
+            # position with direction, use robot_pose instead of robot_position
             # red points with ellipse
-            draw_objects.append(Trajectory(np.expand_dims(robot_position, axis=0), self.world_canvas, self.world_extents, self.world_canvas_extents,
+            draw_objects.append(Trajectory(np.expand_dims(robot_pose, axis=0), 
+                self.world_canvas, 
+                self.world_extents, 
+                self.world_canvas_extents,
                 standard_deviations=np.expand_dims(robot_stdev, axis=0),
                 cursor_color="blue", background_color="lightblue",
                 position_stddev_color = "#8080ff", theta_stddev_color="#c0c0ff"))
 
         # measured positions
         if len(landmark_positions) > 0:
+
+            # only show ids for landmarks that are not yet estimated
+            only_new_landmark_ids = []
+            for id in landmark_ids:
+                if id in landmark_estimated_ids:
+                    only_new_landmark_ids.append(None)
+                else:
+                    only_new_landmark_ids.append(id)
+            only_new_landmark_ids = np.array(only_new_landmark_ids)
+
             # black points
-            draw_objects.append(Points(np.expand_dims(landmark_positions, axis=0), self.world_canvas, "#262339", ids=np.expand_dims(landmark_ids, axis=0)))
+            draw_objects.append(Points(np.expand_dims(landmark_positions, axis=0), self.world_canvas, "#262339", ids=np.expand_dims(only_new_landmark_ids, axis=0)))
 
         # estimated positions
         if len(landmark_estimated_positions) > 0:
 
             # landmark world ellipses and red points
-            factor = self.world_canvas_extents[0] / self.world_extents[0]
-            draw_objects.append(Points(np.expand_dims(landmark_estimated_positions, axis=0), self.world_canvas, "#cc0000",
-                                    ellipses=np.expand_dims(landmark_estimated_stdevs, axis=0),
-                                    ellipse_factor=factor))
+            scale = self.world_canvas_extents[0] / self.world_extents[0]
+            draw_objects.append(Points(np.expand_dims(landmark_estimated_positions, axis=0), 
+                                self.world_canvas, "#cc0000",
+                                ids=np.expand_dims(landmark_estimated_ids, axis=0),
+                                ellipses=np.expand_dims(landmark_estimated_stdevs, axis=0),
+                                ellipse_factor=scale))
 
         # Start new canvas and do all background drawing.
         self.world_canvas.delete(tkinter.ALL)
