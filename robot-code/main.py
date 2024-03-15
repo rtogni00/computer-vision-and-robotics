@@ -45,19 +45,22 @@ class Main():
                 msg = Message(
                     id = count,
                     timestamp = time0,
-                    start = start,
+                    start = True,
+                    
                     landmark_ids = [],
                     landmark_rs = [],
                     landmark_alphas = [],
-                    landmark_xs = [],
-                    landmark_ys = [],
-                    landmark_stdevs = [],
-                    x = 0.0,
-                    y = 0.0,
-                    theta = 0.0,
-                    stdev = [0.5, 0.5, 0.5]
+                    landmark_positions = [],
+
+                    landmark_estimated_ids = [],
+                    landmark_estimated_positions = [],
+                    landmark_estimated_stdevs = [],
+
+                    robot_position = np.array([0.0, 0.0]),
+                    robot_theta = 0.0,
+                    robot_stdev = [0.5, 0.5, 0.5],
                 )
-                    
+
                 # pickle message
                 msg_str = jsonpickle.encode(msg)
 

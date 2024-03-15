@@ -74,7 +74,7 @@ class GuiPart:
         self.all_file_names = []
         # self.add_file()
         root.update()
-        root.update_idletasks() 
+        root.update_idletasks()
 
         self.width, self.height = self.root.winfo_width(), self.root.winfo_height()
         root.bind("<Configure>", self.resize_event)
@@ -147,16 +147,31 @@ class GuiPart:
         points = np.column_stack((x, y))
         return points
 
-    def to_world_canvas(self, world_x, world_y):
+    def to_world_canvas(self, world_positions, single_pos=False):
         """Transforms a point from world coord system to world canvas coord system."""
+        world_positions_np = np.array(world_positions)
+
+        if single_pos:
+            if len(world_positions_np) < 2:
+                return np.array([])
+            world_x = world_positions_np[0]
+            world_y = world_positions_np[1]
+        else: # len(world_positions_np.shape) == 2
+            if len(world_positions_np.shape) < 2:
+                return np.empty((0, 2))
+            world_x = world_positions_np[:, 0]
+            world_y = world_positions_np[:, 1]
 
         scale = (1/np.array(self.world_extents)) * np.array(self.world_canvas_extents)
         x = np.array(world_x) * scale[0] + self.world_canvas_extents[0]/2
         x = x.astype(int)
         y = self.world_canvas_extents[1]/2 - np.array(world_y) * scale[1]
         y = y.astype(int)
-        points = np.column_stack((x, y))
-        return list(points)
+        # return list(points)
+        if len(world_positions_np.shape) == 1:
+            return np.array([x, y])
+        else:
+            return np.column_stack((x, y))
 
     def load_new_data(self, msg):
 
@@ -166,41 +181,57 @@ class GuiPart:
         draw_objects.append(ScannerData(self.sensor_canvas,
             self.sensor_canvas_extents, self.scanner_range))
 
-        landmark_points = self.to_sensor_canvas(msg.landmark_rs, msg.landmark_alphas)
+        # landmark measurements
+        landmark_ids = np.array(msg.landmark_ids) # shape (m,)
+        landmark_rel_positions = self.to_sensor_canvas(msg.landmark_rs, msg.landmark_alphas)# shape (m, 2)
+        landmark_positions = self.to_world_canvas(msg.landmark_positions) # shape (m, 2)
 
-        landmark_points = np.array([landmark_points])
-        landmark_ids = np.array([msg.landmark_ids])
-        landmark_stdevs = list([msg.landmark_stdevs])
+        # estimated landmarks positions
+        landmark_estimated_ids = np.array(msg.landmark_estimated_ids) # shape (n,)
+        landmark_estimated_stdevs = np.array(msg.landmark_estimated_stdevs) # shape (n, 2)
+        landmark_estimated_positions = self.to_world_canvas(msg.landmark_estimated_positions) # shape (n, 2)
 
-        if len(landmark_points[0]) > 0:
-            draw_objects.append(Points(landmark_points, self.sensor_canvas, "#cc0000", ids=landmark_ids))
+        # estimated robot position:
+        robot_position = self.to_world_canvas(msg.robot_position, single_pos=True) # shape (2,)
+        robot_stdev = np.array(msg.robot_stdev) # shape (3,)
 
-        # robot world coordinate:
-        robot_world_points = self.to_world_canvas(msg.x, msg.y)
-        robot_stdev = list([msg.stdev])
+        # print("landmark_ids", landmark_ids.shape)
+        # print("landmark_rel_positions", landmark_rel_positions.shape)
+        # print("landmark_positions", landmark_positions.shape)
 
-        if len(robot_world_points[0]) > 0:
+        # print("landmark_estimated_ids", landmark_estimated_ids.shape)
+        # print("landmark_estimated_stdevs", landmark_estimated_stdevs.shape)
+        # print("landmark_estimated_positions", landmark_estimated_positions.shape)
+
+        # print("robot_position", robot_position.shape)
+        # print("robot_stdev", robot_stdev.shape)
+
+        if len(landmark_rel_positions) > 0 and len(landmark_rel_positions[0]) > 0:
+            draw_objects.append(Points(list([landmark_rel_positions]), self.sensor_canvas, "#cc0000", ids=np.expand_dims(landmark_ids, axis=0)))
+
+        #! we add a dimension to each array. This way we *could* save all the draw objects and iterate over them...
+        if robot_position is not None:
             # black points
             # draw_objects.append(Points(robot_world_points, self.world_canvas, "#262339"))
 
             # red points with ellipse
-            draw_objects.append(Trajectory(robot_world_points, self.world_canvas, self.world_extents, self.world_canvas_extents,
-                standard_deviations = robot_stdev,
+            draw_objects.append(Trajectory(np.expand_dims(robot_position, axis=0), self.world_canvas, self.world_extents, self.world_canvas_extents,
+                standard_deviations=np.expand_dims(robot_stdev, axis=0),
                 cursor_color="blue", background_color="lightblue",
                 position_stddev_color = "#8080ff", theta_stddev_color="#c0c0ff"))
 
-        # landmark world coodinates:
-        landmark_world_points = self.to_world_canvas(msg.landmark_xs, msg.landmark_ys)
-        landmark_world_points = np.array([landmark_world_points])
-
-        if len(landmark_world_points[0]) > 0:
+        # measured positions
+        if len(landmark_positions) > 0:
             # black points
-            draw_objects.append(Points(landmark_world_points, self.world_canvas, "#262339", ids=landmark_ids))
+            draw_objects.append(Points(np.expand_dims(landmark_positions, axis=0), self.world_canvas, "#262339", ids=np.expand_dims(landmark_ids, axis=0)))
+
+        # estimated positions
+        if len(landmark_estimated_positions) > 0:
 
             # landmark world ellipses and red points
             factor = self.world_canvas_extents[0] / self.world_extents[0]
-            draw_objects.append(Points(landmark_world_points, self.world_canvas, "#cc0000",
-                                    ellipses=landmark_stdevs,
+            draw_objects.append(Points(np.expand_dims(landmark_estimated_positions, axis=0), self.world_canvas, "#cc0000",
+                                    ellipses=np.expand_dims(landmark_estimated_stdevs, axis=0),
                                     ellipse_factor=factor))
 
         # Start new canvas and do all background drawing.
@@ -213,7 +244,6 @@ class GuiPart:
         # Call all draw objects.
         for d in draw_objects:
             d.draw(0)
-
 
 
     def processIncoming(self):
@@ -243,7 +273,7 @@ class GuiPart:
                 text += "id: " + str(msg.id) + "\n"
                 text += "start: " + str(msg.start) + "\n"
                 text += "landmark ids: " + str(msg.landmark_ids) + "\n"
-                text += "robot pos: (" + str(np.round(msg.x, 2)) + ", " + str(np.round(msg.y, 2)) + ")\n"
+                text += "robot pos: (" + str(np.round(msg.robot_position[0], 2)) + ", " + str(np.round(msg.robot_position[1], 2)) + ")\n"
                 self.log_canvas.delete("TEXT")
                 self.log_canvas.create_text(10,10,fill="black", anchor=tkinter.NW,
                         text=text, tags="TEXT")
@@ -315,7 +345,7 @@ class ThreadedClient:
         to yield control pretty regularly, by select or otherwise.
         """
         while self.running:
-            # Asynchronous stuff here 
+            # Asynchronous stuff here
             msg_str, img = self.subscriber.run()
             self.queue.put((msg_str, img))
 
@@ -336,4 +366,4 @@ if __name__ == '__main__':
 
     signal.signal(signal.SIGINT, sigint_handler)
 
-    root.mainloop()        
+    root.mainloop()

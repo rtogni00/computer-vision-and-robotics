@@ -52,7 +52,7 @@ class Trajectory(DrawableObject):
         self.cursor_object4 = None
 
     def background_draw(self):
-        if self.points:
+        if len(self.points) > 0:
             p_xy_only = []
             for p in self.points:
                 self.canvas.create_oval(\
@@ -81,10 +81,12 @@ class Trajectory(DrawableObject):
                 stddev = self.standard_deviations[at_step]
                 # Note this assumes correct aspect ratio.
                 factor = self.canvas_extents[0] / self.world_extents[0]
-                # print("factor", factor)
-                # print("p", p, stddev[0], stddev[1] * factor, stddev[2] * factor)
-                points = self.get_ellipse_points(p, stddev[0],
-                    stddev[1] * factor, stddev[2] * factor)
+                print("factor", factor)
+                if len(stddev) == 2:
+                    # main_axis_angle = 0
+                    points = self.get_ellipse_points(p, 0, stddev[0] * factor, stddev[1] * factor)
+                else:
+                    points = self.get_ellipse_points(p, stddev[2], stddev[0] * factor, stddev[1] * factor)
                 if self.cursor_object4:
                     self.canvas.delete(self.cursor_object4)
                 self.cursor_object4 = self.canvas.create_line(
@@ -203,8 +205,13 @@ class Points(DrawableObject):
                 # Draw error ellipse if present.
                 if at_step < len(self.ellipses) and i < len(self.ellipses[at_step]):
                     e = self.ellipses[at_step][i]
-                    points = self.get_ellipse_points(c, e[0], e[1] * self.ellipse_factor,
-                                                     e[2] * self.ellipse_factor)
+                    if len(e) == 2:
+                        # set the main_axis_angle = 0
+                        points = self.get_ellipse_points(c, 0, e[0] * self.ellipse_factor,
+                                                        e[1] * self.ellipse_factor)
+                    else:
+                        points = self.get_ellipse_points(c, e[2], e[0] * self.ellipse_factor,
+                                                        e[1] * self.ellipse_factor)
                     self.cursor_objects.append(self.canvas.create_line(
                         *points, fill=self.color))
 
