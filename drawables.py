@@ -165,6 +165,26 @@ class Points(DrawableObject):
     def background_draw(self):
         pass
 
+    def id_to_color(self, id):
+        if id % 3 == 0:
+            color = "#AEE15E" # "green"
+        elif id % 3 == 1:
+            color = "#FF6557" # "red"
+        elif id % 3 == 2:
+            color = "#8593FF" # "blue"
+        
+        if id < 100:
+            color = "white"
+
+        elif id > 1000:
+            if id % 2 == 0:
+                color = "red"
+            elif id % 2 == 1:
+                color = "green"
+
+        return color
+        
+
     def draw(self, at_step):
         if self.cursor_objects:
             for obj in self.cursor_objects: self.canvas.delete(obj)
@@ -172,11 +192,15 @@ class Points(DrawableObject):
         if at_step < len(self.points):
             for i in range(len(self.points[at_step])):
                 # Draw point.
+                color = self.color
+                if self.ids[at_step][i] is not None:
+                    color = self.id_to_color(self.ids[at_step][i])
+
                 c = self.points[at_step][i]
                 self.cursor_objects.append(self.canvas.create_oval(
                     c[0] - self.radius, c[1] - self.radius,
                     c[0] + self.radius, c[1] + self.radius,
-                    fill=self.color))
+                    fill=color))
                 if self.ids is not None:
                     if self.ids[at_step][i] is not None:
                         self.cursor_objects.append(self.canvas.create_text(c[0]+25,c[1],fill="black",font="Helvetica 10", text=str(self.ids[at_step][i])))
