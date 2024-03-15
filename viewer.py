@@ -39,7 +39,7 @@ class GuiPart:
 
 
         # The world extents of the scene in meters
-        self.world_extents = (4.0, 4.0) # world extents, in meters
+        self.world_extents = (8.0, 8.0) # world extents, in meters
         self.scanner_range = 2.0 # range of camera, in meters
 
         root.geometry(str(self.window_extents[0]) + "x" + str(self.window_extents[1]))
@@ -53,10 +53,10 @@ class GuiPart:
         self.sensor_canvas = tkinter.Canvas(frame1, height=self.sensor_canvas_extents[1],bg="white")
         self.sensor_canvas.pack(side=tkinter.RIGHT, anchor=tkinter.NE, fill=tkinter.BOTH, expand=True, pady=2, padx=2)
 
-        # self.frame2 = tkinter.Frame(root)
-        # self.frame2.pack(fill=tkinter.BOTH, expand=True)
-        # self.scale = tkinter.Scale(self.frame2, orient=tkinter.HORIZONTAL, command =self.slider_moved)
-        # self.scale.pack(fill=tkinter.X)
+        self.frame2 = tkinter.Frame(root)
+        self.frame2.pack(fill=tkinter.BOTH, expand=True)
+        self.scale = tkinter.Scale(self.frame2, orient=tkinter.HORIZONTAL, command =self.slider_moved)
+        self.scale.pack(fill=tkinter.X)
         # self.info = tkinter.Label(self.frame2)
         # self.info.pack()
         # load = tkinter.Button(self.frame2,text="Load (additional) logfile",command=self.add_file)
@@ -350,6 +350,8 @@ class GuiPart:
                 text += "start: " + str(msg.start) + "\n"
                 text += "landmark ids: " + str(msg.landmark_ids) + "\n"
                 text += "robot pos: (" + str(np.round(msg.robot_position[0], 2)) + ", " + str(np.round(msg.robot_position[1], 2)) + ")\n"
+                text += msg.text
+
                 self.log_canvas.delete("TEXT")
                 self.log_canvas.create_text(10,10,fill="black", anchor=tkinter.NW,
                         text=text, font=("Purisa", 12), tags="TEXT")
