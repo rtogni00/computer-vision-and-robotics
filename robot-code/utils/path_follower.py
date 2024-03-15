@@ -1,4 +1,4 @@
-from the_maze_runner import MazeRunner
+# import the_maze_runner.MazeRunner as MazeRunner
 from cycler import V
 import ev3_dc as ev3
 import time
@@ -10,15 +10,18 @@ import numpy as np
 import sys
 from rich import print
 from utils.tempo import *
+# from the_maze_runner import *
+from utils.the_maze_runner import MazeRunner
 
 class Runner:
-    def __init__(self, data):
+    def __init__(self, data, start, end):
         # self.robot = robot
         self.speed = 15
         self.turn = 0
         # TODO choose start and end in the_maze_runner
-        self.path = MazeRunner(data).create_path()
-        self.speed_cruise = 15
+        print('Computing the path')
+        self.path = MazeRunner(data).create_path(start, end) # in meters
+        print('Path computed, ready to run the race')
 
 
 

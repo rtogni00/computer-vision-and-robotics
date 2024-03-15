@@ -12,7 +12,7 @@ def ordinator(l_input, max_distance=0.5, min_dist_=100):
     Use proper max_distance
     """
     orig_size = len(l_input)
-    _l_input = l_input[:]  # copy input, avoid input changing side effects
+    _l_input = list(l_input[:])  # copy input, avoid input changing side effects
     new_order = []  # the output order
 
     last = _l_input.pop(0)  # start from the first recorded node

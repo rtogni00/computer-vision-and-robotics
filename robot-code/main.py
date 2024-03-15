@@ -135,8 +135,9 @@ class Main():
                 self.mode = TaskPart.PrepareRace
 
         if self.mode == TaskPart.PrepareRace:
-            print('preparing race')
-            self.runner = Runner(data)
+            print('Preparing race')
+            start, end = self.starter.get_path_start_end()
+            self.runner = Runner(data, start, end)
             self.mode = TaskPart.Race
 
         if self.mode == TaskPart.Race:
@@ -144,6 +145,8 @@ class Main():
             self.robot.move(self.speed, self.turn)
             if end_reached:
                 self.mode = TaskPart.Manual
+                self.robot.move(0,0)
+                print("Oh yeah")
 
         if self.mode == TaskPart.Load:
             recalled_memories = self.load_state()

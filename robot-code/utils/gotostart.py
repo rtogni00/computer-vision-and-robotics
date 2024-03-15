@@ -12,9 +12,10 @@ class GoToStart:
         self.robot_pose = data.robot_position
         # self.robot_theta = data.robot_theta
         self.ids = np.array(data.landmark_estimated_ids)
-        self.target = None
+        self.target_start = None
+        self.target_end = None
         self.get_arrival_coords()
-        print("TARGET:",self.target, "TYPE:", type(self.target))
+        # print("TARGET:",self.target, "TYPE:", type(self.target))
         self.status = 0
         self.angle_limit = np.deg2rad(5)
 
@@ -66,9 +67,14 @@ class GoToStart:
         d2 = np.sqrt(np.sum((self.robot_pose-intersect_2)**2))
 
         if d1 < d2:
-            self.target = intersect_1
+            self.target_start = intersect_1
+            self.target_end = intersect_2
         else:
-            self.target = intersect_2
+            self.target_start = intersect_2
+            self.target_end = intersect_1
+
+    def get_path_start_end(self):
+        return self.target_start, self.target_end
 
 
     def run(self, data):
@@ -76,10 +82,10 @@ class GoToStart:
         self.robot_pose = data.robot_position
         x_robot, y_robot = self.robot_pose
         robot_theta = data.robot_theta % (2*np.pi)
-        y_target = self.target[1]
-        x_target = self.target[0]
+        y_target = self.target_start[1]
+        x_target = self.target_start[0]
         # use to decide whether to only rotate
-        distance_to_target = np.sqrt(np.sum((self.robot_pose-self.target)**2))
+        distance_to_target = np.sqrt(np.sum((self.robot_pose-self.target_start)**2))
 
         if distance_to_target < 0.05:
             self.status = 2
