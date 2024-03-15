@@ -278,7 +278,16 @@ class EKFSLAM:
     def dump(self):
         print('DUMPING STATE ON FILE')
         data = {"ids": self.ids,
+                "index_to_ids": self.index_to_ids,
+                "n_ids": self.n_ids,
                 "mu": self.mu,
                 "sigma": self.Sigma}
-        with open('pathfinding/SLAM_DUMP.pickle', 'wb') as pickle_file:
+        with open('SLAM_DUMP.pickle', 'wb') as pickle_file:  # dump of all the robot has recorded
             pickle.dump(data, pickle_file)
+
+    def load_map(self, ids, index_to_ids, n_ids, mu, sigma):
+        self.ids = ids
+        self.index_to_ids = index_to_ids
+        self.n_ids = n_ids
+        self.mu = mu
+        self.Sigma = sigma

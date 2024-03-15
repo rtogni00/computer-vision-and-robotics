@@ -101,7 +101,7 @@ class Main():
             return
 
         # check timer for ex
-        # time0 = timer()
+        time0 = timer()
         if self.mode == TaskPart.Race:
             draw_img = raw_img
             data = self.robot.run_ekf_slam(raw_img, fastmode=True)
@@ -109,12 +109,12 @@ class Main():
             draw_img = raw_img.copy()
             data = self.robot.run_ekf_slam(raw_img, draw_img)
 
-        # elapsed_time = timer() - time0
-        # if elapsed_time <= self.DT:
-        #     dt = self.DT - elapsed_time
-        #     time.sleep(dt)  # moves while sleeping
-        # else:
-        #     print(f"[red]{count} dt = {elapsed_time}, EKFSLAM")
+        elapsed_time = timer() - time0
+        if elapsed_time <= self.DT:
+            dt = self.DT - elapsed_time
+            time.sleep(dt)  # moves while sleeping
+        else:
+            print(f"[red]{count} dt = {elapsed_time}, EKFSLAM")
 
         self.parse_keypress(raw_img, count, data)
 
@@ -124,7 +124,6 @@ class Main():
         if self.mode == TaskPart.Exploration:
             self.speed, self.turn = self.wanderer.tramp(data)
             self.robot.move(self.speed, self.turn)
-            # pass
 
         if self.mode == TaskPart.ToStartLine:
             pass
@@ -133,7 +132,9 @@ class Main():
             pass
 
         if self.mode == TaskPart.Load:
-            pass
+            recalled_memories = self.load_state()
+            self.robot.slam.load_map(*recalled_memories)
+            self.mode = TaskPart.Manual
 
         msg = Message(
             id=count,
@@ -156,10 +157,9 @@ class Main():
             text=f"cam fps: {cam_fps}\ntheta gyro: {data.theta_gyro}\ntheta robo: {data.robot_theta}"
         )
 
-
         msg_str = jsonpickle.encode(msg)
         self.publisher.publish_img(msg_str, draw_img)
-        print('-----------')
+        # print('-----------')
         # return data
 
     def save_state(self, data):
@@ -170,11 +170,15 @@ class Main():
         with open('pathfinding/SLAM'+str(datetime.now().strftime("%Y%m%d_%H%M%S"))+'.pickle', 'wb') as pickle_file:
             pickle.dump(data, pickle_file)
 
-    def load_and_localize(self):
-        with open("SLAM.pickle", 'rb') as f:
-            pass
-
-        pass
+    def load_state(self, pickle_file_path='SLAM_DUMP.pickle'):
+        with open(pickle_file_path, 'rb') as file:
+            loaded_data = pickle.load(file)
+        ids = loaded_data['ids']
+        index_to_ids = loaded_data['index_to_ids']
+        n_ids = loaded_data['n_ids']
+        mu = loaded_data['mu']
+        sigma = loaded_data['sigma']
+        return (ids, index_to_ids, n_ids, mu, sigma)
 
     @timeit
     def parse_keypress(self, raw_img, count, data):
