@@ -52,6 +52,7 @@ class Main():
         self.is_running = True
 
         self.map = None
+        self.message = None
 
         self.mode = TaskPart.Manual
 
@@ -85,7 +86,6 @@ class Main():
             print("*** END PROGRAM ***")
 
     def run(self, count, time0):
-        print('count ', count)
         if not self.robot.recorder.playback:
             # read webcam and get distance from aruco markers
             _, raw_img, cam_fps, img_created = self.robot.camera.read()  # BGR color
@@ -147,14 +147,15 @@ class Main():
             text=f"cam fps: {cam_fps}\ntheta gyro: {data.theta_gyro}\ntheta robo: {data.robot_theta}"
         )
 
+        self.message = {"positions": data.landmark_estimated_positions,
+                        "ids": data.landmark_estimated_ids}
+
         msg_str = jsonpickle.encode(msg)
         self.publisher.publish_img(msg_str, draw_img)
 
     def save_state(self, data):
-        with open("SLAM.pickle", 'wb') as pickle_file:
-            pass
-
-        pass
+        with open("pathfinding/SLAM.pickle", 'wb') as pickle_file:
+            pickle.dump(data, pickle_file)
 
     def load_and_localize(self):
         with open("SLAM.pickle", 'rb') as f:
@@ -230,6 +231,9 @@ class Main():
             print("[green]MODE: Saveed picture")
             cv2.imwrite(
                 'pics/pic_'+str(datetime.now().strftime("%Y%m%d_%H%M%S"))+'.png', raw_img)
+        elif char == "j":
+            self.save_state(self.message)
+            print("[green]Saved ids and landmark positions")
 
         if self.speed != self.new_speed or self.turn != self.new_turn:
             self.speed = self.new_speed
