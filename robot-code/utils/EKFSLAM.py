@@ -174,55 +174,62 @@ class EKFSLAM:
         x_m, y_m = self.mu[3+2*index:3+2*index+2]
 
         # define the return values of h
-        r = np.sqrt((x_m-x)**2+(y_m-y)**2)
-        beta = subtract(np.arctan2((y_m-y), (x_m-x)), theta)
+        # r = np.sqrt((x_m-x)**2+(y_m-y)**2)
+        # beta = subtract(np.arctan2((y_m-y), (x_m-x)), theta)
 
-        # define the entries of jacobian
-        r_x = -(x_m-x)/r
-        r_y = -(y_m-y)/r
-        r_theta = 0
-        r_x_m = -r_x
-        r_y_m = -r_y
-        beta_x = (y_m-y)/r**2
-        beta_y = -(x_m-x)/r**2
-        beta_theta = -1
-        beta_x_m = -beta_x
-        beta_y_m = -beta_y
+        # # define the entries of jacobian
+        # r_x = -(x_m-x)/r
+        # r_y = -(y_m-y)/r
+        # r_theta = 0
+        # r_x_m = -r_x
+        # r_y_m = -r_y
+        # beta_x = (y_m-y)/r**2
+        # beta_y = -(x_m-x)/r**2
+        # beta_theta = -1
+        # beta_x_m = -beta_x
+        # beta_y_m = -beta_y
 
-        H_s_robot = np.array([[r_x, r_y, r_theta,],
-                             [beta_x, beta_y, beta_theta,]])
-        H_s_marker = np.array([[r_x_m, r_y_m],
-                              [beta_x_m, beta_y_m]])
+        # H_s_robot = np.array([[r_x, r_y, r_theta,],
+        #                      [beta_x, beta_y, beta_theta,]])
+        # H_s_marker = np.array([[r_x_m, r_y_m],
+        #                       [beta_x_m, beta_y_m]])
 
-        n = 2*index
-        m = max(3+2*self.n_ids-n-5, 0)
+        # n = 2*index
+        # m = max(3+2*self.n_ids-n-5, 0)
 
-        H = np.block([H_s_robot, np.zeros((2, n)),
-                     H_s_marker, np.zeros((2, m))])
-        H_s = np.block([H_s_robot, H_s_marker])
+        # H = np.block([H_s_robot, np.zeros((2, n)),
+        #              H_s_marker, np.zeros((2, m))])
+        # H_s = np.block([H_s_robot, H_s_marker])
 
-        inf = 3+2*index
-        sup = 3+2*index+2
+        # inf = 3+2*index
+        # sup = 3+2*index+2
 
-        sigma_s_top_left = self.Sigma[0:3, 0:3]
-        sigma_s_low_right = self.Sigma[inf:sup, inf:sup]
-        sigma_s_top_right = self.Sigma[0:3, inf:sup]
-        sigma_s_low_left = self.Sigma[inf:sup, 0:3]
+        # sigma_s_top_left = self.Sigma[0:3, 0:3]
+        # sigma_s_low_right = self.Sigma[inf:sup, inf:sup]
+        # sigma_s_top_right = self.Sigma[0:3, inf:sup]
+        # sigma_s_low_left = self.Sigma[inf:sup, 0:3]
 
-        sigma_s = np.block([[sigma_s_top_left, sigma_s_top_right],
-                            [sigma_s_low_left, sigma_s_low_right]])
+        # sigma_s = np.block([[sigma_s_top_left, sigma_s_top_right],
+        #                     [sigma_s_low_left, sigma_s_low_right]])
 
         # Z = H_s@sigma_s@(H_s.T)+self.Q
 
         # K = self.Sigma@H.T@np.linalg.inv(Z)
 
-        K = compute_matrix_mul(H_s, sigma_s, self.Q, self.Sigma, H)
+        # K = compute_matrix_mul(H_s, sigma_s, self.Q, self.Sigma, H)
 
-        self.mu += K@(np.array([r_i-r, subtract(beta_i, beta)]))
-        self.Sigma = (np.eye(3+2*self.n_ids)-K@H)@self.Sigma
+        # self.mu += K@(np.array([r_i-r, subtract(beta_i, beta)]))
+        # self.Sigma = (np.eye(3+2*self.n_ids)-K@H)@self.Sigma
 
-        # delta_mu, self.Sigma= compute_heavy_stuff(H_s, sigma_s, self.Q, self.Sigma, H)
         # self.mu+=delta_mu
+        delta_mu, self.Sigma = correction_acc(x_m, y_m,
+                                              x, y,
+                                              theta,
+                                              r_i, beta_i,
+                                              self.n_ids,
+                                              index,
+                                              self.Q, self.Sigma)
+        self.mu += delta_mu
 
     @timeit
     def get_robot_pose(self, fastmode=False):
@@ -249,12 +256,12 @@ class EKFSLAM:
                 landmark_estimated_stdevs.append(landmark_error)
             # landmark_xy = self.mu[3+2*i: 3+2*i+2]
             # landmark_estimated_positions.append(landmark_xy)
-            landmark_estimated_positions= self.mu[3:].reshape(self.n_ids,2)
+            landmark_estimated_positions = self.mu[3:].reshape(self.n_ids, 2)
         else:
             # for i in range(self.n_ids):
             #     landmark_xy = self.mu[3+2*i: 3+2*i+2]
             #     landmark_estimated_positions.append(landmark_xy)
-            landmark_estimated_positions = self.mu[3:].reshape(self.n_ids,2)
+            landmark_estimated_positions = self.mu[3:].reshape(self.n_ids, 2)
             landmark_estimated_stdevs = [[0, 0, 0]] * self.n_ids
         return landmark_estimated_positions, landmark_estimated_stdevs
 
@@ -279,7 +286,6 @@ class EKFSLAM:
     @timeit
     def get_landmark_ids(self):
         return self.ids
-
 
     def get_sigma(self):
         return self.Sigma
@@ -307,16 +313,83 @@ class EKFSLAM:
         self.Sigma = sigma
 
 # helper function to get correct difference of two angle
+
+
 @timeit
 @jit(nopython=True)
-def subtract( theta_1, theta_2):
+def subtract(theta_1, theta_2):
     diff = (theta_1-theta_2) % (2*np.pi)
     diff = np.where(diff > np.pi, diff - 2 * np.pi, diff)
     return diff
 
+
+# @timeit
+# @jit(nopython=True)
+# def compute_matrix_mul(H_s, sigma_s, Q, Sigma, H):
+#     # Z =
+#     K = Sigma@H.T@np.linalg.inv(H_s@sigma_s@(H_s.T)+Q)
+#     return K
+
+
 @timeit
 @jit(nopython=True)
-def compute_matrix_mul(H_s, sigma_s, Q, Sigma, H):
-    # Z = 
+def correction_acc(x_m: float, y_m: float,
+                   x: float, y: float,
+                   theta: float,
+                   r_i: float, beta_i: float,
+                   n_ids: int,
+                   index: int,
+                   Q, Sigma):
+    # define the return values of h
+    r = np.sqrt((x_m-x)**2+(y_m-y)**2)
+    beta = subtract(np.arctan2((y_m-y), (x_m-x)), theta)
+
+    # define the entries of jacobian
+    r_x = -(x_m-x)/r
+    r_y = -(y_m-y)/r
+    r_theta = 0
+    r_x_m = -r_x
+    r_y_m = -r_y
+    beta_x = (y_m-y)/r**2
+    beta_y = -(x_m-x)/r**2
+    beta_theta = -1
+    beta_x_m = -beta_x
+    beta_y_m = -beta_y
+
+    H_s_robot = np.array([[r_x, r_y, r_theta,],
+                          [beta_x, beta_y, beta_theta,]])
+    H_s_marker = np.array([[r_x_m, r_y_m],
+                           [beta_x_m, beta_y_m]])
+
+    n = 2*index
+    m = max(3+2*n_ids-n-5, 0)
+
+    H_top = np.concatenate([H_s_robot, np.zeros((2, n))], axis=0)
+    H_bottom = np.concatenate([H_s_marker, np.zeros((2, m))], axis=0)
+    H = np.stack([H_top, H_bottom], axis=0)
+    # H=np.concatenate([H_top, H_bottom], axis=1)
+
+    # H = np.block([H_s_robot, np.zeros((2, n)),
+    #               H_s_marker, np.zeros((2, m))])
+    # H_s = np.block([H_s_robot, H_s_marker])
+    H_s = np.concatenate([H_s_robot, H_s_marker], axis=0)
+
+    inf = 3+2*index
+    sup = 3+2*index+2
+
+    sigma_s_top_left = Sigma[0:3, 0:3]
+    sigma_s_low_right = Sigma[inf:sup, inf:sup]
+    sigma_s_top_right = Sigma[0:3, inf:sup]
+    sigma_s_low_left = Sigma[inf:sup, 0:3]
+
+    sigma_s_top=np.concatenate([sigma_s_top_left, sigma_s_top_right])
+    sigma_s_bottom=np.concatenate([sigma_s_low_left, sigma_s_low_right])
+    sigma_s=np.stack([sigma_s_top, sigma_s_bottom], axis=0)
+    # sigma_s = np.block([[sigma_s_top_left, sigma_s_top_right],
+    #                     [sigma_s_low_left, sigma_s_low_right]])
+
     K = Sigma@H.T@np.linalg.inv(H_s@sigma_s@(H_s.T)+Q)
-    return K
+    delta_mu = K@(np.array([r_i-r, subtract(beta_i, beta)]))
+    Sigma = (np.eye(3+2*n_ids)-K@H)@Sigma
+
+    return delta_mu, Sigma
