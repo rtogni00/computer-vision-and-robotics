@@ -24,7 +24,7 @@ class EKFSLAM:
 
         self.Sigma = init_covariance.copy()
         self.Sigma_prime = init_covariance.copy()
-        
+
         self.ids = []
         self.SIGMA_SQUARED_X = 100
         self.SIGMA_SQUARED_Y = 100
@@ -37,27 +37,20 @@ class EKFSLAM:
         x, y, theta, std = self.get_robot_pose()
         w = self.WIDTH
         alpha = (r-l)/w
-        R = l/alpha
-        R_w_2 = R+(w/2)
         sin_theta = np.sin(theta)
         sin_theta_rlw = np.sin(theta+alpha)
         cos_theta_rlw = np.cos(theta+alpha)
 
         cos_theta = np.cos(theta)
-        const_AB = (w*r)/(r-l)**2
-        const_CD = -(w*l)/(r-l)**2
-        const_ABCD = (r+l)/(2*(r-l))
-        l_alpha_w_2 = (l/alpha+w/2)
 
         # prediction for state vector
-        x_prime = x + R_w_2*(np.sin(theta+alpha)-sin_theta)
-        y_prime = y+R_w_2*(-np.cos(theta+alpha)+cos_theta)
-        theta_prime = (theta+alpha) % (2*np.pi)
-
-        self.mu_prime = np.array([x_prime, y_prime, theta_prime])
 
         # prediction for covariance matrix
         if l == r:
+            x_prime = x + l*(cos_theta)
+            y_prime = y + l*(sin_theta)
+            theta_prime = theta
+
             G = np.array([[1, 0, -l*sin_theta],
                           [0, 1, l*cos_theta],
                           [0, 0, 1]])
@@ -65,29 +58,54 @@ class EKFSLAM:
             B = 0.5*(sin_theta-l/w*cos_theta)
             C = 0.5*(cos_theta-l/w*sin_theta)
             D = 0.5*(sin_theta+l/w*cos_theta)
-            
-            V = np.array([[A, C],
-                          [B, D],
-                          [-1/w, 1/w]])
+
         else:
+            R = l/alpha
+            R_w_2 = R+(w/2)
+            x_prime = x + R_w_2*(np.sin(theta+alpha)-sin_theta)
+            y_prime = y + R_w_2*(-np.cos(theta+alpha)+cos_theta)
+            theta_prime = (theta+alpha) % (2*np.pi)
+
+            const_AB = (w*r)/(r-l)**2
+            const_CD = -(w*l)/(r-l)**2
+            const_ABCD = (r+l)/(2*(r-l))
+            l_alpha_w_2 = (l/alpha+w/2)
+
             G = np.array([[1, 0, l_alpha_w_2*(cos_theta_rlw-cos_theta)],
                           [0, 1, l_alpha_w_2*(sin_theta_rlw-sin_theta)],
                           [0, 0, 1]])
-            
+
             A = const_AB*(sin_theta_rlw-sin_theta)-const_ABCD*cos_theta_rlw
             B = const_AB*(-cos_theta_rlw+cos_theta)-const_ABCD*sin_theta_rlw
             C = const_CD*(sin_theta_rlw-sin_theta)+const_ABCD*cos_theta_rlw
             D = const_CD*(-cos_theta_rlw+cos_theta)+const_ABCD*sin_theta_rlw
 
-            V = np.array([[A, C],
-                          [B, D],
-                          [-1/w, 1/w]])
-        
-        Sigma_u = np.array([[self.SIGMA_SQUARED_X, 0],[0, self.SIGMA_SQUARED_Y]])
+        V = np.array([[A, C],
+                      [B, D],
+                      [-1/w, 1/w]])
 
-        # TODO: change dimensions of G and V according to number of landmark added
-        self.Sigma_prime = G @ self.Sigma @ G.T + V @ Sigma_u @ V.T
+        Sigma_u = np.array(
+            [[self.SIGMA_SQUARED_X, 0], [0, self.SIGMA_SQUARED_Y]])
 
+        # change dimensions of G and V according to number of landmark added
+        sigma_xx = self.Sigma[0:3, 0:3]
+        sigma_xm = self.Sigma[0:3, 3:]
+        # sigma_mx= self.Sigma[3:,0:3]
+        sigma_mm = self.Sigma[3:, 3:]
+
+        Sigma_top_left = G@sigma_xx@G.T
+        Sigma_top_right = G@sigma_xm
+        Sigma_bottom_left = (G@sigma_xm).T
+
+        sigma_prime = np.zeros_like(self.Sigma)
+
+        sigma_prime[0:3, 0:3] = Sigma_top_left + V @ Sigma_u @ V.T
+        sigma_prime[0:3, 3:] = Sigma_top_right
+        sigma_prime[3:, 0:3] = Sigma_bottom_left
+        sigma_prime[3:, 3:] = sigma_mm
+
+        self.mu_prime = np.array([x_prime, y_prime, theta_prime])
+        self.Sigma_prime = sigma_prime
 
     def add_landmark(self, position: tuple, measurement: tuple, id: str):
         if int(id) < 1000:

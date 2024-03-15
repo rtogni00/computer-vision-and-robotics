@@ -1,6 +1,6 @@
 robot:
-  wheel_radius: 0.028
-  width:  0.028
+  wheel_radius: 0.028 # radius of wheels
+  width:  0.028 # width of wheels
   delta_t: 0.1 # in seconds
 
 geometries:
@@ -21,7 +21,7 @@ camera:
   gain: 100
 
 ekf_slam:
-  robot_width: 0
+  robot_width: 0.137 # width of the robot in meters (from centers of two wheels)
   motor_std: 0
   dist_std: 0
   angle_std: 0
