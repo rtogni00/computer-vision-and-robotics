@@ -39,7 +39,7 @@ class Main():
         self.robot = RobotController(self.config)
         self.keypress_listener = KeypressListener()
         self.publisher = Publisher()
-        self.wanderer = aruco_follower.Wanderer(self.robot)
+        self.wanderer = aruco_follower.Wanderer()
 
         self.DT = self.config.robot.delta_t  # delta time in seconds
 
@@ -73,12 +73,13 @@ class Main():
                 time0 = timer()
                 self.run(count, time0)
 
-                # elapsed_time = timer() - time0
-                # if elapsed_time <= self.DT:
-                #     dt = self.DT - elapsed_time
-                #     time.sleep(dt)  # moves while sleeping
-                # else:
-                #     print(f"[red]{count} dt = {elapsed_time}, RUN")
+                elapsed_time = timer() - time0
+                if elapsed_time <= self.DT:
+                    dt = self.DT - elapsed_time
+                    time.sleep(dt)  # moves while sleeping
+                else:
+                    # print(f"[red]{count} dt = {elapsed_time}, RUN")
+                    pass
 
                 count += 1
 
@@ -100,21 +101,12 @@ class Main():
             print("[red]image is None!")
             return
 
-        # check timer for ex
-        time0 = timer()
         if self.mode == TaskPart.Race:
             draw_img = raw_img
             data = self.robot.run_ekf_slam(raw_img, fastmode=True)
         else:
             draw_img = raw_img.copy()
             data = self.robot.run_ekf_slam(raw_img, draw_img)
-
-        elapsed_time = timer() - time0
-        if elapsed_time <= self.DT:
-            dt = self.DT - elapsed_time
-            time.sleep(dt)  # moves while sleeping
-        else:
-            print(f"[red]{count} dt = {elapsed_time}, EKFSLAM")
 
         self.parse_keypress(raw_img, count, data)
 
