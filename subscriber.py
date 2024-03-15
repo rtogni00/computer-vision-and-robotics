@@ -17,7 +17,7 @@ class Subscriber():
     def __init__(self) -> None:
 
         # pub/sub:
-        self.image_hub = imagezmq.ImageHub(open_port='tcp://100.64.0.3:5555', REQ_REP=False)
+        self.image_hub = imagezmq.ImageHub(open_port='tcp://100.64.0.5:5555', REQ_REP=False)
 
         self.image_count = 0
         self.first_image = True
