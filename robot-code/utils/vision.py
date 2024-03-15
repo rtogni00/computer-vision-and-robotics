@@ -82,83 +82,25 @@ class Vision:
 
     def detections(self, img: np.ndarray, draw_img: np.ndarray, x: tuple, kind: str = "aruco") -> tuple:
 
-        corners, ids, _ = self.aruco_det.detectMarkers(img)
+        # detect arucos and circles
+        ids, x_r2m, y_r2m = self.detect_arucos(img)
+        ids_circles, x_r2circle, y_r2circle = self.detect_circles(img)
 
-        if ids is not None:
-            # get rvecs and tvecs of aruco wrt robot
+        # concatenate all ids and get all x and y coords
+        ids = np.concatenate((ids, ids_circles)).astype(np.int16)
+        x_r2landmarks=np.asarray(x_r2m+x_r2circle)
+        y_r2landmark=np.asarray(y_r2m+y_r2circle)
 
-            rvecs, tvecs, _ = cv2.aruco.estimatePoseSingleMarkers(
-                corners, self.aruco_size, self.camera_matrix, self.dist_coeffs)
-
-            # vector of displacement from robot to camera (floor is z=0)
-
-            x_r2m = np.zeros(len(ids))
-            y_r2m = np.zeros(len(ids))
-            z_r2m = np.zeros(len(ids))
-
-            for i, aruco_id in enumerate(ids):
-                # rotation matrix from camera to marker
-                t_c2m = self.to_tf(rvecs[i], tvecs[i])
-                # dot product to get rotation matrix from robot to marker
-                t_r2m = np.dot(self.t_r2c, t_c2m)
-                x_r2m[i], y_r2m[i], z_r2m[i] = t_r2m[:3, 3]
-
-            # convert to alpha and rho
-            # do not take into account the z component
-            ids = ids.flatten().tolist()
-            landmark_rs = np.sqrt(x_r2m ** 2 + y_r2m ** 2)
-            landmark_alphas = np.arctan2(y_r2m, x_r2m)
+        # if landmarks were found
+        if len(ids)>0:
+            landmark_rs=np.sqrt(x_r2landmarks**2 + y_r2landmark**2)
+            landmark_alphas = np.arctan2(y_r2landmark, x_r2landmarks)
             landmark_positions = np.zeros_like(landmark_rs)
-
         else:
-            # print("No markers detected")
-            # except:
-            ids = []
-            landmark_rs = np.zeros(0)
-            landmark_alphas = np.zeros(0)
-            landmark_positions = np.zeros(0)
+            landmark_rs = []
+            landmark_alphas = []
+            landmark_positions = []
 
-        # look for circles
-        ids_circles, pos_circles_world = self.detect_circles(img)
-        # ids_circles = np.asarray(ids_circles)
-        print('id:', ids, type(ids))
-        print('id circ:', ids_circles, type(ids_circles))
-        # updated ids, landmark,....
-        if len(ids_circles) > 0:
-            x_r2circle = np.zeros(len(ids_circles))
-            y_r2circle = np.zeros(len(ids_circles))
-            z_r2circle = np.zeros(len(ids_circles))
-            ids = np.concatenate((ids, ids_circles))
-            for i, pos in enumerate(pos_circles_world):
-                x_r2circle[i] = pos[0]
-                y_r2circle[i] = pos[1]
-
-            landmark_rs_circles = np.sqrt(x_r2circle**2+y_r2circle**2)
-            landmark_alphas_circles = np.arctan2(y_r2circle, x_r2circle)
-            landmark_positions_circles = np.zeros_like(landmark_rs_circles)
-        else:
-            landmark_rs_circles = np.zeros(0)
-            landmark_alphas_circles = np.zeros(0)
-            landmark_positions_circles = np.zeros(0)
-            # pass
-            # landmark_rs_circles=np.
-
-        # print(landmark_rs.shape)
-        # print(type(landmark_rs))
-        # print(landmark_rs_circles.shape)
-
-        # print(type(landmark_rs_circles))
-        landmark_rs = np.concatenate((landmark_rs, landmark_rs_circles))
-        landmark_alphas = np.concatenate(
-            (landmark_alphas, landmark_alphas_circles))
-        landmark_positions = np.concatenate(
-            (landmark_positions, landmark_positions_circles))
-        # print(landmark_rs)
-        # print(type(landmark_rs))
-        # print(landmark_rs_circles)
-        # print(type(landmark_rs_circles))
-        # ids, landmark_rs, landm ark_alphas, landmark_positions = [], [], [], []
-        ids = np.asarray(ids, np.uint16)
         return ids, landmark_rs, landmark_alphas, landmark_positions
 
     def find_centroids(self, img, range_lower, range_upper):
@@ -181,8 +123,9 @@ class Vision:
         circles_binary_image = cv2.morphologyEx(
             circles_binary_image, cv2.MORPH_CLOSE, kernel, iterations=3)
 
+        # each pixel in the binary image is assigned a label
         output = cv2.connectedComponentsWithStats(
-            circles_binary_image, 8, cv2.CV_32S)  # each pixel in the binary image is assigned a label
+            circles_binary_image, 8, cv2.CV_32S)
         # representing the connected component it belongs to.
         # as many random colors as labels
         (numLabels, labels, stats, centroids) = output
@@ -190,35 +133,67 @@ class Vision:
         return numLabels, centroids, stats
 
     def detect_arucos(self, img: np.ndarray):
-        pass
+        # call to cv2
+        corners, ids, _ = self.aruco_det.detectMarkers(img)
+
+        world_coord_x = []
+        world_coord_y = []
+        # only if something was found
+        if ids is not None:
+            ids = ids.flatten().tolist()
+            num_ids=len(ids)
+
+            # get rvecs and tvecs of aruco wrt robot
+            rvecs, tvecs, _ = cv2.aruco.estimatePoseSingleMarkers(
+                corners, self.aruco_size, self.camera_matrix, self.dist_coeffs)
+
+            for i in range(num_ids):
+                # rotation matrix from camera to marker
+                t_c2m = self.to_tf(rvecs[i], tvecs[i])
+                # dot product to get rotation matrix from robot to marker
+                t_r2m = np.dot(self.t_r2c, t_c2m)
+                # save only relevant cordinates
+                x, y = t_r2m[:2, 3]
+                world_coord_x.append(x)
+                world_coord_y.append(y)
+        else:
+            ids=[]
+        return ids, world_coord_x, world_coord_y
+
+    def detect_circle(self, img:np.ndarray, color,lower, upper):
+        output=self.find_centroids(img, lower, upper)
+        (numLabels, centroids, _) = output
+
+        ids=[]
+        world_coord_x=[]
+        world_coord_y=[]
+
+        if color=='green':
+            offset=0
+        else:
+            offset=1
+
+        if numLabels>0:
+            counter=1002+offset
+            for i in range(1, numLabels):
+                ids.append(counter)
+                x = centroids[i, cv2.CC_STAT_LEFT]
+                y = centroids[i, cv2.CC_STAT_TOP]
+                counter = counter+2
+                x, y, _ = self.img_to_world([x, y, 1])
+                world_coord_x.append(x)
+                world_coord_y.append(y)
+
+        return ids, world_coord_x, world_coord_y
 
     def detect_circles(self, img: np.ndarray):
 
-        output_red = self.find_centroids(img, self.red_lower, self.red_upper)
-        (numLabels_red, centroids_red, stats_red) = output_red
-        output_green = self.find_centroids(
-            img, self.green_lower, self.green_upper)
-        (numLabels_green, centroids_green, stats_green) = output_green
+        ids_r, w_c_r_x, w_c_r_y=self.detect_circle(img, 'red', self.red_lower, self.red_upper)
+        ids_g, w_c_g_x, w_c_g_y=self.detect_circle(img, 'green', self.green_lower, self.green_upper)
 
-        ids = []
-        world_coordinates = []
+        # join the lists of ids and coordinates of circles
+        ids=ids_r+ids_g
+        world_coordinates_x=w_c_r_x+w_c_g_x
+        world_coordinates_y=w_c_r_y+w_c_g_y
 
-        if numLabels_red > 0:  # there is something to do with the red circles
-            counter = 1000
-            for i in range(1, numLabels_red):
-                x = centroids_red[i, cv2.CC_STAT_LEFT]
-                y = centroids_red[i, cv2.CC_STAT_TOP]
-                ids.append(counter)
-                counter = counter+2
-                world_coordinates.append(self.img_to_world([x, y, 1]))
-
-        if numLabels_green > 0:  # there is something to do with the green circles
-            counter = 1001
-            for i in range(1, numLabels_green):
-                x = centroids_green[i, cv2.CC_STAT_LEFT]
-                y = centroids_green[i, cv2.CC_STAT_TOP]
-                ids.append(counter)
-                counter = counter+2
-                world_coordinates.append(self.img_to_world([x, y, 1]))
-
-        return ids, world_coordinates
+        return ids, world_coordinates_x, world_coordinates_y
