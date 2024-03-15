@@ -154,7 +154,7 @@ class Main():
         self.publisher.publish_img(msg_str, draw_img)
 
     def save_state(self, data):
-        with open("pathfinding/SLAM.pickle", 'wb') as pickle_file:
+        with open('pathfinding/SLAM'+str(datetime.now().strftime("%Y%m%d_%H%M%S"))+'.pickle', 'wb') as pickle_file:
             pickle.dump(data, pickle_file)
 
     def load_and_localize(self):
