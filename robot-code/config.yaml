@@ -21,7 +21,7 @@ camera:
 ekf_slam:
   robot_width: 0.137 # width of the robot in meters (from centers of two wheels)
   motor_std: 0.1 # meters
-  dist_std: 0.15 # meters TODO: set to 10cm
+  dist_std: 0.2 # meters TODO: set to 10cm
   angle_std: 5 # degrees TODO: 1 degree
 
 runner:
@@ -42,7 +42,10 @@ maze:
   spatial_step: 0.05 # 5cm 
   dilations: 5
   save_fig: True
+  radius_startline: 0.1
+  radius_obstacle: 0.25
 
 log:
-  filename: "timestamps_without_vs.log"
+  loggin: True
+  filename: "timestamps_with_vs.log"
 

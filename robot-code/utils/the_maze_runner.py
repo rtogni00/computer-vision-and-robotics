@@ -22,6 +22,8 @@ class MazeRunner():
         self.min_y = None
         self.mask = None
         self.n_dilations=config.maze.dilations
+        self.radius_obstacle=config.maze.radius_obstacle
+        self.radius_startline=config.maze.radius_startline
 
     def matrix_to_meter(self, index_x, index_y):
         x = self.spatial_step*index_x+self.min_x#+self.spatial_step/2
@@ -102,11 +104,11 @@ class MazeRunner():
         # addition of obstacles markers and start line to split the track
         mask_line_obs = np.zeros_like(mask, dtype=bool)
         for x_i, y_i in positions_obstacle:
-            mask_line_obs += np.array([[Point(x_i, y_i).buffer(0.20).contains(Point(x[i], y[j]))
+            mask_line_obs += np.array([[Point(x_i, y_i).buffer(self.radius_obstacle).contains(Point(x[i], y[j]))
                                         for i in range(self.n_x)] for j in range(self.n_y)])
             
         for x_i, y_i in positions_start_line:
-            mask_line_obs += np.array([[Point(x_i, y_i).buffer(0.10).contains(Point(x[i], y[j]))
+            mask_line_obs += np.array([[Point(x_i, y_i).buffer(self.radius_startline).contains(Point(x[i], y[j]))
                                         for i in range(self.n_x)] for j in range(self.n_y)])
 
         self.mask = mask+mask_line_obs
