@@ -10,6 +10,7 @@ from utils.utils import boundary
 from utils.utils import load_config
 from utils.tempo import *
 
+
 class Vision:
     def __init__(self, camera_matrix, dist_coeffs, cam_config, robotgeometries) -> None:
 
@@ -23,7 +24,6 @@ class Vision:
         # self.red_upper = np.array([10, 255, 255])
         # self.green_lower = np.array([50, 100, 100])
         # self.green_upper = np.array([70, 255, 255])
-
 
         # get aruco stuff from cv
         self.aruco_dict = cv2.aruco.getPredefinedDictionary(
@@ -81,7 +81,7 @@ class Vision:
         tf[:3, :3] = rot_matrix
         tf[:3, 3] = tvec
         return tf
-    
+
     @timeit
     def img_to_world(self, x_img):
         x_tilde = self.M_inv @ x_img
@@ -94,18 +94,21 @@ class Vision:
 
         # detect arucos and circles
         ids, x_r2m, y_r2m = self.detect_arucos(img, draw_img)
-        # if kind=="all":
-        ids_circles, x_r2circle, y_r2circle = self.detect_circles(
-            img, draw_img)
-        # else:
-        #     ids_circles=[]
-        #     x_r2circle=[]
-        #     y_r2circle=[]
+        if kind == "all":
+            ids_circles, x_r2circle, y_r2circle = self.detect_circles(
+                img, draw_img)
+            
+            # concatenate all ids and get all x and y coords
+            ids = np.concatenate((ids, ids_circles)).astype(np.int16)
+            x_r2landmarks = np.asarray(x_r2m+x_r2circle)
+            y_r2landmarks = np.asarray(y_r2m+y_r2circle)
+        else:
+            # ids_circles = []
+            # x_r2circle = []
+            # y_r2circle = []
+            x_r2landmarks= np.asarray(x_r2m)
+            y_r2landmarks= np.asarray(y_r2m)
 
-        # concatenate all ids and get all x and y coords
-        ids = np.concatenate((ids, ids_circles)).astype(np.int16)
-        x_r2landmarks = np.asarray(x_r2m+x_r2circle)
-        y_r2landmarks = np.asarray(y_r2m+y_r2circle)
 
         # if landmarks were found
         # landmark_positions are wrt world coordinates
@@ -122,7 +125,7 @@ class Vision:
             landmark_positions = []
 
         return ids, landmark_rs, landmark_alphas, landmark_positions
-    
+
     @timeit
     def find_centroids(self, img, range_lower, range_upper):
         """Takes an input images and returns a list containing the x (left to right) and y (top to bottom)"""
@@ -131,7 +134,6 @@ class Vision:
 
         # mask = cv2.inRange(img, range_lower, range_upper)
         mask = cv2.inRange(hsv, range_lower, range_upper)
-
 
         circles = cv2.bitwise_and(img, img, mask=mask)
 
@@ -187,6 +189,7 @@ class Vision:
         else:
             ids = []
         return ids, world_coord_x, world_coord_y
+
     @timeit
     def detect_circle(self, img: np.ndarray, color, lower, upper, draw_img=None):
         output = self.find_centroids(img, lower, upper)
@@ -222,6 +225,7 @@ class Vision:
                 world_coord_y.append(y)
 
         return ids, world_coord_x, world_coord_y
+
     @timeit
     def detect_circles(self, img: np.ndarray, draw_img=None, kind='all'):
 

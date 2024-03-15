@@ -43,6 +43,8 @@ class RobotController:
         self.past_ids=[]
 
         self.robotgeometries = config.geometries
+        self.radius = self.config.robot.wheel_radius
+
 
     def __enter__(self) -> RobotController:
 
@@ -103,10 +105,9 @@ class RobotController:
 
         alpha_l = np.deg2rad(motor_pose.left)
         alpha_r = np.deg2rad(motor_pose.right)
-        radius = self.config.robot.wheel_radius
 
-        l = alpha_l*radius
-        r = alpha_r*radius
+        l = alpha_l*self.radius
+        r = alpha_r*self.radius
         theta_gyro = np.deg2rad(self.gyro.angle)
 
         return (l, r, theta_gyro)
@@ -122,7 +123,7 @@ class RobotController:
 
         robot_pose=self.slam.get_robot_pose()
         ids, landmark_rs, landmark_alphas, landmark_positions = self.vision.detections(
-            img, draw_img, robot_pose, kind='all')
+            img, draw_img, robot_pose, kind='aruco')
 
         robot_x, robot_y, robot_theta, robot_stdev = robot_pose
         landmark_estimated_ids = self.slam.get_landmark_ids()
@@ -136,7 +137,7 @@ class RobotController:
                     if id not in landmark_estimated_ids:
                         self.slam.add_landmark(
                             landmark_positions[i], id)
-                    elif id in landmark_estimated_ids:
+                    else:#if id in landmark_estimated_ids:
                         # correct each detected landmark that is already added
                         self.slam.correction(
                             (landmark_rs[i], landmark_alphas[i]), id)

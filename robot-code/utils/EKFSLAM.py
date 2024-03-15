@@ -49,24 +49,26 @@ class EKFSLAM:
 
     @timeit
     def predict(self, l, r):
-        x, y, theta, std = self.get_robot_pose()
-        self.mu, self.Sigma = self._predict(l, r,
-                                            self.WIDTH, self.WHEEL_RADIUS,
-                                            x, y, theta,
-                                            self.std_lr,
-                                            # self.ids,
-                                            self.mu, self.Sigma)
+        x, y, theta, _ = self.get_robot_pose(fastmode=True)
+        # self.mu, self.Sigma = 
+        self._predict(l, r, 
+                      self.WIDTH, #self.WHEEL_RADIUS,
+                      x, y, theta,
+                      self.std_lr)#,
+                      # self.ids,
+                    #   self.mu, self.Sigma)
 
     @timeit
-    def _predict(self, l, r, WIDTH, WHEEL_RADIUS, x, y, theta, std_lr, mu, Sigma):
+    # def _predict(self, l, r, WIDTH, WHEEL_RADIUS, x, y, theta, std_lr, mu, Sigma):
+    def _predict(self, l, r, WIDTH, x, y, theta, std_lr):#, mu, Sigma):
 
-        w = WIDTH  # robot width from center of the two wheels
-        alpha = (r-l)/w
+        alpha = (r-l)/WIDTH
 
         # prediction for robot coordinates only
         # new position and covariance matrix
         # difference in left and right angle  0.1 deg
-        if abs(l - r) <= np.deg2rad(0.1) * WHEEL_RADIUS:
+        # if abs(l - r) <= np.deg2rad(0.1) * WHEEL_RADIUS:
+        if np.abs(l-r)<=0.00004:
 
             sin_theta = np.sin(theta)
             cos_theta = np.cos(theta)
@@ -80,14 +82,14 @@ class EKFSLAM:
             G = np.array([[1, 0, -l*sin_theta],
                           [0, 1, l*cos_theta],
                           [0, 0, 1]], dtype=np.float64)
-            A = 0.5*(cos_theta+l/w*sin_theta)
-            B = 0.5*(sin_theta-l/w*cos_theta)
-            C = 0.5*(cos_theta-l/w*sin_theta)
-            D = 0.5*(sin_theta+l/w*cos_theta)
+            A = 0.5*(cos_theta+l/WIDTH*sin_theta)
+            B = 0.5*(sin_theta-l/WIDTH*cos_theta)
+            C = 0.5*(cos_theta-l/WIDTH*sin_theta)
+            D = 0.5*(sin_theta+l/WIDTH*cos_theta)
 
         else:
             R = l/alpha
-            R_w_2 = R+(w/2)
+            R_w_2 = R+(WIDTH/2)
             x += R_w_2*(np.sin(theta+alpha)-np.sin(theta))
             y += R_w_2*(-np.cos(theta+alpha)+np.cos(theta))
 
@@ -98,10 +100,10 @@ class EKFSLAM:
             sin_theta_rlw = np.sin(theta+alpha)
             cos_theta_rlw = np.cos(theta+alpha)
 
-            const_AB = (w*r)/(r-l)**2
-            const_CD = -(w*l)/(r-l)**2
+            const_AB = (WIDTH*r)/(r-l)**2
+            const_CD = -(WIDTH*l)/(r-l)**2
             const_ABCD = (r+l)/(2*(r-l))
-            l_alpha_w_2 = (R+w/2)
+            l_alpha_w_2 = (R+WIDTH/2)
 
             G = np.array([[1, 0, l_alpha_w_2*(cos_theta_rlw-cos_theta)],
                           [0, 1, l_alpha_w_2*(sin_theta_rlw-sin_theta)],
@@ -114,7 +116,7 @@ class EKFSLAM:
 
         V = np.array([[A, C],
                       [B, D],
-                      [-1/w, 1/w]])
+                      [-1/WIDTH, 1/WIDTH]])
 
         N = self.n_ids
         if N > 0:
@@ -124,11 +126,11 @@ class EKFSLAM:
 
         # diag = np.diag(np.array([np.power(error_l, 2), np.power(error_r, 2)]))
         diag = np.eye(2)*std_lr
-        Sigma = np.dot(np.dot(G, Sigma), G.T) + np.dot(np.dot(V, diag), V.T)
+        self.Sigma = np.dot(np.dot(G, self.Sigma), G.T) + np.dot(np.dot(V, diag), V.T)
 
-        mu[0], mu[1], mu[2] = x, y, theta
+        self.mu[0], self.mu[1], self.mu[2] = x, y, theta
 
-        return mu, Sigma
+        # return mu, Sigma
 
     @timeit
     def add_landmark(self, position: tuple, id: str):
@@ -161,7 +163,7 @@ class EKFSLAM:
         index = self.index_to_ids[id]
 
         # current world position of robot
-        x, y, theta, _ = self.get_robot_pose()
+        x, y, theta, _ = self.get_robot_pose(fastmode=True)
 
         # the measured position fo the aruco from the camera
         r_i, beta_i = landmark_position_measured
@@ -217,12 +219,15 @@ class EKFSLAM:
         self.Sigma = (np.eye(3+2*self.n_ids)-K@H)@self.Sigma
 
     @timeit
-    def get_robot_pose(self):
+    def get_robot_pose(self, fastmode=False):
         # read out the robot position and angle from mu variable
         # read out robot error from Sigma
         robot_x, robot_y, robot_theta = self.mu[:3].copy()
-        sigma = self.Sigma[:2, :2]
-        error = self.get_error_ellipse(sigma)
+        if not fastmode:
+            sigma = self.Sigma[:2, :2]
+            error = self.get_error_ellipse(sigma)
+        else:
+            error=[0,0,0]
 
         return robot_x, robot_y, robot_theta % (2*np.pi), error  # wrt world
 
