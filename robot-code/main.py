@@ -7,6 +7,7 @@ import pickle
 from message import Message
 from timeit import default_timer as timer
 from numba import typed
+from datetime import datetime
 
 from utils.robot_controller import RobotController
 
@@ -16,8 +17,9 @@ from rich import print
 from utils.utils import load_config
 
 
-
 from enum import Enum
+
+
 class TaskPart(Enum):
     Manual = 0
     Exploration = 1
@@ -35,7 +37,7 @@ class Main():
         self.keypress_listener = KeypressListener()
         self.publisher = Publisher()
 
-        self.DT = self.config.robot.delta_t # delta time in seconds
+        self.DT = self.config.robot.delta_t  # delta time in seconds
 
         self.speed = 0
         self.turn = 0
@@ -70,7 +72,7 @@ class Main():
                 elapsed_time = timer() - time0
                 if elapsed_time <= self.DT:
                     dt = self.DT - elapsed_time
-                    time.sleep(dt) # moves while sleeping
+                    time.sleep(dt)  # moves while sleeping
                 else:
                     print(f"[red]Warning! dt = {elapsed_time}")
 
@@ -80,10 +82,9 @@ class Main():
 
     def run(self, count, time0):
 
-
         if not self.robot.recorder.playback:
             # read webcam and get distance from aruco markers
-            _, raw_img, cam_fps, img_created = self.robot.camera.read() # BGR color
+            _, raw_img, cam_fps, img_created = self.robot.camera.read()  # BGR color
 
             speed = self.speed
             turn = self.turn
@@ -97,18 +98,18 @@ class Main():
 
         if self.mode == TaskPart.Race:
             draw_img = raw_img
-            data = self.robot.run_ekf_slam(raw_img, fastmode = True)
+            data = self.robot.run_ekf_slam(raw_img, fastmode=True)
         else:
             draw_img = raw_img.copy()
             data = self.robot.run_ekf_slam(raw_img, draw_img)
 
-        self.parse_keypress()
+        self.parse_keypress(raw_img, count)
 
         if self.mode == TaskPart.Manual:
             self.robot.move(self.speed, self.turn)
 
         if self.mode == TaskPart.Exploration:
-           pass
+            pass
 
         if self.mode == TaskPart.ToStartLine:
             pass
@@ -120,34 +121,33 @@ class Main():
             pass
 
         msg = Message(
-            id = count,
-            timestamp = time0,
-            start = True,
+            id=count,
+            timestamp=time0,
+            start=True,
 
-            landmark_ids = data.landmark_ids,
-            landmark_rs = data.landmark_rs,
-            landmark_alphas = data.landmark_alphas,
-            landmark_positions = data.landmark_positions,
+            landmark_ids=data.landmark_ids,
+            landmark_rs=data.landmark_rs,
+            landmark_alphas=data.landmark_alphas,
+            landmark_positions=data.landmark_positions,
 
-            landmark_estimated_ids = data.landmark_estimated_ids,
-            landmark_estimated_positions = data.landmark_estimated_positions,
-            landmark_estimated_stdevs = data.landmark_estimated_stdevs,
+            landmark_estimated_ids=data.landmark_estimated_ids,
+            landmark_estimated_positions=data.landmark_estimated_positions,
+            landmark_estimated_stdevs=data.landmark_estimated_stdevs,
 
-            robot_position = data.robot_position,
-            robot_theta = data.robot_theta,
-            robot_stdev = data.robot_stdev,
+            robot_position=data.robot_position,
+            robot_theta=data.robot_theta,
+            robot_stdev=data.robot_stdev,
 
-            text = f"cam fps: {cam_fps}"
+            text=f"cam fps: {cam_fps}"
         )
 
         msg_str = jsonpickle.encode(msg)
         self.publisher.publish_img(msg_str, draw_img)
 
-
     def save_state(self, data):
         with open("SLAM.pickle", 'wb') as pickle_file:
             pass
-        
+
         pass
 
     def load_and_localize(self):
@@ -156,11 +156,11 @@ class Main():
 
         pass
 
-    def parse_keypress(self):
+    def parse_keypress(self, raw_img, count):
         char = self.keypress_listener.get_keypress()
 
         turn_step = 40
-        speed_step = 5
+        speed_step = 15
 
         if char == "a":
             if self.turn >= 0:
@@ -210,6 +210,10 @@ class Main():
         elif char == "e":
             self.mode = TaskPart.Exploration
             print("[green]MODE: Exploration")
+        elif char == "8":
+            print("[green]MODE: Saveed picture")
+            cv2.imwrite(
+                'pics/pic_'+str(datetime.now().strftime("%Y%m%d_%H%M%S"))+'.png', raw_img)
 
         if self.speed != self.new_speed or self.turn != self.new_turn:
             self.speed = self.new_speed
@@ -220,4 +224,3 @@ class Main():
 if __name__ == '__main__':
 
     main = Main()
-
