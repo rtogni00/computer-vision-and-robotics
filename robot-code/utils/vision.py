@@ -8,7 +8,7 @@ from scipy import optimize
 from enum import Enum
 from utils.utils import boundary
 from utils.utils import load_config
-
+from utils.tempo import *
 
 class Vision:
     def __init__(self, camera_matrix, dist_coeffs, cam_config, robotgeometries) -> None:
@@ -71,7 +71,7 @@ class Vision:
         self.C_tilde = -self.M_inv @ p_4
 
     # function to transform from one system of reference to another
-
+    @timeit
     def to_tf(self, rvec, tvec, order="xyz"):
         """Returns transformation matrix from camera to marker"""
 
@@ -81,13 +81,15 @@ class Vision:
         tf[:3, :3] = rot_matrix
         tf[:3, 3] = tvec
         return tf
-
+    
+    @timeit
     def img_to_world(self, x_img):
         x_tilde = self.M_inv @ x_img
         mu = float(- self.C_tilde[2]/x_tilde[2])  # this solves for Z=0
         X = np.squeeze(mu * x_tilde) + self.C_tilde
         return X
 
+    @timeit
     def detections(self, img: np.ndarray, draw_img: None, x: tuple, kind: str = "all") -> tuple:
 
         # detect arucos and circles
@@ -120,7 +122,8 @@ class Vision:
             landmark_positions = []
 
         return ids, landmark_rs, landmark_alphas, landmark_positions
-
+    
+    @timeit
     def find_centroids(self, img, range_lower, range_upper):
         """Takes an input images and returns a list containing the x (left to right) and y (top to bottom)"""
 
@@ -152,6 +155,7 @@ class Vision:
 
         return numLabels, centroids, stats
 
+    @timeit
     def detect_arucos(self, img: np.ndarray, draw_img=None):
         # TODO: check to_tf and frame coordinated system used
         # call to cv2
@@ -183,7 +187,7 @@ class Vision:
         else:
             ids = []
         return ids, world_coord_x, world_coord_y
-
+    @timeit
     def detect_circle(self, img: np.ndarray, color, lower, upper, draw_img=None):
         output = self.find_centroids(img, lower, upper)
         (numLabels, centroids, stats) = output
@@ -218,7 +222,7 @@ class Vision:
                 world_coord_y.append(y)
 
         return ids, world_coord_x, world_coord_y
-
+    @timeit
     def detect_circles(self, img: np.ndarray, draw_img=None, kind='all'):
 
         ids_r, w_c_r_x, w_c_r_y = self.detect_circle(

@@ -2,6 +2,9 @@ import numpy as np
 from rich import print
 from timeit import default_timer as timer
 from utils.tempo import *
+import jsonpickle
+import pickle
+
 
 class EKFSLAM:
     def __init__(self,
@@ -24,8 +27,8 @@ class EKFSLAM:
         self.Sigma = init_covariance.copy()
 
         self.ids = []
-        self.index_to_ids={}
-        self.n_ids=0
+        self.index_to_ids = {}
+        self.n_ids = 0
         self.SIGMA_SQUARED_X = 100
         self.SIGMA_SQUARED_Y = 100
         self.error_l = MOTOR_STD
@@ -44,31 +47,31 @@ class EKFSLAM:
         return
 
     @timeit
-    def predict(self, l ,r):
+    def predict(self, l, r):
         x, y, theta, std = self.get_robot_pose()
-        self.mu, self.Sigma = self._predict(l, r, 
+        self.mu, self.Sigma = self._predict(l, r,
                                             self.WIDTH, self.WHEEL_RADIUS,
-                                            x, y, theta, 
+                                            x, y, theta,
                                             self.error_l, self.error_r,
-                                            # self.ids, 
+                                            # self.ids,
                                             self.mu, self.Sigma)
 
-    
     @timeit
-    def _predict(self, l, r , WIDTH, WHEEL_RADIUS, x, y, theta, error_l, error_r, mu, Sigma):
+    def _predict(self, l, r, WIDTH, WHEEL_RADIUS, x, y, theta, error_l, error_r, mu, Sigma):
 
         w = WIDTH  # robot width from center of the two wheels
         alpha = (r-l)/w
-        
+
         # prediction for robot coordinates only
         # new position and covariance matrix
-        if abs(l- r) <= np.deg2rad(0.1) * WHEEL_RADIUS: # difference in left and right angle  0.1 deg
-            
+        # difference in left and right angle  0.1 deg
+        if abs(l - r) <= np.deg2rad(0.1) * WHEEL_RADIUS:
+
             sin_theta = np.sin(theta)
             cos_theta = np.cos(theta)
             sin_theta_rlw = np.sin(theta+alpha)
             cos_theta_rlw = np.cos(theta+alpha)
-            
+
             l = (l+r)/2
             x += l*(cos_theta)
             x += l*(sin_theta)
@@ -86,14 +89,14 @@ class EKFSLAM:
             R_w_2 = R+(w/2)
             x += R_w_2*(np.sin(theta+alpha)-np.sin(theta))
             y += R_w_2*(-np.cos(theta+alpha)+np.cos(theta))
-            
+
             theta = (theta+alpha)
 
             sin_theta = np.sin(theta)
             cos_theta = np.cos(theta)
             sin_theta_rlw = np.sin(theta+alpha)
             cos_theta_rlw = np.cos(theta+alpha)
-        
+
             const_AB = (w*r)/(r-l)**2
             const_CD = -(w*l)/(r-l)**2
             const_ABCD = (r+l)/(2*(r-l))
@@ -102,7 +105,7 @@ class EKFSLAM:
             G = np.array([[1, 0, l_alpha_w_2*(cos_theta_rlw-cos_theta)],
                           [0, 1, l_alpha_w_2*(sin_theta_rlw-sin_theta)],
                           [0, 0, 1]], dtype=np.float64)
-            
+
             A = const_AB*(sin_theta_rlw-sin_theta)-const_ABCD*cos_theta_rlw
             B = const_AB*(-cos_theta_rlw+cos_theta)-const_ABCD*sin_theta_rlw
             C = const_CD*(sin_theta_rlw-sin_theta)+const_ABCD*cos_theta_rlw
@@ -111,14 +114,14 @@ class EKFSLAM:
         V = np.array([[A, C],
                       [B, D],
                       [-1/w, 1/w]])
-        
 
         N = self.n_ids
         if N > 0:
-            G = np.block([[G, np.zeros((3,2*N))], [np.zeros((2*N,3)), np.identity(2*N)]])
-            V = np.append(V, np.zeros((2*N,2)), axis=0)
+            G = np.block([[G, np.zeros((3, 2*N))],
+                         [np.zeros((2*N, 3)), np.identity(2*N)]])
+            V = np.append(V, np.zeros((2*N, 2)), axis=0)
 
-        diag = np.diag(np.array([np.power(error_l,2), np.power(error_r,2)]))
+        diag = np.diag(np.array([np.power(error_l, 2), np.power(error_r, 2)]))
         Sigma = np.dot(np.dot(G, Sigma), G.T) + np.dot(np.dot(V, diag), V.T)
 
         mu[0], mu[1], mu[2] = x, y, theta
@@ -145,15 +148,15 @@ class EKFSLAM:
 
             # add the landmark id to self.ids
             self.ids.append(id)
-            self.index_to_ids[id]=self.n_ids
-            self.n_ids+=1
+            self.index_to_ids[id] = self.n_ids
+            self.n_ids += 1
             print(f"Landmark with id {id} added")
 
     @timeit
     def correction(self, landmark_position_measured: tuple, id: int):
         # index of identified aruco
         # index = self.ids.index(id)
-        index=self.index_to_ids[id]
+        index = self.index_to_ids[id]
 
         # current world position of robot
         x, y, theta, _ = self.get_robot_pose()
@@ -207,10 +210,10 @@ class EKFSLAM:
         Z = H_s@sigma_s@(H_s.T)+self.Q
 
         K = self.Sigma@((H.T)@(np.linalg.inv(Z)))
-        
+
         self.mu = self.mu + \
             K@(np.array([r_i-r, self.subtract(beta_i, beta)]))
-        self.Sigma = (np.identity(3+2*self.n_ids)-K@H)@self.Sigma 
+        self.Sigma = (np.identity(3+2*self.n_ids)-K@H)@self.Sigma
 
     @timeit
     def get_robot_pose(self):
@@ -268,6 +271,14 @@ class EKFSLAM:
 
     def get_sigma(self):
         return self.Sigma
-    
 
-    
+    def get_mu(self):
+        return self.mu
+
+    def dump(self):
+        print('DUMPING STATE ON FILE')
+        data = {"ids": self.ids,
+                "mu": self.mu,
+                "sigma": self.Sigma}
+        with open('pathfinding/SLAM_DUMP.pickle', 'wb') as pickle_file:
+            pickle.dump(data, pickle_file)

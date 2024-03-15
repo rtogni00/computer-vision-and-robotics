@@ -88,6 +88,9 @@ class RobotController:
 
         if self.camera:
             self.camera.close()
+        
+        # save a dump of all the knowledge of the robot
+        self.slam.dump()
 
     @timeit
     def move(self, speed, turn, img=None):
@@ -130,13 +133,14 @@ class RobotController:
         for i, id in enumerate(ids):
             # if id<=1000:
             # if id not in self.slam.get_landmark_ids() and id in self.past_ids:
-            if id not in landmark_estimated_ids and id in self.past_ids:
-                self.slam.add_landmark(
-                    landmark_positions[i], id)
-            elif id in landmark_estimated_ids:
-                # correct each detected landmark that is already added
-                self.slam.correction(
-                    (landmark_rs[i], landmark_alphas[i]), id)
+            if id in self.past_ids:
+                if id not in landmark_estimated_ids:
+                    self.slam.add_landmark(
+                        landmark_positions[i], id)
+                elif id in landmark_estimated_ids:
+                    # correct each detected landmark that is already added
+                    self.slam.correction(
+                        (landmark_rs[i], landmark_alphas[i]), id)
         
         self.past_ids=ids
 

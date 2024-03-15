@@ -116,7 +116,7 @@ class Main():
         # else:
         #     print(f"[red]{count} dt = {elapsed_time}, EKFSLAM")
 
-        self.parse_keypress(raw_img, count)
+        self.parse_keypress(raw_img, count, data)
 
         if self.mode == TaskPart.Manual:
             self.robot.move(self.speed, self.turn)
@@ -160,8 +160,9 @@ class Main():
         msg_str = jsonpickle.encode(msg)
         self.publisher.publish_img(msg_str, draw_img)
         print('-----------')
+        # return data
 
-    def save_state(self):
+    def save_state(self, data):
         data = {"positions": data.landmark_estimated_positions,
                 "ids": data.landmark_estimated_ids,
                 "robot_pose": data.robot_position,
@@ -176,7 +177,7 @@ class Main():
         pass
 
     @timeit
-    def parse_keypress(self, raw_img, count):
+    def parse_keypress(self, raw_img, count, data):
         char = self.keypress_listener.get_keypress()
 
         turn_step = 40
@@ -245,7 +246,7 @@ class Main():
             cv2.imwrite(
                 'pics/pic_'+str(datetime.now().strftime("%Y%m%d_%H%M%S"))+'.png', raw_img)
         elif char == "j":
-            self.save_state()
+            self.save_state(data)
             print("[green]Saved ids and landmark positions")
 
         if self.speed != self.new_speed or self.turn != self.new_turn:
