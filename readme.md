@@ -1,5 +1,7 @@
 # Computer Vision and Robotics
 
-## Group project for the course at the university of Goettingen, Germany during winter semester 2023/24
+A mostly Python code for a LEGO Mindstorm robot capable of exploring an unknown track made of Aruco markers, computing the most efficient path and running the whole trajectory in the shortest time possible.
 
-## Tommaso Bertola, Roberto Togni & Marco Martinico
+The project was developed for the course Computer Vision and Robotics at the University of Goettingen, Germany, during the Erasmus winter semester 2023/24
+
+The collaborators to the project are @tommasobertola @rtogni00 and @marcomartinico
