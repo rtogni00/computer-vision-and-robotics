@@ -131,7 +131,7 @@ class EKFSLAM:
     @timeit
     def add_landmark(self, position: tuple, id: str):
         # measurement: tuple, id: str): # changed to a shorter signature of the function
-        if int(id) <= 1000:
+        if int(id) <= 1000 and int(id)>0:
             x, y = position  # array with x and y
 
             # extend self.mu and self.Sigma with the new landmark
@@ -223,7 +223,7 @@ class EKFSLAM:
         sigma = self.Sigma[:2, :2]
         error = self.get_error_ellipse(sigma)
 
-        return robot_x, robot_y, robot_theta, error  # wrt world
+        return robot_x, robot_y, robot_theta % (2*np.pi), error  # wrt world
 
     @timeit
     def get_landmark_poses(self):
