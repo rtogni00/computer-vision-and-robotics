@@ -28,13 +28,15 @@ class EKFSLAM:
         self.ids = []
         self.SIGMA_SQUARED_X = 100
         self.SIGMA_SQUARED_Y = 100
+        self.SIGMA_SQUARED_L = MOTOR_STD
+        self.SIGMA_SQUARED_R = MOTOR_STD
 
         self.DIST_STD = DIST_STD
         self.ANGLE_STD = np.radians(ANGLE_STD)
 
         # initial uncertainty on mark position
         self.Sigma_u = np.array(
-            [[self.SIGMA_SQUARED_X, 0], [0, self.SIGMA_SQUARED_Y]])
+            [[self.SIGMA_SQUARED_L, 0], [0, self.SIGMA_SQUARED_R]])
 
         # uncertainty on measurements
         self.Q = np.array([[self.DIST_STD**2, 0], [0, self.ANGLE_STD**2]])
@@ -43,7 +45,7 @@ class EKFSLAM:
 
     def predict(self, l, r):
         # get current poition in world coordinates
-        # TODO check coordinate frames (Robot or World?)
+        # these are world coordinated
         x, y, theta, std = self.get_robot_pose()
 
         w = self.WIDTH  # robot width from center of the two wheels
@@ -75,6 +77,8 @@ class EKFSLAM:
             y_prime = y + R_w_2*(-np.cos(theta+alpha)+cos_theta)
             # TODO: check if theta in -pi pi is needed
             theta_prime = (theta+alpha) % (2*np.pi)
+            if theta_prime > np.pi:
+                theta_prime = theta_prime-2*np.pi
 
             const_AB = (w*r)/(r-l)**2
             const_CD = -(w*l)/(r-l)**2
@@ -136,6 +140,8 @@ class EKFSLAM:
 
             # add the landmark id to self.ids
             self.ids.append(id)
+            print(f"Landmark with id {id} added")
+
 
     def correction(self, landmark_position_measured: tuple, id: int):
         # index of identified aruco
@@ -162,7 +168,7 @@ class EKFSLAM:
         r_x_m = -r_x
         r_y_m = -r_y
         beta_x = (y_m-y)/r**2
-        beta_y = -(x_m-x)/r*2
+        beta_y = -(x_m-x)/r**2
         beta_theta = -1
         beta_x_m = -beta_x
         beta_y_m = -beta_y
@@ -192,7 +198,7 @@ class EKFSLAM:
 
         Z = H_s@sigma_s@(H_s.T)+self.Q
 
-        K = self.Sigma_prime@(H.T)@(np.linalg.inv(Z))
+        K = self.Sigma_prime@((H.T)@(np.linalg.inv(Z)))
         self.mu = self.mu_prime + \
             K@(np.array([r_i-r, self.subtract(beta_i, beta)]).T)
         self.Sigma = (np.eye(3+2*len(self.ids))-K@H)@self.Sigma_prime
@@ -223,7 +229,8 @@ class EKFSLAM:
         else:
             i = 1
             j = 0
-        print("*************",eigen_vec[i][1], eigen_vec[i][0])        # get eigenvalues and eigenvectors of covariance matrix
+        # get eigenvalues and eigenvectors of covariance matrix
+        print("*************", eigen_vec[i][1], eigen_vec[i][0])
 
         angle = np.arctan2(eigen_vec[i][1], eigen_vec[i][0])
         return np.sqrt(eigen_vals[i]), np.sqrt(eigen_vals[j]), angle

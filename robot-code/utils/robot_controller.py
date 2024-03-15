@@ -117,8 +117,8 @@ class RobotController:
             if id not in self.slam.get_landmark_ids():
                 self.slam.add_landmark(
                     landmark_positions[i], id)  # (landmark_rs[i], landmark_alphas[i]), id) # already done the calculation in vision
-                if id < 1000:
-                    print(f"Landmark with id {id} added")
+                # if id < 1000:
+                #     print(f"Landmark with id {id} added")
             else:
                 # correct each detected landmark that is already added
                 self.slam.correction(

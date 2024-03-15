@@ -22,7 +22,7 @@ camera:
 
 ekf_slam:
   robot_width: 0.137 # width of the robot in meters (from centers of two wheels)
-  motor_std: 0
-  dist_std: 0
-  angle_std: 0
+  motor_std: 0.1 # meters
+  dist_std: 0.5 # meters
+  angle_std: 10 # degrees
 
