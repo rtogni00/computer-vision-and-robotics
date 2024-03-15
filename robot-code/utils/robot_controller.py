@@ -127,16 +127,18 @@ class RobotController:
         robot_x, robot_y, robot_theta, robot_stdev = robot_pose
         landmark_estimated_ids = self.slam.get_landmark_ids()
 
-        for i, id in enumerate(ids):
-            if id in self.past_ids:
-                if id not in landmark_estimated_ids:
-                    self.slam.add_landmark(
-                        landmark_positions[i], id)
-                elif id in landmark_estimated_ids:
-                    # correct each detected landmark that is already added
-                    self.slam.correction(
-                        (landmark_rs[i], landmark_alphas[i]), id)
-        
+        # fastmode = only perform prediction step
+        if not fastmode:
+            for i, id in enumerate(ids):
+                if id in self.past_ids:
+                    if id not in landmark_estimated_ids:
+                        self.slam.add_landmark(
+                            landmark_positions[i], id)
+                    elif id in landmark_estimated_ids:
+                        # correct each detected landmark that is already added
+                        self.slam.correction(
+                            (landmark_rs[i], landmark_alphas[i]), id)
+            
         self.past_ids=ids
 
         landmark_estimated_positions, landmark_estimated_stdevs = self.slam.get_landmark_poses()
