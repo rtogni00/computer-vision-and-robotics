@@ -1,0 +1,710 @@
+config:
+{
+    'robot': {'wheel_radius': 0.028, 'width': 0.028, 'delta_t': 0.1},
+    'geometries': {'h_r2c': 0.075, 'v_r2c': 0.285, 'x_angle': -130, 'y_angle': 0, 'z_angle': -90, 'aruco_size': 0.048},
+    'camera': {'y_offset': 0, 'z_offset': 0, 'y_angle': 0, 'exposure_time': 50, 'gain': 100},
+    'ekf_slam': {'robot_width': 0.137, 'motor_std': 0.1, 'dist_std': 0.5, 'angle_std': 10}
+}
+starting...
+
+
+ cam_fps 2
+***CONNECTED TO REAL VEHICLE***
+starting EKF SLAM...
+READY!
+MODE: Manual
+Landmark with id 261 added
+Landmark with id 291 added
+Landmark with id 317 added
+Landmark with id 423 added
+Landmark with id 239 added
+Landmark with id 417 added
+Landmark with id 420 added
+Landmark with id 441 added
+MODE: Load map
+MODE: Prepare race path
+Preparing race
+first and last: [ 0.29332324 -0.20777448] [0.14760287 0.20687621] 0.43951066530573407
+Computing the path
+Start computing the maze
+Computing a star
+Path computed, ready to start race
+Path computed, ready to run the race
+DISTANCE TO TARGET: 0.20771917548142443
+PID CONTROLLER: robot_pose [ 0.05665051 -0.09872598],            robot_angle 0.22822621366844764,             speed 15, turn -4,            desired_dir -3.0095295936508664,             
+err_ang 3.0454294998602727, corr 4, path_0 (-0.1492599207704172, -0.1260783380657077)
+DISTANCE TO TARGET: 0.21586258857022378
+PID CONTROLLER: robot_pose [ 0.06486272 -0.09872598],            robot_angle 0.22822621366844764,             speed 15, turn -8,            desired_dir -3.0145391918861635,             
+err_ang 3.0404199016249756, corr 4, path_0 (-0.1492599207704172, -0.1260783380657077)
+DISTANCE TO TARGET: 0.24165312374007386
+PID CONTROLLER: robot_pose [ 0.09011247 -0.09295599],            robot_angle 0.22109202110555112,             speed 15, turn -12,            desired_dir -3.0040941299945656,             
+err_ang 3.05799915607947, corr 4, path_0 (-0.1492599207704172, -0.1260783380657077)
+DISTANCE TO TARGET: 0.2670035671111557
+PID CONTROLLER: robot_pose [ 0.11496364 -0.087649  ],            robot_angle 0.1996894434168615,             speed 15, turn -16,            desired_dir -2.997162851938048,             
+err_ang 3.086333011824676, corr 4, path_0 (-0.1492599207704172, -0.1260783380657077)
+ cam_fps 6
+DISTANCE TO TARGET: 0.3143800206995914
+PID CONTROLLER: robot_pose [ 0.16161183 -0.07924298],            robot_angle 0.15688428803948234,             speed 15, turn -21,            desired_dir -2.9920591271926202,             
+err_ang 3.134241891947484, corr 5, path_0 (-0.1492599207704172, -0.1260783380657077)
+DISTANCE TO TARGET: 0.3458942512798769
+PID CONTROLLER: robot_pose [ 0.19284838 -0.07504165],            robot_angle 0.11051203638065504,             speed 15, turn -17,            desired_dir -2.9935019829344958,             
+err_ang -3.1040140193151506, corr -4, path_0 (-0.1492599207704172, -0.1260783380657077)
+DISTANCE TO TARGET: 0.37272075983687647
+PID CONTROLLER: robot_pose [ 0.21962539 -0.07274548],            robot_angle 0.060572688440379045,             speed 15, turn -13,            desired_dir -2.9980091452190996,             
+err_ang -3.0585818336594786, corr -4, path_0 (-0.1492599207704172, -0.1260783380657077)
+DISTANCE TO TARGET: 0.39704611226022224
+PID CONTROLLER: robot_pose [ 0.24403298 -0.07161449],            robot_angle 0.032035918188793165,             speed 15, turn -9,            desired_dir -3.0039861985293648,             
+err_ang -3.036022116718158, corr -4, path_0 (-0.1492599207704172, -0.1260783380657077)
+DISTANCE TO TARGET: 0.4247252533774861
+PID CONTROLLER: robot_pose [ 0.27188156 -0.07102026],            robot_angle 0.010633340500103654,             speed 15, turn -5,            desired_dir -3.0115946026866385,             
+err_ang -3.022227943186742, corr -4, path_0 (-0.1492599207704172, -0.1260783380657077)
+DISTANCE TO TARGET: 0.45938553509095925
+PID CONTROLLER: robot_pose [ 0.30682209 -0.07108496],            robot_angle 6.268848973709552,             speed 15, turn -1,            desired_dir -3.0215941347019997,             
+err_ang -3.0072578012319653, corr -4, path_0 (-0.1492599207704172, -0.1260783380657077)
+DISTANCE TO TARGET: 0.48625831019270754
+PID CONTROLLER: robot_pose [ 0.33393912 -0.07161888],            robot_angle 6.258147684865207,             speed 15, turn 3,            desired_dir -3.0293602119723317,             
+err_ang -3.004322589657953, corr -4, path_0 (-0.1492599207704172, -0.1260783380657077)
+DISTANCE TO TARGET: 0.5213857471492624
+PID CONTROLLER: robot_pose [ 0.3693597 -0.0724427],            robot_angle 6.261714781146655,             speed 15, turn 7,            desired_dir -3.038539028403793,             err_ang 
+-3.0170685023708614, corr -4, path_0 (-0.1492599207704172, -0.1260783380657077)
+DISTANCE TO TARGET: 0.5519608455112094
+PID CONTROLLER: robot_pose [ 0.40014231 -0.07299387],            robot_angle 6.268848973709552,             speed 15, turn 11,            desired_dir -3.0452694415360564,             
+err_ang -3.030933108066023, corr -4, path_0 (-0.1492599207704172, -0.1260783380657077)
+DISTANCE TO TARGET: 0.5816387577046589
+PID CONTROLLER: robot_pose [ 0.42995153 -0.0729959 ],            robot_angle 0.014200436781552028,             speed 15, turn 15,            desired_dir -3.050201899550181,             
+err_ang -3.064402336331733, corr -4, path_0 (-0.1492599207704172, -0.1260783380657077)
+DISTANCE TO TARGET: 0.6070017055689583
+PID CONTROLLER: robot_pose [ 0.45535236 -0.07227257],            robot_angle 0.04273720703313831,             speed 15, turn 20,            desired_dir -3.052834288350806,             
+err_ang -3.0955714953839446, corr -5, path_0 (-0.1492599207704172, -0.1260783380657077)
+DISTANCE TO TARGET: 0.6314236459895453
+PID CONTROLLER: robot_pose [ 0.47974645 -0.07088046],            robot_angle 0.07127397728472419,             speed 15, turn 25,            desired_dir -3.0540627981167496,             
+err_ang -3.125336775401474, corr -5, path_0 (-0.1492599207704172, -0.1260783380657077)
+DISTANCE TO TARGET: 0.6551235675959651
+PID CONTROLLER: robot_pose [ 0.50334867 -0.06872926],            robot_angle 0.11051203638065533,             speed 15, turn 21,            desired_dir -3.0539411314390095,             
+err_ang 3.1187321393599214, corr 4, path_0 (-0.1492599207704172, -0.1260783380657077)
+DISTANCE TO TARGET: 0.6787941675723193
+PID CONTROLLER: robot_pose [ 0.5268245  -0.06548645],            robot_angle 0.1640184806023788,             speed 15, turn 17,            desired_dir -3.0522096765005577,             
+err_ang 3.06695715007665, corr 4, path_0 (-0.1492599207704172, -0.1260783380657077)
+ cam_fps 9
+DISTANCE TO TARGET: 0.7108797466661181
+PID CONTROLLER: robot_pose [ 0.55847779 -0.05931498],            robot_angle 0.22109202110555137,             speed 15, turn 13,            desired_dir -3.0475375124898862,             
+err_ang 3.0145557735841484, corr 4, path_0 (-0.1492599207704172, -0.1260783380657077)
+DISTANCE TO TARGET: 0.7425746251730664
+PID CONTROLLER: robot_pose [ 0.58958994 -0.05179543],            robot_angle 0.2531958876385855,             speed 15, turn 9,            desired_dir -3.0413907934783424,             
+err_ang 2.9885986260626582, corr 4, path_0 (-0.1492599207704172, -0.1260783380657077)
+DISTANCE TO TARGET: 0.7695720338856263
+PID CONTROLLER: robot_pose [ 0.61598276 -0.044563  ],            robot_angle 0.2817326578901718,             speed 15, turn 5,            desired_dir -3.0354706341844477,             
+err_ang 2.9659820151049665, corr 4, path_0 (-0.1492599207704172, -0.1260783380657077)
+DISTANCE TO TARGET: 0.794806409819174
+PID CONTROLLER: robot_pose [ 0.64056269 -0.03721063],            robot_angle 0.29956813929741366,             speed 15, turn 1,            desired_dir -3.029547851277041,             
+err_ang 2.954069316605132, corr 4, path_0 (-0.1492599207704172, -0.1260783380657077)
+DISTANCE TO TARGET: 0.8272054840190127
+PID CONTROLLER: robot_pose [ 0.67202763 -0.02730754],            robot_angle 0.3102694281417581,             speed 15, turn -3,            desired_dir -3.02190411720262,             
+err_ang 2.9510117618352076, corr 4, path_0 (-0.1492599207704172, -0.1260783380657077)
+DISTANCE TO TARGET: 0.8528829030395855
+PID CONTROLLER: robot_pose [ 0.69690998 -0.01928068],            robot_angle 0.313836524423206,             speed 15, turn -7,            desired_dir -3.0160434769378592,             
+err_ang 2.953305305818521, corr 4, path_0 (-0.1492599207704172, -0.1260783380657077)
+DISTANCE TO TARGET: 0.8805108135039474
+PID CONTROLLER: robot_pose [ 0.7236527  -0.01065367],            robot_angle 0.3102694281417581,             speed 15, turn -11,            desired_dir -3.0101259821138093,             
+err_ang 2.9627898969240185, corr 4, path_0 (-0.1492599207704172, -0.1260783380657077)
+DISTANCE TO TARGET: 0.9062899053997512
+PID CONTROLLER: robot_pose [ 0.7486192  -0.00289364],            robot_angle 0.2924339467345171,             speed 15, turn -15,            desired_dir -3.005248653215905,             
+err_ang 2.9855027072291644, corr 4, path_0 (-0.1492599207704172, -0.1260783380657077)
+DISTANCE TO TARGET: 0.9321726503682823
+PID CONTROLLER: robot_pose [0.77374574 0.00433022],            robot_angle 0.26746427276437873,             speed 15, turn -19,            desired_dir -3.0012348241685425,             
+err_ang 3.014486210246665, corr 4, path_0 (-0.1492599207704172, -0.1260783380657077)
+DISTANCE TO TARGET: 0.9559692793586801
+PID CONTROLLER: robot_pose [0.7969274  0.01032845],            robot_angle 0.23892750251279243,             speed 15, turn -23,            desired_dir -2.998414448294414,             
+err_ang 3.04584335637238, corr 4, path_0 (-0.1492599207704172, -0.1260783380657077)
+DISTANCE TO TARGET: 0.9783812982226684
+PID CONTROLLER: robot_pose [0.81885889 0.01525791],            robot_angle 0.2032565396983104,             speed 15, turn -28,            desired_dir -2.9966261610552345,             
+err_ang 3.0833026064260416, corr 5, path_0 (-0.1492599207704172, -0.1260783380657077)
+DISTANCE TO TARGET: 1.0057304413836976
+PID CONTROLLER: robot_pose [0.84578906 0.02011074],            robot_angle 0.1533171917580344,             speed 15, turn -33,            desired_dir -2.995719747793212,             
+err_ang 3.13414836762834, corr 5, path_0 (-0.1492599207704172, -0.1260783380657077)
+DISTANCE TO TARGET: 1.0281997367774451
+PID CONTROLLER: robot_pose [0.86810013 0.02282846],            robot_angle 0.08910945869196607,             speed 15, turn -29,            desired_dir -2.9962587404252154,             
+err_ang -3.0853681991171813, corr -4, path_0 (-0.1492599207704172, -0.1260783380657077)
+DISTANCE TO TARGET: 1.0488966373950046
+PID CONTROLLER: robot_pose [0.88882671 0.02412257],            robot_angle 0.03560301447024219,             speed 15, turn -25,            desired_dir -2.997899718598111,             
+err_ang -3.0335027330683535, corr -4, path_0 (-0.1492599207704172, -0.1260783380657077)
+ cam_fps 8
+DISTANCE TO TARGET: 1.0781675393738308
+PID CONTROLLER: robot_pose [0.91838688 0.02417328],            robot_angle 6.25101349230231,             speed 15, turn -21,            desired_dir -3.001779269661424,             err_ang 
+-2.969607454784148, corr -4, path_0 (-0.1492599207704172, -0.1260783380657077)
+DISTANCE TO TARGET: 1.101658033726726
+PID CONTROLLER: robot_pose [0.94229123 0.02280586],            robot_angle 6.201074144362035,             speed 15, turn -17,            desired_dir -3.0060322770798455,             
+err_ang -2.9239211142622956, corr -4, path_0 (-0.1492599207704172, -0.1260783380657077)
+DISTANCE TO TARGET: 1.1263614382145064
+PID CONTROLLER: robot_pose [0.96756527 0.02018027],            robot_angle 6.1582689889846565,             speed 15, turn -13,            desired_dir -3.011374443423181,             
+err_ang -2.886458125228252, corr -4, path_0 (-0.1492599207704172, -0.1260783380657077)
+DISTANCE TO TARGET: 1.1489887547971482
+PID CONTROLLER: robot_pose [0.99079486 0.01692602],            robot_angle 6.12973221873307,             speed 15, turn -9,            desired_dir -3.016808002747124,             err_ang 
+-2.863354914300608, corr -4, path_0 (-0.1492599207704172, -0.1260783380657077)
+DISTANCE TO TARGET: 1.1742810202475542
+PID CONTROLLER: robot_pose [1.01681306 0.01252083],            robot_angle 6.101195448481484,             speed 15, turn -5,            desired_dir -3.0232879220543922,             err_ang
+-2.841298063356289, corr -4, path_0 (-0.1492599207704172, -0.1260783380657077)
+DISTANCE TO TARGET: 1.1975663820036038
+PID CONTROLLER: robot_pose [1.04079498 0.00784167],            robot_angle 6.079792870792795,             speed 15, turn -1,            desired_dir -3.0295314714311576,             err_ang
+-2.826139035044367, corr -4, path_0 (-0.1492599207704172, -0.1260783380657077)
+DISTANCE TO TARGET: 1.2266225506755895
+PID CONTROLLER: robot_pose [1.07069759 0.0016188 ],            robot_angle 6.076225774511346,             speed 15, turn 3,            desired_dir -3.0372990123994366,             err_ang 
+-2.8303394797311956, corr -4, path_0 (-0.1492599207704172, -0.1260783380657077)
+DISTANCE TO TARGET: 1.255001548823391
+PID CONTROLLER: robot_pose [ 1.09984957 -0.00461077],            robot_angle 6.069091581948448,             speed 15, turn 7,            desired_dir -3.044654116968855,             err_ang
+-2.8305603917377162, corr -4, path_0 (-0.1492599207704172, -0.1260783380657077)
+DISTANCE TO TARGET: 1.2879343220657447
+PID CONTROLLER: robot_pose [ 1.13357928 -0.01163007],            robot_angle 6.08692706335569,             speed 15, turn 11,            desired_dir -3.0526134089660797,             
+err_ang -2.8563551651421832, corr -4, path_0 (-0.1492599207704172, -0.1260783380657077)
+DISTANCE TO TARGET: 1.3159044006696015
+PID CONTROLLER: robot_pose [ 1.16212807 -0.01714745],            robot_angle 6.097628352200036,             speed 15, turn 15,            desired_dir -3.058717571086606,             
+err_ang -2.8731606161070555, corr -4, path_0 (-0.1492599207704172, -0.1260783380657077)
+DISTANCE TO TARGET: 1.3426335494426498
+PID CONTROLLER: robot_pose [ 1.18932597 -0.02190222],            robot_angle 6.122598026170172,             speed 15, turn 19,            desired_dir -3.063923704822302,             
+err_ang -2.9033364238128883, corr -4, path_0 (-0.1492599207704172, -0.1260783380657077)
+DISTANCE TO TARGET: 1.3676697155079554
+PID CONTROLLER: robot_pose [ 1.2147137  -0.02559741],            robot_angle 6.154701892703207,             speed 15, turn 23,            desired_dir -3.068057688395268,             
+err_ang -2.939574273918888, corr -4, path_0 (-0.1492599207704172, -0.1260783380657077)
+DISTANCE TO TARGET: 1.3926739108889368
+PID CONTROLLER: robot_pose [ 1.23997821 -0.02831314],            robot_angle 6.1975070480805865,             speed 15, turn 27,            desired_dir -3.0713352346561025,             
+err_ang -2.9856569755571023, corr -4, path_0 (-0.1492599207704172, -0.1260783380657077)
+ cam_fps 7
+DISTANCE TO TARGET: 1.4285881570094539
+PID CONTROLLER: robot_pose [ 1.27609318 -0.02999153],            robot_angle 6.275983166272447,             speed 15, turn 32,            desired_dir -3.0742818610406935,             
+err_ang -3.0670797201335542, corr -5, path_0 (-0.1492599207704172, -0.1260783380657077)
+DISTANCE TO TARGET: 1.4700975474902727
+PID CONTROLLER: robot_pose [ 1.31757683 -0.02821756],            robot_angle 0.09267655497341387,             speed 15, turn 28,            desired_dir -3.0749758498909645,             
+err_ang 3.1155329023152074, corr 4, path_0 (-0.1492599207704172, -0.1260783380657077)
+DISTANCE TO TARGET: 1.5020181559695547
+PID CONTROLLER: robot_pose [ 1.34927458 -0.02383902],            robot_angle 0.18185396200962142,             speed 15, turn 24,            desired_dir -3.073472018675218,             
+err_ang 3.027859326494747, corr 4, path_0 (-0.1492599207704172, -0.1260783380657077)
+DISTANCE TO TARGET: 1.5338948940383412
+PID CONTROLLER: robot_pose [ 1.38073509 -0.01676776],            robot_angle 0.2603300802014829,             speed 15, turn 20,            desired_dir -3.0702687885462003,             
+err_ang 2.9525864384319025, corr 4, path_0 (-0.1492599207704172, -0.1260783380657077)
+DISTANCE TO TARGET: 1.5575488189524953
+PID CONTROLLER: robot_pose [ 1.40395755 -0.01000155],            robot_angle 0.3067023318603094,             speed 15, turn 16,            desired_dir -3.066998195350011,             
+err_ang 2.909484779969265, corr 4, path_0 (-0.1492599207704172, -0.1260783380657077)
+DISTANCE TO TARGET: 1.5821595506544428
+PID CONTROLLER: robot_pose [ 1.42801209 -0.00181317],            robot_angle 0.34950748723769043,             speed 15, turn 12,            desired_dir -3.0629701856765403,             
+err_ang 2.8707076342653552, corr 4, path_0 (-0.1492599207704172, -0.1260783380657077)
+DISTANCE TO TARGET: 1.606808053953537
+PID CONTROLLER: robot_pose [1.4520051  0.00727249],            robot_angle 0.3744771612078264,             speed 15, turn 8,            desired_dir -3.058505954477974,             err_ang 
+2.8502021914937856, corr 4, path_0 (-0.1492599207704172, -0.1260783380657077)
+DISTANCE TO TARGET: 1.6324594621870112
+PID CONTROLLER: robot_pose [1.47687683 0.01745968],            robot_angle 0.4030139314594127,             speed 15, turn 4,            desired_dir -3.05355149805729,             err_ang 
+2.8266198776628837, corr 4, path_0 (-0.1492599207704172, -0.1260783380657077)
+DISTANCE TO TARGET: 1.657512488473234
+PID CONTROLLER: robot_pose [1.50107732 0.02798223],            robot_angle 0.41728231658520587,             speed 15, turn 0,            desired_dir -3.0485114509632782,             
+err_ang 2.8173915396311022, corr 4, path_0 (-0.1492599207704172, -0.1260783380657077)
+DISTANCE TO TARGET: 1.684124592970393
+PID CONTROLLER: robot_pose [1.52670455 0.03950767],            robot_angle 0.42798360542955194,             speed 15, turn -4,            desired_dir -3.0431118334739486,             
+err_ang 2.812089868276086, corr 4, path_0 (-0.1492599207704172, -0.1260783380657077)
+DISTANCE TO TARGET: 1.7116798344124007
+PID CONTROLLER: robot_pose [1.55318057 0.05152858],            robot_angle 0.42441650914810325,             speed 15, turn -8,            desired_dir -3.0376437918217642,             
+err_ang 2.8211250062097193, corr 4, path_0 (-0.1492599207704172, -0.1260783380657077)
+DISTANCE TO TARGET: 1.744039542449145
+PID CONTROLLER: robot_pose [1.58425444 0.06523788],            robot_angle 0.4065810277408614,             speed 15, turn -12,            desired_dir -3.031674266851079,             
+err_ang 2.844930012587646, corr 4, path_0 (-0.1492599207704172, -0.1260783380657077)
+DISTANCE TO TARGET: 1.7750061601861997
+PID CONTROLLER: robot_pose [1.61401298 0.07767531],            robot_angle 0.3851784500521725,             speed 15, turn -16,            desired_dir -3.026548660912177,             
+err_ang 2.8714581962152366, corr 4, path_0 (-0.1492599207704172, -0.1260783380657077)
+ cam_fps 8
+DISTANCE TO TARGET: 1.8136157189829318
+PID CONTROLLER: robot_pose [1.6512073  0.09191193],            robot_angle 0.34594039095624174,             speed 15, turn -20,            desired_dir -3.021104833067914,             
+err_ang 2.9161400831554305, corr 4, path_0 (-0.1492599207704172, -0.1260783380657077)
+DISTANCE TO TARGET: 1.8514611587485197
+PID CONTROLLER: robot_pose [1.68783852 0.10409061],            robot_angle 0.2960010430159665,             speed 15, turn -24,            desired_dir -3.016952729976748,             
+err_ang 2.9702315341868717, corr 4, path_0 (-0.1492599207704172, -0.1260783380657077)
+DISTANCE TO TARGET: 1.8758586784249034
+PID CONTROLLER: robot_pose [1.71157936 0.11082449],            robot_angle 0.25676298392003416,             speed 15, turn -29,            desired_dir -3.014964176783896,             
+err_ang 3.011458146475656, corr 5, path_0 (-0.1492599207704172, -0.1260783380657077)
+DISTANCE TO TARGET: 1.9025964724934348
+PID CONTROLLER: robot_pose [1.73775691 0.11690483],            robot_angle 0.1996894434168632,             speed 15, turn -34,            desired_dir -3.0135315626155985,             
+err_ang 3.0699643011471247, corr 5, path_0 (-0.1492599207704172, -0.1260783380657077)
+DISTANCE TO TARGET: 1.9255433388856917
+PID CONTROLLER: robot_pose [1.76039977 0.12073537],            robot_angle 0.13548171035079326,             speed 15, turn -39,            desired_dir -3.0130603048495637,             
+err_ang 3.134643291979229, corr 5, path_0 (-0.1492599207704172, -0.1260783380657077)
+DISTANCE TO TARGET: 1.94947442549633
+PID CONTROLLER: robot_pose [1.78422146 0.12312096],            robot_angle 0.06413978472182755,             speed 15, turn -35,            desired_dir -3.01341297668405,             
+err_ang -3.0775527614058773, corr -4, path_0 (-0.1492599207704172, -0.1260783380657077)
+DISTANCE TO TARGET: 1.9715824930495776
+PID CONTROLLER: robot_pose [1.80644478 0.12363482],            robot_angle 6.265281877428102,             speed 15, turn -31,            desired_dir -3.0145953496273723,             
+err_ang -2.9966919198758877, corr -4, path_0 (-0.1492599207704172, -0.1260783380657077)
+DISTANCE TO TARGET: 1.995370923393571
+PID CONTROLLER: robot_pose [1.83059234 0.12229669],            robot_angle 6.1903728555176905,             speed 15, turn -28,            desired_dir -3.01679333290196,             err_ang
+-2.9239808812400643, corr -3, path_0 (-0.1492599207704172, -0.1260783380657077)
+DISTANCE TO TARGET: 2.0244323273390954
+PID CONTROLLER: robot_pose [1.86036979 0.11828749],            robot_angle 6.108329641044379,             speed 15, turn -25,            desired_dir -3.0205892652933617,             
+err_ang -2.845733599158155, corr -3, path_0 (-0.1492599207704172, -0.1260783380657077)
+DISTANCE TO TARGET: 2.046458268363668
+PID CONTROLLER: robot_pose [1.8831098  0.11363976],            robot_angle 6.054823196822655,             speed 15, turn -22,            desired_dir -3.0241850721610293,             
+err_ang -2.795822961804099, corr -3, path_0 (-0.1492599207704172, -0.1260783380657077)
+DISTANCE TO TARGET: 2.0683369879880527
+PID CONTROLLER: robot_pose [1.90581597 0.10776126],            robot_angle 6.004883848882378,             speed 15, turn -19,            desired_dir -3.028293591675813,             err_ang
+-2.749992133378605, corr -3, path_0 (-0.1492599207704172, -0.1260783380657077)
+DISTANCE TO TARGET: 2.0893930461082575
+PID CONTROLLER: robot_pose [1.92775898 0.10098061],            robot_angle 5.962078693505002,             speed 15, turn -16,            desired_dir -3.0327054069915023,             
+err_ang -2.7115987933169183, corr -3, path_0 (-0.1492599207704172, -0.1260783380657077)
+DISTANCE TO TARGET: 2.110799500576002
+PID CONTROLLER: robot_pose [1.95012516 0.0931403 ],            robot_angle 5.929974826971967,             speed 15, turn -13,            desired_dir -3.0375493044750623,             
+err_ang -2.684338824267442, corr -3, path_0 (-0.1492599207704172, -0.1260783380657077)
+ cam_fps 8
+DISTANCE TO TARGET: 2.1390944246676855
+PID CONTROLLER: robot_pose [1.97972693 0.08162323],            robot_angle 5.894303864157483,             speed 15, turn -10,            desired_dir -3.044341532224357,             err_ang
+-2.655460089202254, corr -3, path_0 (-0.1492599207704172, -0.1260783380657077)
+DISTANCE TO TARGET: 2.1697856652789893
+PID CONTROLLER: robot_pose [2.01184128 0.06785836],            robot_angle 5.8621999976244465,             speed 15, turn -7,            desired_dir -3.052092636568862,             err_ang
+-2.631107327013723, corr -3, path_0 (-0.1492599207704172, -0.1260783380657077)
+DISTANCE TO TARGET: 2.193324107811341
+PID CONTROLLER: robot_pose [2.0364546  0.05646663],            robot_angle 5.83723032365431,             speed 15, turn -4,            desired_dir -3.0582687299626974,             err_ang 
+-2.6123137464374224, corr -3, path_0 (-0.1492599207704172, -0.1260783380657077)
+DISTANCE TO TARGET: 2.21520480227151
+PID CONTROLLER: robot_pose [2.05930231 0.04534275],            robot_angle 5.822961938528517,             speed 15, turn 0,            desired_dir -3.064131357486126,             err_ang 
+-2.603907988835058, corr -4, path_0 (-0.1492599207704172, -0.1260783380657077)
+DISTANCE TO TARGET: 2.2435707888734817
+PID CONTROLLER: robot_pose [2.08883068 0.03063907],            robot_angle 5.819394842247072,             speed 15, turn 4,            desired_dir -3.0716839452689273,             err_ang 
+-2.607893480336413, corr -4, path_0 (-0.1492599207704172, -0.1260783380657077)
+DISTANCE TO TARGET: 2.2668002768690365
+PID CONTROLLER: robot_pose [2.11291213 0.01870125],            robot_angle 5.826529034809966,             speed 15, turn 8,            desired_dir -3.077679566648707,             err_ang 
+-2.6210232942790874, corr -4, path_0 (-0.1492599207704172, -0.1260783380657077)
+DISTANCE TO TARGET: 2.2876471520249666
+PID CONTROLLER: robot_pose [2.13444183 0.00821906],            robot_angle 5.833663227372864,             speed 15, turn 12,            desired_dir -3.082853410824008,             err_ang 
+-2.6333313310172866, corr -4, path_0 (-0.1492599207704172, -0.1260783380657077)
+DISTANCE TO TARGET: 2.308052165823511
+PID CONTROLLER: robot_pose [ 2.15543747e+00 -1.68077596e-03],            robot_angle 5.851498708780104,             speed 15, turn 16,            desired_dir -3.087669319412029,           
+err_ang -2.6559827210125473, corr -4, path_0 (-0.1492599207704172, -0.1260783380657077)
+DISTANCE TO TARGET: 2.3269605625950818
+PID CONTROLLER: robot_pose [ 2.17482368 -0.01040259],            robot_angle 5.869334190187348,             speed 15, turn 20,            desired_dir -3.0918610650746197,             
+err_ang -2.678009948082382, corr -4, path_0 (-0.1492599207704172, -0.1260783380657077)
+DISTANCE TO TARGET: 2.3472287899658615
+PID CONTROLLER: robot_pose [ 2.19553193 -0.01914771],            robot_angle 5.897870960438934,             speed 15, turn 24,            desired_dir -3.096020766540761,             
+err_ang -2.7107064198001076, corr -4, path_0 (-0.1492599207704172, -0.1260783380657077)
+DISTANCE TO TARGET: 2.368522874283162
+PID CONTROLLER: robot_pose [ 2.21720848 -0.02744808],            robot_angle 5.937109019534863,             speed 15, turn 28,            desired_dir -3.099938511541607,             
+err_ang -2.753862223896885, corr -4, path_0 (-0.1492599207704172, -0.1260783380657077)
+DISTANCE TO TARGET: 2.389765599737837
+PID CONTROLLER: robot_pose [ 2.2387564  -0.03465801],            robot_angle 5.983481271193689,             speed 15, turn 32,            desired_dir -3.1033283829576863,             
+err_ang -2.803624346971789, corr -4, path_0 (-0.1492599207704172, -0.1260783380657077)
+DISTANCE TO TARGET: 2.413759940136228
+PID CONTROLLER: robot_pose [ 2.26301266 -0.04135504],            robot_angle 6.04412190797831,             speed 15, turn 36,            desired_dir -3.106485307965596,             err_ang
+-2.867421908764319, corr -4, path_0 (-0.1492599207704172, -0.1260783380657077)
+ cam_fps 7
+DISTANCE TO TARGET: 2.4382467056565336
+PID CONTROLLER: robot_pose [ 2.28768146 -0.04630538],            robot_angle 6.12616512245162,             speed 15, turn 41,            desired_dir -3.108869469307395,             err_ang
+-2.9518492845794277, corr -5, path_0 (-0.1492599207704172, -0.1260783380657077)
+DISTANCE TO TARGET: 2.45731424850982
+PID CONTROLLER: robot_pose [ 2.30683498 -0.0486758 ],            robot_angle 6.1939399517991385,             speed 15, turn 46,            desired_dir -3.110088606288402,             
+err_ang -3.020843250907955, corr -5, path_0 (-0.1492599207704172, -0.1260783380657077)
+DISTANCE TO TARGET: 2.4760597783284366
+PID CONTROLLER: robot_pose [ 2.32562001 -0.04964956],            robot_angle 6.268848973709554,             speed 15, turn 51,            desired_dir -3.1107206535382788,             
+err_ang -3.096384320068246, corr -5, path_0 (-0.1492599207704172, -0.1260783380657077)
+DISTANCE TO TARGET: 2.4929152139497903
+PID CONTROLLER: robot_pose [ 2.34247144 -0.04925992],            robot_angle 0.06057268844037722,             speed 15, turn 47,            desired_dir -3.110773080772506,             
+err_ang 3.111839537966703, corr 4, path_0 (-0.1492599207704172, -0.1260783380657077)
+DISTANCE TO TARGET: 2.511665969228419
+PID CONTROLLER: robot_pose [ 2.36116776 -0.04721905],            robot_angle 0.15688428803948215,             speed 15, turn 44,            desired_dir -3.110190288039007,             
+err_ang 3.0161107311010973, corr 3, path_0 (-0.1492599207704172, -0.1260783380657077)
+DISTANCE TO TARGET: 2.531402443551638
+PID CONTROLLER: robot_pose [ 2.38078465 -0.04317596],            robot_angle 0.24962879135713514,             speed 15, turn 41,            desired_dir -3.1088372102137787,             
+err_ang 2.924719305608672, corr 3, path_0 (-0.1492599207704172, -0.1260783380657077)
+DISTANCE TO TARGET: 2.549839617147662
+PID CONTROLLER: robot_pose [ 2.39904929 -0.03774808],            robot_angle 0.32810490954899985,             speed 15, turn 38,            desired_dir -3.1069442274141568,             
+err_ang 2.8481361702164296, corr 3, path_0 (-0.1492599207704172, -0.1260783380657077)
+DISTANCE TO TARGET: 2.568318612074273
+PID CONTROLLER: robot_pose [ 2.41728817 -0.03072959],            robot_angle 0.4065810277408613,             speed 15, turn 35,            desired_dir -3.1044591512514117,             
+err_ang 2.7721451281873133, corr 3, path_0 (-0.1492599207704172, -0.1260783380657077)
+DISTANCE TO TARGET: 2.5860806951150113
+PID CONTROLLER: robot_pose [ 2.43474571 -0.02250093],            robot_angle 0.4743558570883767,             speed 15, turn 32,            desired_dir -3.1015300516406645,             
+err_ang 2.7072993984505445, corr 3, path_0 (-0.1492599207704172, -0.1260783380657077)
+DISTANCE TO TARGET: 2.603115258311275
+PID CONTROLLER: robot_pose [ 2.45140931 -0.01325729],            robot_angle 0.5385635901544434,             speed 15, turn 29,            desired_dir -3.0982382943620315,             
+err_ang 2.6463834226631118, corr 3, path_0 (-0.1492599207704172, -0.1260783380657077)
+DISTANCE TO TARGET: 2.6226031663152027
+PID CONTROLLER: robot_pose [ 2.47036763e+00 -1.18302020e-03],            robot_angle 0.5956371306576193,             speed 15, turn 26,            desired_dir -3.0939519825130155,         
+err_ang 2.593596194008951, corr 3, path_0 (-0.1492599207704172, -0.1260783380657077)
+DISTANCE TO TARGET: 2.641658313915032
+PID CONTROLLER: robot_pose [2.48878055 0.01212844],            robot_angle 0.6562777674422373,             speed 15, turn 23,            desired_dir -3.089250568741727,             err_ang
+2.537656970995622, corr 3, path_0 (-0.1492599207704172, -0.1260783380657077)
+DISTANCE TO TARGET: 2.6592961676909805
+PID CONTROLLER: robot_pose [2.50569608 0.02579238],            robot_angle 0.7026500191010671,             speed 15, turn 20,            desired_dir -3.0844521969768515,             
+err_ang 2.496083091101667, corr 3, path_0 (-0.1492599207704172, -0.1260783380657077)
+ cam_fps 9
+DISTANCE TO TARGET: 2.6827146992766817
+PID CONTROLLER: robot_pose [2.52795484 0.04561692],            robot_angle 0.752589367041339,             speed 15, turn 17,            desired_dir -3.0775483136799706,             err_ang
+2.453047626458277, corr 3, path_0 (-0.1492599207704172, -0.1260783380657077)
+DISTANCE TO TARGET: 2.700760241274716
+PID CONTROLLER: robot_pose [2.54493289 0.0621529 ],            robot_angle 0.7918274261372714,             speed 15, turn 14,            desired_dir -3.071840456637149,             err_ang
+2.419517424405166, corr 3, path_0 (-0.1492599207704172, -0.1260783380657077)
+DISTANCE TO TARGET: 2.718185439267777
+PID CONTROLLER: robot_pose [2.56117226 0.07907882],            robot_angle 0.8203641963888577,             speed 15, turn 11,            desired_dir -3.0660450338028364,             
+err_ang 2.3967760769878925, corr 3, path_0 (-0.1492599207704172, -0.1260783380657077)
+DISTANCE TO TARGET: 2.734440316866063
+PID CONTROLLER: robot_pose [2.57619004 0.09547609],            robot_angle 0.8381996777961012,             speed 15, turn 8,            desired_dir -3.0604800553717553,             err_ang
+2.3845055740117296, corr 3, path_0 (-0.1492599207704172, -0.1260783380657077)
+DISTANCE TO TARGET: 2.7527162432123733
+PID CONTROLLER: robot_pose [2.59291379 0.11460831],            robot_angle 0.8667364480476875,             speed 15, turn 5,            desired_dir -3.054044805138021,             err_ang 
+2.3624040539938775, corr 3, path_0 (-0.1492599207704172, -0.1260783380657077)
+DISTANCE TO TARGET: 2.7696242381580394
+PID CONTROLLER: robot_pose [2.6082179  0.13302485],            robot_angle 0.8881390257363764,             speed 15, turn 2,            desired_dir -3.047903904565592,             err_ang 
+2.347142376877618, corr 3, path_0 (-0.1492599207704172, -0.1260783380657077)
+DISTANCE TO TARGET: 2.788044187326242
+PID CONTROLLER: robot_pose [2.62471919 0.15361842],            robot_angle 0.9024074108621679,             speed 15, turn -1,            desired_dir -3.041103555284551,             err_ang
+2.3396743410328673, corr 3, path_0 (-0.1492599207704172, -0.1260783380657077)
+DISTANCE TO TARGET: 2.805977017384783
+PID CONTROLLER: robot_pose [2.64065488 0.17372566],            robot_angle 0.8988403145807192,             speed 15, turn -4,            desired_dir -3.0345435362035595,             
+err_ang 2.3498014563953076, corr 3, path_0 (-0.1492599207704172, -0.1260783380657077)
+DISTANCE TO TARGET: 2.8242994181788723
+PID CONTROLLER: robot_pose [2.65685069 0.19393799],            robot_angle 0.8917061220178251,             speed 15, turn -7,            desired_dir -3.028040569932938,             err_ang
+2.363438615228823, corr 3, path_0 (-0.1492599207704172, -0.1260783380657077)
+DISTANCE TO TARGET: 2.8487148051845335
+PID CONTROLLER: robot_pose [2.67832405 0.22025233],            robot_angle 0.881004833173479,             speed 15, turn -10,            desired_dir -3.019716803990133,             err_ang
+2.3824636700159747, corr 3, path_0 (-0.1492599207704172, -0.1260783380657077)
+DISTANCE TO TARGET: 2.8670274101402917
+PID CONTROLLER: robot_pose [2.69438917 0.23930644],            robot_angle 0.8596022554847869,             speed 15, turn -13,            desired_dir -3.013801349564583,             
+err_ang 2.409781702130216, corr 3, path_0 (-0.1492599207704172, -0.1260783380657077)
+DISTANCE TO TARGET: 2.8835806160724786
+PID CONTROLLER: robot_pose [2.70892083 0.25581169],            robot_angle 0.8381996777961012,             speed 15, turn -16,            desired_dir -3.008766377543618,             
+err_ang 2.4362192518398667, corr 3, path_0 (-0.1492599207704172, -0.1260783380657077)
+DISTANCE TO TARGET: 2.900459604616377
+PID CONTROLLER: robot_pose [2.72374469 0.27205531],            robot_angle 0.8239312926703064,             speed 15, turn -20,            desired_dir -3.0038921897134716,             
+err_ang 2.4553618247958084, corr 4, path_0 (-0.1492599207704172, -0.1260783380657077)
+ cam_fps 8
+DISTANCE TO TARGET: 2.9227561764965375
+PID CONTROLLER: robot_pose [2.7433669  0.29250707],            robot_angle 0.7882603298558227,             speed 15, turn -24,            desired_dir -2.9978825129870548,             
+err_ang 2.497042464336708, corr 4, path_0 (-0.1492599207704172, -0.1260783380657077)
+DISTANCE TO TARGET: 2.942009672006628
+PID CONTROLLER: robot_pose [2.76040382 0.30898238],            robot_angle 0.7490222707598936,             speed 15, turn -28,            desired_dir -2.993169556597402,             
+err_ang 2.5409934798222906, corr 4, path_0 (-0.1492599207704172, -0.1260783380657077)
+DISTANCE TO TARGET: 2.960437184661027
+PID CONTROLLER: robot_pose [2.77682467 0.32360744],            robot_angle 0.7062171153825157,             speed 15, turn -32,            desired_dir -2.9891039382560383,             
+err_ang 2.5878642535410323, corr 4, path_0 (-0.1492599207704172, -0.1260783380657077)
+DISTANCE TO TARGET: 2.9801376972991056
+PID CONTROLLER: robot_pose [2.79455014 0.33782145],            robot_angle 0.6455764785978912,             speed 15, turn -36,            desired_dir -2.9852931654622625,             
+err_ang 2.652315663119433, corr 4, path_0 (-0.1492599207704172, -0.1260783380657077)
+DISTANCE TO TARGET: 3.000287332370539
+PID CONTROLLER: robot_pose [2.8128821  0.35082705],            robot_angle 0.5885029380947219,             speed 15, turn -40,            desired_dir -2.9819623336956425,             
+err_ang 2.7127200353892214, corr 4, path_0 (-0.1492599207704172, -0.1260783380657077)
+DISTANCE TO TARGET: 3.019012988080995
+PID CONTROLLER: robot_pose [2.8301195  0.36150517],            robot_angle 0.5207281087472032,             speed 15, turn -44,            desired_dir -2.979377903745396,             
+err_ang 2.7830792946869867, corr 4, path_0 (-0.1492599207704172, -0.1260783380657077)
+DISTANCE TO TARGET: 3.044156024723747
+PID CONTROLLER: robot_pose [2.85362823 0.37347013],            robot_angle 0.42084941286665284,             speed 15, turn -49,            desired_dir -2.976746257834622,             
+err_ang 2.8855896364783113, corr 5, path_0 (-0.1492599207704172, -0.1260783380657077)
+DISTANCE TO TARGET: 3.06155428275617
+PID CONTROLLER: robot_pose [2.87014344 0.38020022],            robot_angle 0.3530745835191342,             speed 15, turn -54,            desired_dir -2.9754630250137963,             
+err_ang 2.9546476986466557, corr 5, path_0 (-0.1492599207704172, -0.1260783380657077)
+DISTANCE TO TARGET: 3.078506057027712
+PID CONTROLLER: robot_pose [2.88649493 0.38518677],            robot_angle 0.23892750251278905,             speed 15, turn -59,            desired_dir -2.9747438746502817,             
+err_ang 3.069513930016516, corr 5, path_0 (-0.1492599207704172, -0.1260783380657077)
+DISTANCE TO TARGET: 3.0980408622570415
+PID CONTROLLER: robot_pose [2.90568659 0.38885757],            robot_angle 0.1390488066322419,             speed 15, turn -55,            desired_dir -2.974604251443747,             
+err_ang -3.1136530580759887, corr -4, path_0 (-0.1492599207704172, -0.1260783380657077)
+DISTANCE TO TARGET: 3.113625370533011
+PID CONTROLLER: robot_pose [2.92125622 0.39024866],            robot_angle 0.039170110751688275,             speed 15, turn -52,            desired_dir -2.9749948399436126,             
+err_ang -3.0141649506953008, corr -3, path_0 (-0.1492599207704172, -0.1260783380657077)
+DISTANCE TO TARGET: 3.1299969978952453
+PID CONTROLLER: robot_pose [2.93786657 0.39018828],            robot_angle 6.236745107176519,             speed 15, turn -49,            desired_dir -2.9758938852857297,             
+err_ang -2.929453685282663, corr -3, path_0 (-0.1492599207704172, -0.1260783380657077)
+DISTANCE TO TARGET: 3.145844591248698
+PID CONTROLLER: robot_pose [2.95417061 0.38875865],            robot_angle 6.154701892703209,             speed 15, turn -46,            desired_dir -2.977196957154534,             err_ang
+-2.8487135426781567, corr -3, path_0 (-0.1492599207704172, -0.1260783380657077)
+ cam_fps 8
+DISTANCE TO TARGET: 3.1676634478307224
+PID CONTROLLER: robot_pose [2.97698099 0.38451887],            robot_angle 6.04412190797831,             speed 15, turn -43,            desired_dir -2.9796958596508105,             err_ang
+-2.7406324604495342, corr -3, path_0 (-0.1492599207704172, -0.1260783380657077)
+DISTANCE TO TARGET: 3.1831679085903133
+PID CONTROLLER: robot_pose [2.99344027 0.37987963],            robot_angle 5.972779982349346,             speed 15, turn -40,            desired_dir -2.981967704359862,             err_ang
+-2.6715623795296217, corr -3, path_0 (-0.1492599207704172, -0.1260783380657077)
+DISTANCE TO TARGET: 3.2002448271592265
+PID CONTROLLER: robot_pose [3.01180051 0.37318504],            robot_angle 5.894303864157484,             speed 15, turn -37,            desired_dir -2.984944920389338,             err_ang
+-2.5960634773672364, corr -3, path_0 (-0.1492599207704172, -0.1260783380657077)
+DISTANCE TO TARGET: 3.216821526355343
+PID CONTROLLER: robot_pose [3.02984653 0.36506617],            robot_angle 5.826529034809965,             speed 15, turn -34,            desired_dir -2.9883130880978146,             
+err_ang -2.5316568157281942, corr -3, path_0 (-0.1492599207704172, -0.1260783380657077)
+DISTANCE TO TARGET: 3.2321029402520223
+PID CONTROLLER: robot_pose [3.04667112 0.35611891],            robot_angle 5.762321301743896,             speed 15, turn -31,            desired_dir -2.9918436582105223,             
+err_ang -2.4709796527748313, corr -3, path_0 (-0.1492599207704172, -0.1260783380657077)
+DISTANCE TO TARGET: 3.250884792664534
+PID CONTROLLER: robot_pose [3.06759761 0.34304802],            robot_angle 5.687412279833486,             speed 15, turn -28,            desired_dir -2.996779758017274,             err_ang
+-2.401006730671174, corr -3, path_0 (-0.1492599207704172, -0.1260783380657077)
+DISTANCE TO TARGET: 3.2641438088744765
+PID CONTROLLER: robot_pose [3.08252245 0.33241648],            robot_angle 5.641040028174657,             speed 15, turn -25,            desired_dir -3.000662569922157,             err_ang
+-2.358517290917227, corr -3, path_0 (-0.1492599207704172, -0.1260783380657077)
+DISTANCE TO TARGET: 3.281411312306226
+PID CONTROLLER: robot_pose [3.10210041 0.31699749],            robot_angle 5.591100680234382,             speed 15, turn -22,            desired_dir -3.006152956410814,             err_ang
+-2.3140683294656093, corr -3, path_0 (-0.1492599207704172, -0.1260783380657077)
+DISTANCE TO TARGET: 3.297412269632153
+PID CONTROLLER: robot_pose [3.12036039 0.30113441],            robot_angle 5.544728428575552,             speed 15, turn -19,            desired_dir -3.011667423552007,             err_ang
+-2.273210544947972, corr -3, path_0 (-0.1492599207704172, -0.1260783380657077)
+DISTANCE TO TARGET: 3.3142066542939537
+PID CONTROLLER: robot_pose [3.13963357 0.28275582],            robot_angle 5.498356176916729,             speed 15, turn -16,            desired_dir -3.017919555358691,             err_ang
+-2.233090425095833, corr -3, path_0 (-0.1492599207704172, -0.1260783380657077)
+DISTANCE TO TARGET: 3.3284650868384644
+PID CONTROLLER: robot_pose [3.15606976 0.26568116],            robot_angle 5.459118117820793,             speed 15, turn -13,            desired_dir -3.0236194448605147,             
+err_ang -2.1995522555017217, corr -3, path_0 (-0.1492599207704172, -0.1260783380657077)
+DISTANCE TO TARGET: 3.3447030680544203
+PID CONTROLLER: robot_pose [3.17482204 0.2447555 ],            robot_angle 5.427014251287762,             speed 15, turn -10,            desired_dir -3.03049226072774,             err_ang 
+-2.174321204835916, corr -3, path_0 (-0.1492599207704172, -0.1260783380657077)
+DISTANCE TO TARGET: 3.3590666039700463
+PID CONTROLLER: robot_pose [3.19139184 0.22516838],            robot_angle 5.402044577317624,             speed 15, turn -7,            desired_dir -3.0368343882293534,             err_ang
+-2.1556936583673902, corr -3, path_0 (-0.1492599207704172, -0.1260783380657077)
+ cam_fps 8
+DISTANCE TO TARGET: 3.376425081765402
+PID CONTROLLER: robot_pose [3.21133923 0.20044839],            robot_angle 5.380641999628935,             speed 15, turn -4,            desired_dir -3.0447334484575777,             err_ang
+-2.1421901409069264, corr -3, path_0 (-0.1492599207704172, -0.1260783380657077)
+DISTANCE TO TARGET: 3.3915777629360386
+PID CONTROLLER: robot_pose [3.22863196 0.17829997],            robot_angle 5.369940710784592,             speed 15, turn -1,            desired_dir -3.051726401552954,             err_ang 
+-2.1384818051579586, corr -3, path_0 (-0.1492599207704172, -0.1260783380657077)
+DISTANCE TO TARGET: 3.4054964174218583
+PID CONTROLLER: robot_pose [3.24438871 0.15774352],            robot_angle 5.362806518221694,             speed 15, turn 2,            desired_dir -3.0581535837517624,             err_ang 
+-2.13777479479387, corr -3, path_0 (-0.1492599207704172, -0.1260783380657077)
+DISTANCE TO TARGET: 3.4198348747458036
+PID CONTROLLER: robot_pose [3.26047809 0.13651885],            robot_angle 5.359239421940245,             speed 15, turn 5,            desired_dir -3.0647304832350715,             err_ang 
+-2.1407845979957294, corr -3, path_0 (-0.1492599207704172, -0.1260783380657077)
+DISTANCE TO TARGET: 3.43458716148642
+PID CONTROLLER: robot_pose [3.27686269 0.11490475],            robot_angle 5.362806518221694,             speed 15, turn 8,            desired_dir -3.0713713326433365,             err_ang 
+-2.150992543685444, corr -3, path_0 (-0.1492599207704172, -0.1260783380657077)
+DISTANCE TO TARGET: 3.449377776697081
+PID CONTROLLER: robot_pose [3.29310301 0.0937955 ],            robot_angle 5.373507807066037,             speed 15, turn 11,            desired_dir -3.0778063654380623,             err_ang
+-2.1681288653245137, corr -3, path_0 (-0.1492599207704172, -0.1260783380657077)
+DISTANCE TO TARGET: 3.4646223392488324
+PID CONTROLLER: robot_pose [3.30964272 0.07292029],            robot_angle 5.391343288473281,             speed 15, turn 14,            desired_dir -3.08412370419811,             err_ang 
+-2.192281685491805, corr -3, path_0 (-0.1492599207704172, -0.1260783380657077)
+DISTANCE TO TARGET: 3.48017264446388
+PID CONTROLLER: robot_pose [3.32631358 0.05278053],            robot_angle 5.416312962443419,             speed 15, turn 17,            desired_dir -3.090176325337953,             err_ang 
+-2.223303980601786, corr -3, path_0 (-0.1492599207704172, -0.1260783380657077)
+DISTANCE TO TARGET: 3.4963216226759113
+PID CONTROLLER: robot_pose [3.34342542 0.03333936],            robot_angle 5.4519839252579025,             speed 15, turn 20,            desired_dir -3.095981007771165,             err_ang
+-2.2647796258494814, corr -3, path_0 (-0.1492599207704172, -0.1260783380657077)
+DISTANCE TO TARGET: 3.518529070991484
+PID CONTROLLER: robot_pose [3.36667828 0.00892311],            robot_angle 5.494789080635281,             speed 15, turn 23,            desired_dir -3.103214516272246,             err_ang 
+-2.31481828972794, corr -3, path_0 (-0.1492599207704172, -0.1260783380657077)
+DISTANCE TO TARGET: 3.5338848578770845
+PID CONTROLLER: robot_pose [ 3.38260436 -0.00659252],            robot_angle 5.526892947168312,             speed 15, turn 27,            desired_dir -3.107774743799979,             
+err_ang -2.3514823837887047, corr -4, path_0 (-0.1492599207704172, -0.1260783380657077)
+DISTANCE TO TARGET: 3.549371326403428
+PID CONTROLLER: robot_pose [ 3.39855592 -0.02100893],            robot_angle 5.569698102545686,             speed 15, turn 31,            desired_dir -3.1119860695637733,             
+err_ang -2.3984988649298735, corr -4, path_0 (-0.1492599207704172, -0.1260783380657077)
+DISTANCE TO TARGET: 3.5663803384512307
+PID CONTROLLER: robot_pose [ 3.41596308 -0.03522852],            robot_angle 5.626771643048869,             speed 15, turn 35,            desired_dir -3.116115942316935,             
+err_ang -2.4597022781862172, corr -4, path_0 (-0.1492599207704172, -0.1260783380657077)
+ cam_fps 8
+DISTANCE TO TARGET: 3.589104440967345
+PID CONTROLLER: robot_pose [ 3.43907226 -0.05162804],            robot_angle 5.705247761240727,             speed 15, turn 39,            desired_dir -3.120847746715936,             
+err_ang -2.5429102007770776, corr -4, path_0 (-0.1492599207704172, -0.1260783380657077)
+DISTANCE TO TARGET: 3.609231256099249
+PID CONTROLLER: robot_pose [ 3.45943308 -0.06374772],            robot_angle 5.787290975714037,             speed 15, turn 43,            desired_dir -3.1243220177495794,             
+err_ang -2.628427686284031, corr -4, path_0 (-0.1492599207704172, -0.1260783380657077)
+DISTANCE TO TARGET: 3.6288419742770355
+PID CONTROLLER: robot_pose [ 3.47919926 -0.0733713 ],            robot_angle 5.872901286468796,             speed 15, turn 47,            desired_dir -3.1270676630324377,             
+err_ang -2.716783642321648, corr -4, path_0 (-0.1492599207704172, -0.1260783380657077)
+DISTANCE TO TARGET: 3.6581397898876666
+PID CONTROLLER: robot_pose [ 3.50863633 -0.08386745],            robot_angle 6.008450945163827,             speed 15, turn 52,            desired_dir -3.1300535036684494,             
+err_ang -2.8553191416526893, corr -5, path_0 (-0.1492599207704172, -0.1260783380657077)
+DISTANCE TO TARGET: 3.6785478215015277
+PID CONTROLLER: robot_pose [ 3.52909721 -0.08862289],            robot_angle 6.101195448481484,             speed 15, turn 57,            desired_dir -3.1314103498957526,             
+err_ang -2.9494204911976496, corr -5, path_0 (-0.1492599207704172, -0.1260783380657077)
+DISTANCE TO TARGET: 3.698875862386067
+PID CONTROLLER: robot_pose [ 3.5494513  -0.09117876],            robot_angle 6.215342529487828,             speed 15, turn 62,            desired_dir -3.132157328541903,             
+err_ang -3.0643145508501455, corr -5, path_0 (-0.1492599207704172, -0.1260783380657077)
+DISTANCE TO TARGET: 3.7206055082109715
+PID CONTROLLER: robot_pose [ 3.57118228 -0.09121899],            robot_angle 0.06413978472182791,             speed 15, turn 58,            desired_dir -3.1322232503274847,             
+err_ang 3.0868222721302736, corr 4, path_0 (-0.1492599207704172, -0.1260783380657077)
+DISTANCE TO TARGET: 3.7400023875964834
+PID CONTROLLER: robot_pose [ 3.59055587 -0.0887187 ],            robot_angle 0.19255525085396782,             speed 15, turn 55,            desired_dir -3.131603285488381,             
+err_ang 2.9590267708372373, corr 3, path_0 (-0.1492599207704172, -0.1260783380657077)
+DISTANCE TO TARGET: 3.7571014414666526
+PID CONTROLLER: robot_pose [ 3.60761073 -0.08443535],            robot_angle 0.2995681392974188,             speed 15, turn 52,            desired_dir -3.1305086198207133,             
+err_ang 2.8531085480614546, corr 3, path_0 (-0.1492599207704172, -0.1260783380657077)
+DISTANCE TO TARGET: 3.7754645242067935
+PID CONTROLLER: robot_pose [ 3.6258927  -0.07754961],            robot_angle 0.42084941286666133,             speed 15, turn 49,            desired_dir -3.128738588429502,             
+err_ang 2.733597305883423, corr 3, path_0 (-0.1492599207704172, -0.1260783380657077)
+DISTANCE TO TARGET: 3.7928587813854704
+PID CONTROLLER: robot_pose [ 3.6431686  -0.06894999],            robot_angle 0.5028926273399618,             speed 15, turn 46,            desired_dir -3.1265300025807052,             
+err_ang 2.6537626772589196, corr 3, path_0 (-0.1492599207704172, -0.1260783380657077)
+DISTANCE TO TARGET: 3.8109142119600734
+PID CONTROLLER: robot_pose [ 3.66104474 -0.05792026],            robot_angle 0.6027713232205186,             speed 15, turn 43,            desired_dir -3.1237067321279453,             
+err_ang 2.5567072518311225, corr 3, path_0 (-0.1492599207704172, -0.1260783380657077)
+DISTANCE TO TARGET: 3.8273210571310297
+PID CONTROLLER: robot_pose [ 3.67721688 -0.04569336],            robot_angle 0.6919487302567262,             speed 15, turn 40,            desired_dir -3.1205881729804443,             
+err_ang 2.470648403942416, corr 3, path_0 (-0.1492599207704172, -0.1260783380657077)
+ cam_fps 8
+DISTANCE TO TARGET: 3.8486631023574875
+PID CONTROLLER: robot_pose [ 3.69810699 -0.02620074],            robot_angle 0.8096629075445168,             speed 15, turn 38,            desired_dir -3.1156384956959142,             
+err_ang 2.3578839039391557, corr 2, path_0 (-0.1492599207704172, -0.1260783380657077)
+DISTANCE TO TARGET: 3.86431583183806
+PID CONTROLLER: robot_pose [ 3.7132809  -0.00896603],            robot_angle 0.888139025736375,             speed 15, turn 36,            desired_dir -3.1112819206318485,             
+err_ang 2.2837643608113627, corr 2, path_0 (-0.1492599207704172, -0.1260783380657077)
+DISTANCE TO TARGET: 3.878498659400683
+PID CONTROLLER: robot_pose [3.72687766 0.00923362],            robot_angle 0.9701822402096917,             speed 15, turn 34,            desired_dir -3.106697857075021,             err_ang
+2.2063052098948734, corr 2, path_0 (-0.1492599207704172, -0.1260783380657077)
+DISTANCE TO TARGET: 3.890289152317768
+PID CONTROLLER: robot_pose [3.73802607 0.02675265],            robot_angle 1.0379570695572071,             speed 15, turn 32,            desired_dir -3.102297289379103,             err_ang
+2.1429309482432757, corr 2, path_0 (-0.1492599207704172, -0.1260783380657077)
+DISTANCE TO TARGET: 3.90214638989099
+PID CONTROLLER: robot_pose [3.7490507  0.04689787],            robot_angle 1.102164802623277,             speed 15, turn 30,            desired_dir -3.0972496451382523,             err_ang
+2.083770859418057, corr 2, path_0 (-0.1492599207704172, -0.1260783380657077)
+DISTANCE TO TARGET: 3.913955573475487
+PID CONTROLLER: robot_pose [3.75977101 0.07020055],            robot_angle 1.1770738245336898,             speed 15, turn 28,            desired_dir -3.091423138559026,             err_ang
+2.0146883440868706, corr 2, path_0 (-0.1492599207704172, -0.1260783380657077)
+DISTANCE TO TARGET: 3.9239371466704673
+PID CONTROLLER: robot_pose [3.76854196 0.09326426],            robot_angle 1.2377144613183013,             speed 15, turn 26,            desired_dir -3.0856648999031697,             
+err_ang 1.9598059459581147, corr 2, path_0 (-0.1492599207704172, -0.1260783380657077)
+DISTANCE TO TARGET: 3.932046703204088
+PID CONTROLLER: robot_pose [3.77539385 0.11492799],            robot_angle 1.291220905540035,             speed 15, turn 24,            desired_dir -3.080261366409779,             err_ang 
+1.9117030352297721, corr 2, path_0 (-0.1492599207704172, -0.1260783380657077)
+DISTANCE TO TARGET: 3.941556638308813
+PID CONTROLLER: robot_pose [3.78294527 0.14527215],            robot_angle 1.362562831168996,             speed 15, turn 22,            desired_dir -3.072694673795445,             err_ang 
+1.8479278022151453, corr 2, path_0 (-0.1492599207704172, -0.1260783380657077)
+DISTANCE TO TARGET: 3.9483633866828187
+PID CONTROLLER: robot_pose [3.78783989 0.17194597],            robot_angle 1.416069275390723,             speed 15, turn 20,            desired_dir -3.0660403304108765,             err_ang
+1.8010757013779868, corr 2, path_0 (-0.1492599207704172, -0.1260783380657077)
+DISTANCE TO TARGET: 3.9537179826559234
+PID CONTROLLER: robot_pose [3.79120473 0.19737839],            robot_angle 1.4624415270495525,             speed 15, turn 18,            desired_dir -3.059690344624474,             err_ang
+1.7610534355055592, corr 2, path_0 (-0.1492599207704172, -0.1260783380657077)
+DISTANCE TO TARGET: 3.9578114310037034
+PID CONTROLLER: robot_pose [3.79330501 0.22098519],            robot_angle 1.5016795861454784,             speed 15, turn 16,            desired_dir -3.0537891080989215,             
+err_ang 1.7277166129351862, corr 2, path_0 (-0.1492599207704172, -0.1260783380657077)
+DISTANCE TO TARGET: 3.9614850649101565
+PID CONTROLLER: robot_pose [3.79463258 0.24685046],            robot_angle 1.5373505489599653,             speed 15, turn 14,            desired_dir -3.0473144175249773,             
+err_ang 1.6985203406946434, corr 2, path_0 (-0.1492599207704172, -0.1260783380657077)
+ cam_fps 7
+DISTANCE TO TARGET: 3.9653500078543273
+PID CONTROLLER: robot_pose [3.7951089  0.28129775],            robot_angle 1.576588608055891,             speed 15, turn 12,            desired_dir -3.0386771208380976,             err_ang
+1.6679195782855976, corr 2, path_0 (-0.1492599207704172, -0.1260783380657077)
+DISTANCE TO TARGET: 3.96739847451166
+PID CONTROLLER: robot_pose [3.79473009 0.30426272],            robot_angle 1.5979911857445832,             speed 15, turn 10,            desired_dir -3.032909486602065,             err_ang
+1.652284634832938, corr 2, path_0 (-0.1492599207704172, -0.1260783380657077)
+DISTANCE TO TARGET: 3.969366735694828
+PID CONTROLLER: robot_pose [3.79357549 0.33209329],            robot_angle 1.6265279559961727,             speed 15, turn 8,            desired_dir -3.025907908828223,             err_ang 
+1.6307494423551905, corr 2, path_0 (-0.1492599207704172, -0.1260783380657077)
+DISTANCE TO TARGET: 3.9705908106138312
+PID CONTROLLER: robot_pose [3.79210742 0.35476971],            robot_angle 1.6443634374034064,             speed 15, turn 6,            desired_dir -3.020192280269694,             err_ang 
+1.6186295895064857, corr 2, path_0 (-0.1492599207704172, -0.1260783380657077)
+DISTANCE TO TARGET: 3.971763142640707
+PID CONTROLLER: robot_pose [3.79008479 0.38034607],            robot_angle 1.6550647262477491,             speed 15, turn 4,            desired_dir -3.013738409212994,             err_ang 
+1.6143821717188427, corr 2, path_0 (-0.1492599207704172, -0.1260783380657077)
+DISTANCE TO TARGET: 3.9726665002739723
+PID CONTROLLER: robot_pose [3.78798835 0.40321853],            robot_angle 1.6693331113735503,             speed 15, turn 2,            desired_dir -3.0079606253906466,             err_ang
+1.6058915704153893, corr 2, path_0 (-0.1492599207704172, -0.1260783380657077)
+DISTANCE TO TARGET: 3.9736014583386905
+PID CONTROLLER: robot_pose [3.7850744 0.4311667],            robot_angle 1.680034400217893,             speed 15, turn 0,            desired_dir -3.0008921079475135,             err_ang 
+1.6022587990141801, corr 2, path_0 (-0.1492599207704172, -0.1260783380657077)
+DISTANCE TO TARGET: 3.9743234337493716
+PID CONTROLLER: robot_pose [3.78261084 0.45326529],            robot_angle 1.6836014964993384,             speed 15, turn -2,            desired_dir -2.99529975823429,             err_ang 
+1.6042840524459576, corr 2, path_0 (-0.1492599207704172, -0.1260783380657077)
+DISTANCE TO TARGET: 3.9754342441548935
+PID CONTROLLER: robot_pose [3.77944342 0.48167776],            robot_angle 1.680034400217893,             speed 15, turn -4,            desired_dir -2.9881128847753686,             err_ang
+1.615038022186324, corr 2, path_0 (-0.1492599207704172, -0.1260783380657077)
+DISTANCE TO TARGET: 3.976809383673798
+PID CONTROLLER: robot_pose [3.77660848 0.50840585],            robot_angle 1.6729002076549957,             speed 15, turn -6,            desired_dir -2.9813618682195195,             
+err_ang 1.6289232313050714, corr 2, path_0 (-0.1492599207704172, -0.1260783380657077)
+DISTANCE TO TARGET: 3.9787942924664548
+PID CONTROLLER: robot_pose [3.77375236 0.53783331],            robot_angle 1.662198918810653,             speed 15, turn -8,            desired_dir -2.9739459380002002,             err_ang
+1.647040450368733, corr 2, path_0 (-0.1492599207704172, -0.1260783380657077)
+DISTANCE TO TARGET: 3.980967508682526
+PID CONTROLLER: robot_pose [3.77154731 0.56339459],            robot_angle 1.6514976299663102,             speed 15, turn -10,            desired_dir -2.9675226162922703,             
+err_ang 1.6641650609210057, corr 2, path_0 (-0.1492599207704172, -0.1260783380657077)
+DISTANCE TO TARGET: 3.98347553757962
+PID CONTROLLER: robot_pose [3.76968951 0.58800341],            robot_angle 1.6407963411219675,             speed 15, turn -12,            desired_dir -2.9613574379597405,             
+err_ang 1.6810315280978783, corr 2, path_0 (-0.1492599207704172, -0.1260783380657077)
+DISTANCE TO TARGET: 3.986484424488108
+PID CONTROLLER: robot_pose [3.76818302 0.61263601],            robot_angle 1.6229608597147207,             speed 15, turn -14,            desired_dir -2.9552107179654845,             
+err_ang 1.705013729499381, corr 2, path_0 (-0.1492599207704172, -0.1260783380657077)
+DISTANCE TO TARGET: 3.9900862616202146
+PID CONTROLLER: robot_pose [3.76717019 0.63704915],            robot_angle 1.6015582820260286,             speed 15, turn -17,            desired_dir -2.949151158765964,             
+err_ang 1.7324758663875937, corr 3, path_0 (-0.1492599207704172, -0.1260783380657077)
+DISTANCE TO TARGET: 3.9940772213257136
+PID CONTROLLER: robot_pose [3.76684313 0.65928129],            robot_angle 1.5694544154929937,             speed 15, turn -20,            desired_dir -2.9436719469412176,             
+err_ang 1.770058944745375, corr 3, path_0 (-0.1492599207704172, -0.1260783380657077)
+ cam_fps 7
+DISTANCE TO TARGET: 4.000810619485744
+PID CONTROLLER: robot_pose [3.76762731 0.6890781 ],            robot_angle 1.519515067552725,             speed 15, turn -23,            desired_dir -2.936408128197499,             err_ang
+1.8272621114293628, corr 3, path_0 (-0.1492599207704172, -0.1260783380657077)
+DISTANCE TO TARGET: 4.007064266764299
+PID CONTROLLER: robot_pose [3.76923701 0.71174374],            robot_angle 1.480277008456786,             speed 15, turn -26,            desired_dir -2.930952181504545,             err_ang
+1.8719561172182555, corr 3, path_0 (-0.1492599207704172, -0.1260783380657077)
+DISTANCE TO TARGET: 4.01444338437658
+PID CONTROLLER: robot_pose [3.77178831 0.73481449],            robot_angle 1.4410389493608602,             speed 15, turn -29,            desired_dir -2.9254651217529637,             
+err_ang 1.9166812360657621, corr 3, path_0 (-0.1492599207704172, -0.1260783380657077)
+DISTANCE TO TARGET: 4.022644054447345
+PID CONTROLLER: robot_pose [3.77525233 0.75702347],            robot_angle 1.3910996014205785,             speed 15, turn -32,            desired_dir -2.9202572204378616,             
+err_ang 1.9718284853211463, corr 3, path_0 (-0.1492599207704172, -0.1260783380657077)
+DISTANCE TO TARGET: 4.036491933105083
+PID CONTROLLER: robot_pose [3.78225571 0.78849916],            robot_angle 1.3126234832287267,             speed 15, turn -35,            desired_dir -2.9130304925699413,             
+err_ang 2.0575313313809183, corr 3, path_0 (-0.1492599207704172, -0.1260783380657077)
+DISTANCE TO TARGET: 4.047439895660492
+PID CONTROLLER: robot_pose [3.78854887 0.80956668],            robot_angle 1.2484157501626567,             speed 15, turn -38,            desired_dir -2.9083129905612384,             
+err_ang 2.1264565664556914, corr 3, path_0 (-0.1492599207704172, -0.1260783380657077)
+DISTANCE TO TARGET: 4.0594634905145
+PID CONTROLLER: robot_pose [3.79608281 0.82970121],            robot_angle 1.177073824533683,             speed 15, turn -42,            desired_dir -2.9039164498374483,             
+err_ang 2.202195032808455, corr 4, path_0 (-0.1492599207704172, -0.1260783380657077)
+DISTANCE TO TARGET: 4.072191295430038
+PID CONTROLLER: robot_pose [3.80462599 0.84835903],            robot_angle 1.105731898904722,             speed 15, turn -46,            desired_dir -2.8999574268325925,             
+err_ang 2.2774959814422715, corr 4, path_0 (-0.1492599207704172, -0.1260783380657077)
+DISTANCE TO TARGET: 4.085097272819306
+PID CONTROLLER: robot_pose [3.81377371 0.8650746 ],            robot_angle 1.0343899732757547,             speed 15, turn -50,            desired_dir -2.8965202960692222,             
+err_ang 2.352275037834609, corr 4, path_0 (-0.1492599207704172, -0.1260783380657077)
+DISTANCE TO TARGET: 4.099870752273779
+PID CONTROLLER: robot_pose [3.8247967  0.88179771],            robot_angle 0.9416454699581082,             speed 15, turn -54,            desired_dir -2.893215563142509,             
+err_ang 2.448324274078969, corr 4, path_0 (-0.1492599207704172, -0.1260783380657077)
+DISTANCE TO TARGET: 4.113917793810951
+PID CONTROLLER: robot_pose [3.83579371 0.89552196],            robot_angle 0.8489009666404487,             speed 15, turn -58,            desired_dir -2.8906390204319576,             
+err_ang 2.5436453201071796, corr 4, path_0 (-0.1492599207704172, -0.1260783380657077)
+DISTANCE TO TARGET: 4.128938400417387
+PID CONTROLLER: robot_pose [3.84805882 0.90812437],            robot_angle 0.7490222707598918,             speed 15, turn -62,            desired_dir -2.888420073068911,             
+err_ang 2.6457429633507834, corr 4, path_0 (-0.1492599207704172, -0.1260783380657077)
+DISTANCE TO TARGET: 4.143953641696107
+PID CONTROLLER: robot_pose [3.86080886 0.91876622],            robot_angle 0.642009382316444,             speed 15, turn -67,            desired_dir -2.886704554722182,             err_ang
+2.75447137014096, corr 5, path_0 (-0.1492599207704172, -0.1260783380657077)
+ cam_fps 9
+DISTANCE TO TARGET: 4.163008103310538
+PID CONTROLLER: robot_pose [3.87769299 0.92951947],            robot_angle 0.49219133849561847,             speed 15, turn -72,            desired_dir -2.8852275658597044,             
+err_ang 2.9057664028242636, corr 5, path_0 (-0.1492599207704172, -0.1260783380657077)
+DISTANCE TO TARGET: 4.178888027153964
+PID CONTROLLER: robot_pose [3.89235518 0.93620811],            robot_angle 0.3637758723634785,             speed 15, turn -77,            desired_dir -2.8845689679239506,             
+err_ang 3.034840466892157, corr 5, path_0 (-0.1492599207704172, -0.1260783380657077)
+DISTANCE TO TARGET: 4.196211384240982
+PID CONTROLLER: robot_pose [3.90896131 0.94117535],            robot_angle 0.2175249248240984,             speed 15, turn -74,            desired_dir -2.8844300936376324,             
+err_ang -3.1019550184617306, corr -3, path_0 (-0.1492599207704172, -0.1260783380657077)
+DISTANCE TO TARGET: 4.217705494053462
+PID CONTROLLER: robot_pose [3.93052512 0.94368503],            robot_angle 0.014200436781552195,             speed 15, turn -71,            desired_dir -2.8851549743031812,             
+err_ang -2.8993554110847333, corr -3, path_0 (-0.1492599207704172, -0.1260783380657077)
+DISTANCE TO TARGET: 4.237093188314569
+PID CONTROLLER: robot_pose [3.95096541 0.9421496 ],            robot_angle 6.119030929888717,             speed 15, turn -68,            desired_dir -2.8867290778235124,             
+err_ang -2.7225747005326433, corr -3, path_0 (-0.1492599207704172, -0.1260783380657077)
+DISTANCE TO TARGET: 4.254066254336957
+PID CONTROLLER: robot_pose [3.96969321 0.93754978],            robot_angle 5.965645789786459,             speed 15, turn -65,            desired_dir -2.888885314578549,             err_ang
+-2.5713457971854226, corr -3, path_0 (-0.1492599207704172, -0.1260783380657077)
+DISTANCE TO TARGET: 4.270121513355338
+PID CONTROLLER: robot_pose [3.98821783 0.92995936],            robot_angle 5.8229619385285245,             speed 15, turn -63,            desired_dir -2.8916910894200587,             
+err_ang -2.431467720768996, corr -2, path_0 (-0.1492599207704172, -0.1260783380657077)
+DISTANCE TO TARGET: 4.283057592639382
+PID CONTROLLER: robot_pose [4.00385868 0.92091174],            robot_angle 5.694546472396378,             speed 15, turn -61,            desired_dir -2.894641015511901,             err_ang
+-2.3060021807286937, corr -2, path_0 (-0.1492599207704172, -0.1260783380657077)
+DISTANCE TO TARGET: 4.293625047447145
+PID CONTROLLER: robot_pose [4.0172983  0.91074789],            robot_angle 5.576832295108594,             speed 15, turn -59,            desired_dir -2.8977015608882883,             
+err_ang -2.1913485488172952, corr -2, path_0 (-0.1492599207704172, -0.1260783380657077)
+DISTANCE TO TARGET: 4.303146527679084
+PID CONTROLLER: robot_pose [4.03015577 0.89839935],            robot_angle 5.459118117820797,             speed 15, turn -57,            desired_dir -2.901207820111521,             err_ang
+-2.077140630752732, corr -2, path_0 (-0.1492599207704172, -0.1260783380657077)
+DISTANCE TO TARGET: 4.31065379573744
+PID CONTROLLER: robot_pose [4.04108049 0.88524921],            robot_angle 5.352105229377349,             speed 15, turn -55,            desired_dir -2.9047740938031947,             
+err_ang -1.973694016000957, corr -2, path_0 (-0.1492599207704172, -0.1260783380657077)
+DISTANCE TO TARGET: 4.3172642289347145
+PID CONTROLLER: robot_pose [4.05172512 0.86915787],            robot_angle 5.24152524465245,             speed 15, turn -53,            desired_dir -2.9089757414848845,             err_ang
+-1.8673156789577483, corr -2, path_0 (-0.1492599207704172, -0.1260783380657077)
+DISTANCE TO TARGET: 4.322175344393374
+PID CONTROLLER: robot_pose [4.0610533  0.85088751],            robot_angle 5.127378163646111,             speed 15, turn -51,            desired_dir -2.9135865516210133,             
+err_ang -1.7577794080875382, corr -2, path_0 (-0.1492599207704172, -0.1260783380657077)
+ cam_fps 8
+DISTANCE TO TARGET: 4.325644990386089
+PID CONTROLLER: robot_pose [4.07198817 0.81852166],            robot_angle 4.949023349573696,             speed 15, turn -50,            desired_dir -2.9214466994780945,             
+err_ang -1.587284741872204, corr -1, path_0 (-0.1492599207704172, -0.1260783380657077)
+DISTANCE TO TARGET: 4.324388600119134
+PID CONTROLLER: robot_pose [4.07659065 0.79181257],            robot_angle 4.81704078716011,             speed 15, turn -49,            desired_dir -2.927706477027377,             err_ang 
+-1.4615619570079001, corr -1, path_0 (-0.1492599207704172, -0.1260783380657077)
+*** END PROGRAM ***
+camera closing...
+camera closed
+DUMPING STATE ON FILE
